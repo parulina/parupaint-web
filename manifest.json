@@ -3,7 +3,6 @@
 	"name": "parupaint-web",
 	"version": "0.2",
 	"description":"parupaint chrome webapp.",
-	"offline-enabled":"true",
 	"author":"paru",
 	"short_name":"parupaint",
 	"commands": {
@@ -21,8 +20,8 @@
 		}
 	},
 	"permissions": [
-		"http://sqnya.se:1108/*",
-		"hid", "usb", {"usbDevices":[
+		"http://draw.sqnya.se/*",
+		"storage", "hid", "usb", {"usbDevices":[
 			{ "vendorId": 1386, "productId": 20},
 			{ "vendorId": 5935, "productId": 52}
 		]}

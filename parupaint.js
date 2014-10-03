@@ -1,5 +1,5 @@
 var manifest = chrome.runtime.getManifest();
-var url = 'http://sqnya.se:1108';
+var url = 'http://draw.sqnya.se';
 
 var loadSqnyaImage = function(url2, callback){
 	var xhr = new XMLHttpRequest();
@@ -53,16 +53,16 @@ var updateRooms = function(){
 				
 			}
 			ee.data('save', data.lastmod);
-
+			
 		}
 		var ll = Object.keys(data2).length;
 		$('.room-counter').html(ll + ' room'+(ll == 1 ? '' : 's')+' active');
 
 		rest.remove();
-		
+		setTimeout(updateRooms, 1000);
 	}).fail(function(err){
-		console.log('error: ' + err);
-		$('.room-counter').html('Error contacting server.');
+		console.log(err);
+		$('.room-counter').html('Error contacting server ('+err+').');
 	});
 	
 };
@@ -78,9 +78,9 @@ var initParupaint = function(room){
 		var title = $('<h1></h1>').text('parupaint');
 		var header = $('<h2></h2>').text('for chrome (beta)');
 		var container = $('<div class="show-area"></div>');
-		
+		var input = $('<div class="room-input"></div>').html('<input class="new-room-input" type="text"></input>');
 		$('body').removeClass('room').addClass('main').html('');
-		$('body').append(title).append($('<input class="new-room-input" type="text"></input>')).append(header).append($('<div class="room-counter"></div>')).append(container);
+		$('body').append(title).append(input).append(header).append($('<div class="room-counter"></div>')).append(container);
 		
 		$('input.new-room-input').keypress(function(e){
 			if(e.keyCode == 13){
@@ -88,7 +88,7 @@ var initParupaint = function(room){
 			}
 		});
 		
-		setInterval(updateRooms, 1000);
+		setTimeout(updateRooms, 1000);
 	}
 	
 };
