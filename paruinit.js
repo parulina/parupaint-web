@@ -54,7 +54,7 @@ chrome.hid.getDevices({filters: manifest.permissions[manifest.permissions.length
 		}
 		$('#alert-message').remove();
 		$('body').removeClass('loading');
-		initParupaint();
+		initParupaint('test');
 	};
 	if(devlist.length){
 		$('#alert-message').text('');

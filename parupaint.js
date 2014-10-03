@@ -68,27 +68,151 @@ var updateRooms = function(){
 };
 
 
+var focusCanvas = function(layer, frame){
+	
+	$('canvas').removeClass('focused partial-focused').filter('[data-layer='+layer+']').addClass('partial-focused').filter('[data-frame='+frame+']').addClass('focused');
+}
+
+//		       				tnt     int	    0-x		[0-x]
+var initCanvas = function(width, height, layers, frames){
+	$('.canvas-pool').width(width).height(height).data('ow', width).data('oh', height).html('');
+	for(var l = 0; l < layers; l++){
+		for(var f = 0; f < frames[l]; f++){
+			var id = 'flayer-'+l+'-'+f;
+			
+			var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"></canvas>')
+			$('.canvas-pool').append(nc)
+		}
+	}
+	focusCanvas(0, 0);
+	updateCallbacks();
+}
+
+var tmouse = {};
+
+var updateCallbacks = function(cb){
+	console.log('setting callbacks for pool');
+	
+	var pool = $('#mouse-pool');
+	pool.unbind();
+	pool.mousemove(function(e){
+		
+		if(cb){
+			if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
+			if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
+			
+			var cx = (e.offsetX - tmouse.oldx);
+			var cy = (e.offsetY - tmouse.oldy);
+			tmouse.oldx = e.offsetX;
+			tmouse.oldy = e.offsetY;
+			
+			return cb('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy});
+			
+		}
+	}).mouseout(function(e){
+		if(cb){
+			tmouse.oldx = undefined;
+			tmouse.oldy = undefined;
+			return cb('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
+		}
+	}).mousedown(function(e){
+		if(cb){
+			tmouse.oldx = e.offsetX;
+			tmouse.oldy = e.offsetY;
+			return cb('mousedown', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
+		}
+	}).mouseup(function(e){
+		if(cb){
+			tmouse.oldx = e.offsetX;
+			tmouse.oldy = e.offsetY;
+			return cb('mouseup', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
+		}
+	}).keydown(function(e){
+		console.log('down')
+		if(cb){
+			return cb('keydown', {key: e.keyCode});
+		}
+	}).keyup(function(e){
+		if(cb){
+			return cb('keyup', {key: e.keyCode});
+		}
+	}).bind('contextmenu', function(e) {
+		return false;
+	})
+}
+
+
+
+
+//todo: spectate mode
+
+
 var initParupaint = function(room){
 	document.title = 'Starting up...';
 	
-	clearInterval(updateRooms);
+	clearTimeout(updateRooms);
 	
 	if(!room){
 		document.title = '-- parupaint home --';
-		var title = $('<h1></h1>').text('parupaint');
+		var title = $('<h1 class="title"></h1>').text('parupaint');
 		var header = $('<h2></h2>').text('for chrome (beta)');
 		var container = $('<div class="show-area"></div>');
-		var input = $('<div class="room-input"></div>').html('<input class="new-room-input" type="text"></input>');
-		$('body').removeClass('room').addClass('main').html('');
-		$('body').append(title).append(input).append(header).append($('<div class="room-counter"></div>')).append(container);
+		var input = $('<div class="room-input"></div>').html('<input class="new-room-input" type="text"></input>')//.append('<input type="button" value="offline room"></input>');
+		
+		
+		var roomcounter = $('<div class="room-counter"></div>');
+		var roomstatus = $('<div class="room-status-bar"></div>').html(roomcounter);
+		
+		var infoheader = $('<div class="room-info-header"></div>').append(input).append(title).append(header);
+		
+		$('body').removeClass('room canvas').addClass('main').html('');
+		$('body').append(infoheader).append(roomstatus).append(container);
 		
 		$('input.new-room-input').keypress(function(e){
 			if(e.keyCode == 13){
 				initParupaint($(this).val());
+				$(this).val('');
 			}
 		});
 		
 		setTimeout(updateRooms, 1000);
+	} else {
+		
+		
+		
+		
+		
+		
+		document.title = ''+room+' (offline)';
+		var canvaspool = $('<div id="mouse-pool" class="canvas-pool" tabindex="1"></div>');
+		var canvasworkarea = $('<div class="canvas-workarea"></div>').html(canvaspool);
+		
+		
+		var overlay = $('<div class="overlay"></div>');
+			var oqstatus = $('<div class="qstatus overlay-piece"></div>')
+				var oqstatus_brush = $('<div class="qstatus_brush"></div>')
+				var oqstatus_message = $('<div class="qstatus_message"></div>')
+				var oqstatus_internet = $('<div class="qstatus_internet"></div>')
+			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
+			
+			var info = $('<div class="gui"></div>')
+				var cspinner = $('<div class="color-spinner overlay-piece"></div>');
+				var chatbox = $('<div class="chat-box overlay-piece"></div>');
+			info.append(cspinner).append(chatbox);
+		
+		overlay.append(info).append(oqstatus);
+		
+		
+		$('body').removeClass('room main').addClass('canvas').html('');
+		$('body').append(canvasworkarea).append(overlay);
+		
+		var debug = true;
+		if(debug || !navigator.onLine){
+			//offline.
+			initCanvas(500, 500, 3, [3, 5, 3])
+		}
+		
+		if(onRoom) onRoom(room);
 	}
 	
 };
