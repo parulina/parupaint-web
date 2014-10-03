@@ -1,0 +1,30 @@
+{
+	"manifest_version": 2,
+	"name": "parupaint-web",
+	"version": "0.2",
+	"description":"parupaint chrome webapp.",
+	"offline-enabled":"true",
+	"author":"paru",
+	"short_name":"parupaint",
+	"commands": {
+		"reload-dev":{
+			"suggested_key":{
+				"default": "Ctrl+R"
+			},
+			"description":"reload for dev"
+		}
+	},
+	"app": {
+		"background": {
+			"scripts": [ "background.js" ],
+			"persistent": false
+		}
+	},
+	"permissions": [
+		"http://sqnya.se:1108/*",
+		"hid", "usb", {"usbDevices":[
+			{ "vendorId": 1386, "productId": 20},
+			{ "vendorId": 5935, "productId": 52}
+		]}
+	]
+}
