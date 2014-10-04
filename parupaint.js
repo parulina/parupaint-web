@@ -73,9 +73,13 @@ var focusCanvas = function(layer, frame){
 	$('canvas').removeClass('focused partial-focused').filter('[data-layer='+layer+']').addClass('partial-focused').filter('[data-frame='+frame+']').addClass('focused');
 }
 
+
+
+
 //		       				tnt     int	    0-x		[0-x]
 var initCanvas = function(width, height, layers, frames){
-	$('.canvas-pool').width(width).height(height).data('ow', width).data('oh', height).html('');
+	$('.canvas-workarea').width(width).height(height)
+	$('.canvas-pool').data('ow', width).data('oh', height).html('');
 	for(var l = 0; l < layers; l++){
 		for(var f = 0; f < frames[l]; f++){
 			var id = 'flayer-'+l+'-'+f;
@@ -128,17 +132,22 @@ var updateCallbacks = function(cb){
 			return cb('mouseup', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
 		}
 	}).keydown(function(e){
-		console.log('down')
 		if(cb){
-			return cb('keydown', {key: e.keyCode});
+			return cb('keydown', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
 		}
 	}).keyup(function(e){
 		if(cb){
-			return cb('keyup', {key: e.keyCode});
+			
 		}
 	}).bind('contextmenu', function(e) {
 		return false;
-	})
+	}).bind('mousewheel DOMMouseScroll', function(e){
+        
+		var wd = e.originalEvent.wheelDelta / 100;
+		var ed = e.originalEvent.detail;
+		if(wd || ed) return cb('mousewheel', {scroll: wd || ed})
+		
+    })
 }
 
 
@@ -184,8 +193,9 @@ var initParupaint = function(room){
 		
 		
 		document.title = ''+room+' (offline)';
-		var canvaspool = $('<div id="mouse-pool" class="canvas-pool" tabindex="1"></div>');
-		var canvasworkarea = $('<div class="canvas-workarea"></div>').html(canvaspool);
+		var canvaspool = $('<div class="canvas-pool"></div>');
+		var self = $('<div class="canvas-cursor cursor-self admin"></div>');
+		var canvasworkarea = $('<div id="mouse-pool" class="canvas-workarea" tabindex="1"></div>').append(canvaspool).append(self);
 		
 		
 		var overlay = $('<div class="overlay"></div>');
@@ -209,7 +219,7 @@ var initParupaint = function(room){
 		var debug = true;
 		if(debug || !navigator.onLine){
 			//offline.
-			initCanvas(500, 500, 3, [3, 5, 3])
+			initCanvas(1500, 1500, 3, [3, 5, 3])
 		}
 		
 		if(onRoom) onRoom(room);
