@@ -115,7 +115,7 @@ var updateCallbacks = function(cb){
 	
 	var pool = $('#mouse-pool');
 	pool.unbind();
-	pool.mousemove(function(e){
+	pool.bind('mousemove mousedown', function(e){
 		//console.log(e)
 		if(cb){
 			if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
@@ -228,8 +228,23 @@ var initParupaint = function(room){
 				var oqstatus_internet = $('<div class="qstatus_internet"></div>')
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
-			var info = $('<div class="gui"></div>')
+			var info = $('<div class="gui visible"></div>')
 				var cspinner = $('<div class="color-spinner overlay-piece"></div>');
+					
+					var selectorcode = '<div class="color-selector"></div>';
+					var preview = $('<div class="preview-col checker-bg"></div>')
+						
+					var hue = $('<div class="hue-pick"></div>').html(preview).append(selectorcode)
+					
+					var lp = $('<div class="light-pick"></div>').html(selectorcode),
+						sp = $('<div class="saturation-pick"></div>').html(selectorcode),
+						ap = $('<div class="alpha-pick"></div>').html(selectorcode)
+							
+					var pick = $('<div class="hsl-select-pick"></div>').append(lp).append(sp).append(hue).append(ap)
+					
+			//			palette = $('<div class="palette-storage"></div>')
+				cspinner.append(pick)
+				
 				var chatbox = $('<div class="chat-box overlay-piece"></div>');
 			info.append(cspinner).append(chatbox);
 		

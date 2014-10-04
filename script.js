@@ -1,20 +1,37 @@
 var overlayTimeout = null;
 var overlayGone = function(){
+	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
+	$('.overlay .qstatus').hide();
 };
 
 $(document).keydown(function(e){
 	switch(e.keyCode){
 			case 9:
 			{
-				if(!$('.overlay .gui').hasClass('visible')){
-					$('.overlay .gui').addClass('visible');
-				}
 				if(e.shiftKey){
 					overlayGone();
 				}else{
-					clearTimeout(overlayTimeout);
-					overlayTimeout = setTimeout(overlayGone, 2000);
+					var qs = $('.overlay .qstatus');
+					
+					if($('.overlay .gui').hasClass('visible')){
+						clearTimeout(overlayTimeout)
+						overlayTimeout = setTimeout(overlayGone, 2000)
+					}else{
+						if(qs.length){
+							if(qs.is(':visible')){
+								if(!$('.overlay .gui').hasClass('visible')){
+									$('.overlay .gui').addClass('visible');
+									qs.hide();
+								}
+							} else {
+								qs.show();
+								console.log('show quick')
+							}
+						}
+					}
+					
+					
 				}
 				break;
 			}
@@ -26,23 +43,6 @@ $(document).keydown(function(e){
 })
 
 
-function hex2rgb(hex) {
-    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-        return r + r + g + g + b + b;
-    });
-	var alpha = 255
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
-	if(result[4]) alpha = parseInt(result[4], 16)
-	
-    return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-        a: alpha
-    } : null;
-}
 
 var drawCanvasLine = function(canvas, x1, y1, x2, y2, color, width){
 	if(canvas == null){
@@ -342,12 +342,14 @@ onRoom = function(room){
 		});
 	});
 	
+	$('.gui .color-spinner').mouseout(function(e){
+		clearTimeout(overlayTimeout);
+		overlayTimeout = setTimeout(overlayGone, 3000);
+	}).mouseover(function(e){
+		clearTimeout(overlayTimeout);
+	});
 	
-	
-	
-	
-	
-	
-	
+	colorScript()
 	
 }
+
