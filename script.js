@@ -118,7 +118,7 @@ var cursorColor = function(cursor, color){
 	}
 	if(cursor.length){
 		cursor.data('color', color);
-		cursor.css({borderColor: color})
+		cursor.css({borderColor: color, backgroundColor: color})
 		tsettings.brush().color = color;
 	}
 }
@@ -218,6 +218,9 @@ onRoom = function(room){
 					}
 					case 82:
 					{
+						if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
+							$('.canvas-cursor.cursor-self').addClass('pick-color')
+						}
 						var cc = $('canvas.focused');
 						if(cc.length){
 						//	var x = parseInt($('.canvas-cursor.cursor-self').css('left')),
@@ -241,6 +244,9 @@ onRoom = function(room){
 					}
 			}
 		} else if(e == 'keyup'){
+			if(data.key == 82){
+				$('.canvas-cursor.cursor-self').removeClass('pick-color')
+			}
 			if(data.key == 32){
 				tsettings.tmoving = false;
 				return false;

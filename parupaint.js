@@ -144,7 +144,7 @@ var updateCallbacks = function(cb){
 		}
 	}).keyup(function(e){
 		if(cb){
-			
+			return cb('keyup', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
 		}
 	}).bind('contextmenu', function(e) {
 		return false;
