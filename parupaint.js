@@ -75,21 +75,34 @@ var focusCanvas = function(layer, frame){
 
 
 
-
+// empty layers & frames for resize
 //		       				tnt     int	    0-x		[0-x]
 var initCanvas = function(width, height, layers, frames){
+	
+	var nn = (layers != undefined && frames != undefined)
+	
 	$('.canvas-workarea').width(width).height(height)
-	$('.canvas-pool').data('ow', width).data('oh', height).html('');
+	$('.canvas-pool').data('ow', width).data('oh', height);
+	if(nn){
+		$('.canvas-pool').html('')
+	}
 	for(var l = 0; l < layers; l++){
 		for(var f = 0; f < frames[l]; f++){
 			var id = 'flayer-'+l+'-'+f;
-			
-			var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"></canvas>')
-			$('.canvas-pool').append(nc)
+			if(nn){
+				var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"></canvas>')
+				nc[0].getContext('2d').webkitImageSmoothingEnabled = false;
+				$('.canvas-pool').append(nc)
+			} else {
+				var nc = $(id)
+				if(nc.length){
+					nc[0].width = width;
+					nc[0].width = height;
+				}
+			}
 		}
 	}
-	focusCanvas(0, 0);
-	updateCallbacks();
+	if(nn) focusCanvas(0, 0);
 }
 
 var tmouse = {};
@@ -223,11 +236,6 @@ var initParupaint = function(room){
 		$('body').removeClass('room main').addClass('canvas').html('');
 		$('body').append(canvasworkarea).append(overlay);
 		
-		var debug = true;
-		if(debug || !navigator.onLine){
-			//offline.
-			initCanvas(1500, 1500, 3, [3, 5, 3])
-		}
 		
 		if(onRoom) onRoom(room);
 	}
