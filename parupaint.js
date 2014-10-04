@@ -85,24 +85,27 @@ var initCanvas = function(width, height, layers, frames){
 	$('.canvas-pool').data('ow', width).data('oh', height);
 	if(nn){
 		$('.canvas-pool').html('')
-	}
-	for(var l = 0; l < layers; l++){
-		for(var f = 0; f < frames[l]; f++){
-			var id = 'flayer-'+l+'-'+f;
-			if(nn){
+		for(var l = 0; l < layers; l++){
+			for(var f = 0; f < frames[l]; f++){
+				var id = 'flayer-'+l+'-'+f;
+
 				var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"></canvas>')
 				nc[0].getContext('2d').webkitImageSmoothingEnabled = false;
 				$('.canvas-pool').append(nc)
-			} else {
-				var nc = $(id)
-				if(nc.length){
-					nc[0].width = width;
-					nc[0].width = height;
-				}
+
 			}
 		}
+		focusCanvas(0, 0);
+	} else {
+		$('.canvas-pool').children('canvas').each(function(k, e){
+			var nc = $(e)
+			if(nc.length){
+				nc[0].width = width;
+				nc[0].height = height;
+			}	
+		});
+		
 	}
-	if(nn) focusCanvas(0, 0);
 }
 
 var tmouse = {};
@@ -113,7 +116,7 @@ var updateCallbacks = function(cb){
 	var pool = $('#mouse-pool');
 	pool.unbind();
 	pool.mousemove(function(e){
-		
+		//console.log(e)
 		if(cb){
 			if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
 			if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
@@ -232,6 +235,8 @@ var initParupaint = function(room){
 		
 		overlay.append(info).append(oqstatus);
 		
+		
+		var drawarea = $('<div class="draw-main-area"></div>').append(canvasworkarea).append(overlay)
 		
 		$('body').removeClass('room main').addClass('canvas').html('');
 		$('body').append(canvasworkarea).append(overlay);
