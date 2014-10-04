@@ -1,0 +1,132 @@
+.canvas-cursor{
+	left:0;top:0;
+	width:1px;
+	height:1px;
+	position:absolute;
+	pointer-events:none;
+	-webkit-user-select:none;
+	/*
+	font-size:11px;
+	text-shadow:0px 0px 2px white;
+	*/
+}
+.canvas-cursor:after {
+	content: " ";
+	/*
+	width:attr(data-size px);
+	height:attr(data-size px);
+	this will work... someday.
+	*/
+	width:100%;
+	height:100%;
+	border-radius:100%;
+	position: absolute;
+	left: -50%;
+	top: -50%;
+	border:1.5px solid black;
+	box-shadow: 0px 0px 1px 1px white inset;
+}
+
+.canvas-cursor.eraser:after{
+	border-style: dashed;
+}
+.canvas-cursor.drawing:after{
+	border-width: 2px;
+}
+.canvas-cursor.admin:after{
+	background-color: rgba(240, 201, 0, 0.12);
+}
+.canvas-cursor.cursor-self.admin:after{
+	background-color:transparent;
+}
+
+
+
+body.canvas{
+	background-color:#ddd;
+	transition:none;
+	
+}
+.canvas-workarea{
+	position:absolute;
+	border:1px dashed #9d9d9d;
+	margin: auto;
+	left:0;top:0;right:0;bottom:0;
+	-webkit-user-select: none;
+	background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABn0lEQVR4Xu3ZQRKDIAwFUN14De9/K93oHdzY0hlmHMY2SAL5DXHZim2eAQKM5/saFK91XRV/fRhGB/AM8C7gY4DmKOSDoM8CPg1q9kD8OmCapg/QcRxVoKALoRh8jLwGAixACD4N+O4zblpAAvwKVBoBDoAKUHpMgAKggo/pLokAA5Ab/LXPl7RJxwwIAE4gnLYBQx1g33f2HM9BMAEQ3mQpgjqA5GqwBMEUQEkmmAN4imAS4AmCWYBcBNMAOQjmASiELgB+IXQD8A2hK4A7hO4AUoQuAa4I3QJEhHHbtrPGbmvuZuU8z7m3VrlvXJblLFlFSf0bCACqWJAK9u45MABaCFAAGghwAK0RIAFaIsACtEKABmiB8BcAAaJWsQQN0OJ8Hhag1fk8JEDL83k4AGpdIHk0HcYWKAAq+FjLSyLAAOQGf13QlLRJF0QQAJxAOG0huoDEhggHQT0DJAA4FaM6QNgRktrwKMkEUwAlmWAO4CmCSYAnCGYBchFMA+QgmAegZhgHQDgZot5Sze89AzwDAA5Ha6Y49WzvAspd4AXk+BDRuCM1ygAAAABJRU5ErkJggg==');
+	background-repeat:repeat;
+	cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAR0lEQVQYV5WQSQ4AIAgD6f8fXQGFQKJGOUE7YYM8BDYMVWt6LcwUkgKk7EmDDIhYYIPUn4CZNXep7JRgwDHpe6doer3u+LEBmLoZCntZhJ0AAAAASUVORK5CYII=") 5 5, none;
+}
+.canvas-workarea:focus{
+	outline:none;
+	box-shadow: 0px 0px 100px -13px rgb(171, 171, 171);
+}
+
+
+.canvas-pool{
+	position:absolute;
+	left:0;top:0;right:0;bottom:0;
+	
+}
+.canvas-pool canvas{
+	position:absolute;
+	top:0; left:0; bottom:0; right:0;
+}
+
+
+
+
+canvas{
+	display:none;
+	pointer-events: none;
+}
+canvas.partial-focused{
+	opacity:0.1;
+	display:block;
+}
+canvas.focused{
+	opacity:1.0;
+	display:block;
+	pointer-events: all;
+}
+
+
+.overlay{
+	pointer-events: none;
+}
+
+
+.overlay-piece{
+	background-color:black;
+}
+
+.overlay .gui.visible+.qstatus{
+	opacity:0.3;
+}
+.overlay .gui{
+	display:none;
+}
+.overlay .gui.visible{
+	display:block;
+}
+
+.qstatus.overlay-piece{
+	height:40px;
+	position:absolute;
+	top:0;
+	right:0;
+	left:0;
+}
+.chat-box.overlay-piece{
+	width:45%; height:30%;
+	min-width:300px;min-height:200px;
+	position:absolute;
+	top:0;
+	right:0;
+}
+.color-spinner.overlay-piece{
+	width:200px;height:200px;
+	position:absolute;
+	top:0;
+	left:0;
+}

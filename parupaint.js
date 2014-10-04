@@ -104,13 +104,20 @@ var updateCallbacks = function(cb){
 		if(cb){
 			if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
 			if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
+			if(tmouse.oldsx === undefined) tmouse.oldsx = e.clientX;
+			if(tmouse.oldsy === undefined) tmouse.oldsy = e.clientY;
 			
 			var cx = (e.offsetX - tmouse.oldx);
 			var cy = (e.offsetY - tmouse.oldy);
 			tmouse.oldx = e.offsetX;
 			tmouse.oldy = e.offsetY;
 			
-			return cb('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy});
+			var csx = (e.clientX - tmouse.oldsx);
+			var csy = (e.clientY - tmouse.oldsy);
+			tmouse.oldsx = e.clientX;
+			tmouse.oldsy = e.clientY;
+			
+			return cb('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy});
 			
 		}
 	}).mouseout(function(e){
