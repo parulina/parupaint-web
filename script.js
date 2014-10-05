@@ -1,5 +1,12 @@
 var overlayTimeout = null;
 var overlayGone = function(){
+	
+	
+	console.log('hover:', $('.gui').is(':hover'));
+	if($('.gui').is(':hover') && overlayTimeout){
+		overlayTimeout = setTimeout(overlayGone, 2000)
+		return false;
+	}
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
 	$('.overlay .qstatus').hide();
@@ -10,7 +17,9 @@ $(document).keydown(function(e){
 			case 9:
 			{
 				if(e.shiftKey){
-					overlayGone();
+					clearTimeout(overlayTimeout)
+					overlayTimeout = null
+					overlayGone()
 				}else{
 					var qs = $('.overlay .qstatus');
 					
@@ -358,6 +367,7 @@ onRoom = function(room){
 	colorScript(function(oldc, newc){
 		console.log(oldc, newc)
 		Brush.color(newc).update()
+		writeDefaults();
 	})
 	
 }

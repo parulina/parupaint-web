@@ -104,11 +104,12 @@ var getColorSliderRgb = function(){
 	
 }
 var getColorSliderHsl = function(){
-	var hue = $('.hsl-select-pick .hue-pick').data('value') || 0,
-		sat = $('.hsl-select-pick .saturation-pick').data('value') || 0.5,
-		lit = $('.hsl-select-pick .light-pick').data('value') || 0.5
+	var hue = $('.hsl-select-pick .hue-pick').data('value'),
+		sat = $('.hsl-select-pick .saturation-pick').data('value'),
+		lit = $('.hsl-select-pick .light-pick').data('value'),
+		aph = $('.hsl-select-pick .alpha-pick').data('value')
 	
-	return {h: hue, s:sat, l:lit}
+	return {h: hue == undefined ? 0 : hue, s:sat == undefined ? 0.5 : sat, l:lit == undefined ? 0.5 : lit, a:aph == undefined ? 1 : aph}
 	
 }
 
@@ -126,8 +127,17 @@ var getColorSliderHexAlpha = function(){
 
 
 var updateInterfaceHex = function(hex){
+	console.log('set new hex:' + hex)
 	setColorSliderHex(hex)
 	setPreviewColor(hex)
+}
+var updateInterfaceHsl = function(h, s, l, a){
+	if(typeof h == "object"){
+		s = h.s, l = h.l, a = h.a;
+		h = h.h;
+	}
+	setColorSliderHsl(h, s, l, a)
+	setPreviewColor(getColorSliderHexAlpha())
 }
 
 
@@ -146,7 +156,7 @@ var setPreviewColor = function(col){
 
 var setColorSliderHex = function(hex){
 	var rgb = hex2rgb(hex)
-	console.log('setColorSliderHex:', rgb)
+	//console.log('setColorSliderHex:', rgb)
 	setColorSliderRgb(rgb.r, rgb.g, rgb.b, rgb.a)
 
 }
@@ -157,26 +167,27 @@ var setColorSliderRgb = function(r, g, b, a){
 	}
 	var hsl = rgb2hsl(r/255, g/255, b/255)
 	//console.log('setColorSliderRgb', r, g, b, a, hsl)
-	setColorSliderHsl(hsl.h, hsl.s, hsl.l, a/255)
+	setColorSliderHsl(parseInt(hsl.h)/360, hsl.s, hsl.l, a/255)
 
 }
 
 
 var setColorSliderHsl = function(h, s, l, a){
 	//console.log('setColorSliderHsl', h, s, l, a)
-	if(h != undefined){
-		$('.hsl-select-pick .hue-pick').data('value', h/360).children('.color-selector').css('-webkit-transform', 'rotate('+h+'deg)')
-		var rgb = hue2rgb(h)
+	if(h != undefined || h != null){
+		$('.hsl-select-pick .hue-pick').data('value', h).children('.color-selector').css('-webkit-transform', 'rotate('+h*360+'deg)')
+		var rgb = hue2rgb(h*360)
 		var rgbstr = 'rgb('+rgb.r+', '+rgb.g+', '+rgb.b+')'
 		$('.hsl-select-pick .light-pick').css({background: '-webkit-linear-gradient(white 0%, '+rgbstr+' 50%, black 100%)'})
+		$('.hsl-select-pick .saturation-pick').css({background: '-webkit-linear-gradient(0deg, hsl('+h*360+', 0%, 50%), hsl('+h*360+', 100%, 50%))'})
 	}
-	if(s != undefined){
-		$('.hsl-select-pick .saturation-pick').data('value', s).children('.color-selector').css('top', (l*100)+'%')
+	if(s != undefined || s != null){
+		$('.hsl-select-pick .saturation-pick').data('value', s).children('.color-selector').css('left', (s*100)+'%')
 	}
-	if(l != undefined){
+	if(l != undefined || l != null){
 		$('.hsl-select-pick .light-pick').data('value', l).children('.color-selector').css('top', ((1.0-l)*100)+'%')
 	}
-	if(a != undefined){
+	if(a != undefined || a != null){
 		$('.hsl-select-pick .alpha-pick').data('value', a).css('background-color', 'rgba(255,255,255,'+a+')').children('.color-selector').css('top', ((1.0-a)*100)+'%')
 	}
 
@@ -205,12 +216,14 @@ colorScript = function(onchange){
 			var dist = Math.sqrt(dx*dx + dy*dy)
 			var ang = Math.atan2(dy, dx)
 			var deg = ((ang > 0 ? ang : (2*Math.PI + ang)) * 360 / (2*Math.PI))
-			setColorSliderHsl(deg)
+			setColorSliderHsl(deg/360)
 			var rgb = setPreviewColor()
 			
 			
 		}
 	})
+	
+	
 	
 	$('.color-spinner .light-pick').bind('mousemove mousedown', function(e){
 		if(e.which == 1){
@@ -220,11 +233,56 @@ colorScript = function(onchange){
 			var rgb = setPreviewColor()
 		}
 	})
+	
+	$('.hsl-select-pick').children().bind('mousewheel DOMMouseScroll', function(e){
+        
+		var wd = e.originalEvent.wheelDelta / 100;
+		var ed = e.originalEvent.detail;
+		var w = wd || ed;
+		if(w){
+			var hsl = getColorSliderHsl()
+			
+			var a = $(e.target)
+			if(a.is('.light-pick')){
+				hsl.l += (wd/10);
+				if(hsl.l < 0) hsl.l = 0;
+				if(hsl.l > 1) hsl.l = 1;
+			} else if(a.is('.alpha-pick')){
+				hsl.a += (wd/10);
+				if(hsl.a < 0) hsl.a = 0;
+				if(hsl.a > 1) hsl.a = 1;
+			} else if(a.is('.hue-pick')){
+				hsl.h += (wd/20);
+				if(hsl.h < 0) hsl.h += 1;
+				if(hsl.h > 1) hsl.h -= 1;
+			} else if(a.is('.saturation-pick')){
+				hsl.s += (wd/10);
+				if(hsl.s < 0) hsl.s = 0;
+				if(hsl.s > 1) hsl.s = 1;
+			}
+			updateInterfaceHsl(hsl)
+			onchange(oldcol, getColorSliderHexAlpha())
+			
+		}
+		
+    })
+	
+	
 	$('.color-spinner .alpha-pick').bind('mousemove mousedown', function(e){
 		if(e.which == 1){
 			
 			var alpha = (1.0-(e.offsetY / $(this).height()))
 			setColorSliderHsl(null, null, null, alpha)
+			var rgb = setPreviewColor()
+			console.log(rgb.a, rgb2hex(rgb))
+		}
+	})
+	
+	$('.color-spinner .saturation-pick').bind('mousemove mousedown', function(e){
+		if(e.which == 1){
+			
+			var sat = ((e.offsetX / $(this).width()))
+			setColorSliderHsl(null, sat, null, null)
 			var rgb = setPreviewColor()
 			console.log(rgb.a, rgb2hex(rgb))
 		}

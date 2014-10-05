@@ -242,8 +242,10 @@ var initParupaint = function(room){
 							
 					var pick = $('<div class="hsl-select-pick"></div>').append(ap).append(lp).append(sp).append(hue)
 					
-			//			palette = $('<div class="palette-storage"></div>')
-				cspinner.append(pick)
+					var palette = $('<div class="palette-storage"></div>'),
+							entry = $('<div class="palette-entry"></div>')
+					palette.append(entry)
+				cspinner.append(pick).append(palette)
 				
 				var chatbox = $('<div class="chat-box overlay-piece"></div>');
 			info.append(cspinner).append(chatbox);
