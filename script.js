@@ -78,7 +78,7 @@ var drawCanvasLine = function(canvas, x1, y1, x2, y2, color, width){
 }
 
 
-var tsettings = {
+var Brush = {
 	tmoving:false,
 	
 	beraser:3,
@@ -92,6 +92,40 @@ var tsettings = {
 	brush: function(b){
 		if(b != undefined) 	this.cbrush = b;
 		return this.brushes[this.cbrush];
+	},
+	size: function(size, cursor){
+	
+		if(cursor == undefined){
+			cursor = $('.canvas-cursor.cursor-self');
+		}
+		if(cursor.length){
+			cursor.data('size', size);
+			cursor.css({width: size, height:size})
+			if(cursor.hasClass('cursor-self')) this.brush().size = size;
+		}
+		return this;
+	},
+	color: function(color, cursor){
+		if(cursor == undefined){
+			cursor = $('.canvas-cursor.cursor-self');
+		}
+		if(cursor.length){
+			cursor.data('color', color);
+			cursor.css({borderColor: color, 'background-color': color})
+			if(cursor.hasClass('cursor-self')) this.brush().color = color;
+		}
+		return this;
+	},
+	update: function(){
+
+		var cursor = $('.canvas-cursor.cursor-self')
+		this.size(this.brush().size, cursor)
+		this.color(this.brush().color, cursor)
+		cursor.removeClass('eraser drawing')
+		if(this.cbrush == 1){
+			cursor.addClass('eraser')
+		}
+		return this;
 	}
 }
 
@@ -101,42 +135,8 @@ var failSafe = function(){
 	
 }
 
-
 var writeDefaults = function(){
-	chrome.storage.local.set({brushDefaults: JSON.stringify(tsettings.brushes)}, failSafe);
-}
-
-var cursorSize = function(cursor, size){
-	if(cursor == null){
-		cursor = $('.canvas-cursor.cursor-self');
-	}
-	if(cursor.length){
-		cursor.data('size', size);
-		cursor.css({width: size, height:size})
-		tsettings.brush().size = size;
-		
-	}
-}
-var cursorColor = function(cursor, color){
-	if(cursor == null){
-		cursor = $('.canvas-cursor.cursor-self');
-	}
-	if(cursor.length){
-		cursor.data('color', color);
-		cursor.css({borderColor: color, backgroundColor: color})
-		tsettings.brush().color = color;
-	}
-}
-
-var cursorUpdate = function(){
-	
-	var cursor = $('.canvas-cursor.cursor-self')
-	cursorSize(cursor, tsettings.brush().size)
-	cursorColor(cursor, tsettings.brush().color)
-	cursor.removeClass('eraser drawing')
-	if(tsettings.cbrush == 1){
-		cursor.addClass('eraser')
-	}
+	chrome.storage.local.set({brushDefaults: JSON.stringify(Brush.brushes)}, failSafe);
 }
 
 
@@ -191,8 +191,10 @@ onRoom = function(room){
 		
 		if(data.brushDefaults){
 			var def = JSON.parse(data.brushDefaults);
-			tsettings.brushes = def;
-			cursorUpdate()
+			Brush.brushes = def;
+			Brush.update()
+			updateInterfaceHex(Brush.brush().color)
+			
 		}
 		
 		
@@ -239,11 +241,11 @@ onRoom = function(room){
 			if(e == 'mousemove'){	
 
 				var drawing = (data.button == 1);
-				var moving = (tsettings.tmoving || data.button == tsettings.bmove);
+				var moving = (Brush.tmoving || data.button == Brush.bmove);
 
 				//todo: store with zoom offset
-				tsettings.mx = data.x;
-				tsettings.my = data.y;
+				Brush.mx = data.x;
+				Brush.my = data.y;
 				var cursor = $('.canvas-cursor.cursor-self');
 				if(cursor.length){
 					var left = parseInt(cursor.css('left')), top = parseInt(cursor.css('top'));
@@ -264,16 +266,18 @@ onRoom = function(room){
 					var ny1 = ((data.y - data.cy));
 					var nx2 = ((data.x));
 					var ny2 = ((data.y));
-					var s = parseInt(cursor.data('size')) || tsettings.brush().size;
-					var c = cursor.data('color') || tsettings.brush().color;
+					var s = parseInt(cursor.data('size')) || Brush.brush().size;
+					var c = Brush.brush().color || cursor.data('color');
 
 					drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
 				}
 			}else if(e == 'mousedown'){
-				if(data.button == tsettings.beraser){
-					var newbrush = tsettings.cbrush == 0 ? 1 : 0;
-					tsettings.brush(newbrush)
-					cursorUpdate()
+				if(data.button == Brush.beraser){
+					var newbrush = Brush.cbrush == 0 ? 1 : 0;
+					Brush.brush(newbrush)
+					Brush.update()
+					updateInterfaceHex(Brush.brush().color)
+					
 				}
 				else if(data.button == 1){
 					$('.canvas-cursor.cursor-self').addClass('drawing')
@@ -295,7 +299,7 @@ onRoom = function(room){
 				if(s < 1) s = 1;
 				if(s > 256) s = 256;
 
-				cursorSize(cursor, s);
+				Brush.size(s).update()
 				writeDefaults()
 
 				return false;
@@ -312,7 +316,7 @@ onRoom = function(room){
 							if(cc.length){
 							//	var x = parseInt($('.canvas-cursor.cursor-self').css('left')),
 							//		y = parseInt($('.canvas-cursor.cursor-self').css('top'))
-								var x = tsettings.mx, y = tsettings.my;	
+								var x = Brush.mx, y = Brush.my;	
 
 								var px = cc[0].getContext('2d').getImageData(x, y, 1, 1).data;
 								var r = ('00' + px[0].toString(16)).slice(-2),
@@ -320,14 +324,16 @@ onRoom = function(room){
 									b = ('00' + px[2].toString(16)).slice(-2),
 									a = ('00' + px[3].toString(16)).slice(-2)
 								var hex = "#" + ("00000000" + (r+g+b+a)).slice(-8);
-								cursorColor(null, hex)
+								
+								Brush.color(hex).update()
+								updateInterfaceHex(hex)
 								writeDefaults();
 							}
 							break;
 						}
 						case 32:
 						{
-							return !(tsettings.tmoving = true)
+							return !(Brush.tmoving = true)
 						}
 				}
 			} else if(e == 'keyup'){
@@ -335,7 +341,7 @@ onRoom = function(room){
 					$('.canvas-cursor.cursor-self').removeClass('pick-color')
 				}
 				if(data.key == 32){
-					tsettings.tmoving = false;
+					Brush.tmoving = false;
 					return false;
 				}
 			}
@@ -349,7 +355,10 @@ onRoom = function(room){
 		clearTimeout(overlayTimeout);
 	});
 	
-	colorScript()
+	colorScript(function(oldc, newc){
+		console.log(oldc, newc)
+		Brush.color(newc).update()
+	})
 	
 }
 

@@ -232,7 +232,7 @@ var initParupaint = function(room){
 				var cspinner = $('<div class="color-spinner overlay-piece"></div>');
 					
 					var selectorcode = '<div class="color-selector"></div>';
-					var preview = $('<div class="preview-col checker-bg"></div>')
+					var preview = $('<div class="preview-col"></div>')
 						
 					var hue = $('<div class="hue-pick"></div>').html(preview).append(selectorcode)
 					
@@ -240,7 +240,7 @@ var initParupaint = function(room){
 						sp = $('<div class="saturation-pick"></div>').html(selectorcode),
 						ap = $('<div class="alpha-pick"></div>').html(selectorcode)
 							
-					var pick = $('<div class="hsl-select-pick"></div>').append(lp).append(sp).append(hue).append(ap)
+					var pick = $('<div class="hsl-select-pick"></div>').append(ap).append(lp).append(sp).append(hue)
 					
 			//			palette = $('<div class="palette-storage"></div>')
 				cspinner.append(pick)
