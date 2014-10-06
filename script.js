@@ -1,12 +1,17 @@
 var overlayTimeout = null;
-var overlayGone = function(){
-	
-	
-	console.log('hover:', $('.gui').is(':hover'));
-	if($('.gui').is(':hover') && overlayTimeout){
-		overlayTimeout = setTimeout(overlayGone, 2000)
-		return false;
+var overlayGone = function(now){
+	if(now){
+		clearTimeout(overlayTimeout)
+		overlayTimeout = null
 	}
+	if(overlayTimeout){
+		var reset = ( $('.gui').is(':hover') || $('textarea.chat-input').is(':focus') )
+		if(reset){
+			overlayTimeout = setTimeout(overlayGone, 2000)
+			return false;
+		}
+	}
+	
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
 	$('.overlay .qstatus').hide();
@@ -17,20 +22,25 @@ $(document).keydown(function(e){
 			case 9:
 			{
 				if(e.shiftKey){
-					clearTimeout(overlayTimeout)
-					overlayTimeout = null
-					overlayGone()
+					overlayGone(true)
 				}else{
 					var qs = $('.overlay .qstatus');
 					
 					if($('.overlay .gui').hasClass('visible')){
-						clearTimeout(overlayTimeout)
-						overlayTimeout = setTimeout(overlayGone, 2000)
+						
+						var ta = $('textarea.chat-input')
+						if(ta.is(':focus')){
+							ta.select()
+						}
+						ta.focus()
+						
+						return false;
 					}else{
 						if(qs.length){
 							if(qs.is(':visible')){
 								if(!$('.overlay .gui').hasClass('visible')){
 									$('.overlay .gui').addClass('visible');
+									
 									qs.hide();
 								}
 							} else {
@@ -47,6 +57,11 @@ $(document).keydown(function(e){
 			case 116:
 			{
 				return chrome.runtime.reload()
+			}
+			case 27:
+			{
+				overlayGone(true)
+				break;
 			}
 	}
 })
@@ -119,8 +134,9 @@ var Brush = {
 			cursor = $('.canvas-cursor.cursor-self');
 		}
 		if(cursor.length){
+			var cssrgba = rgba2css((color[0] == '#') ? hex2rgb(color) : color)
 			cursor.data('color', color);
-			cursor.css({borderColor: color, 'background-color': color})
+			cursor.css({borderColor: cssrgba, 'background-color': cssrgba})
 			if(cursor.hasClass('cursor-self')) this.brush().color = color;
 		}
 		return this;
@@ -130,7 +146,7 @@ var Brush = {
 		var cursor = $('.canvas-cursor.cursor-self')
 		this.size(this.brush().size, cursor)
 		this.color(this.brush().color, cursor)
-		cursor.removeClass('eraser drawing')
+		cursor.removeClass('eraser')
 		if(this.cbrush == 1){
 			cursor.addClass('eraser')
 		}
@@ -196,43 +212,49 @@ var saveCanvasLocal = function(r){
 
 
 onRoom = function(room){
+	addMessage('loading parupaint...')
+	
 	chrome.storage.local.get(null, function(data){
 		
 		if(data.brushDefaults){
 			var def = JSON.parse(data.brushDefaults);
 			Brush.brushes = def;
 			Brush.update()
-			updateInterfaceHex(Brush.brush().color)
-			
 		}
+		updateInterfaceHex(Brush.brush().color)
+		
+		$('.canvas-cursor.cursor-self').data('name', data.name || ('unnamed_mofo'+(Date.now().toString().slice(-5))))
 		
 		
 		
-		
-		if(data.rooms[room].data){
-			console.log('Room is saved.', data.rooms[room].data)
-			var layers = []
-			for(var l in data.rooms[room].data){
-				layers[l] = data.rooms[room].data[l].length
-			}
-			var w = data.rooms[room].width || 500,
-				h = data.rooms[room].height || 500
-			
-			initCanvas(w, h, layers.length, layers)
-			for(var l in data.rooms[room].data){
-				for(var f in data.rooms[room].data[l]){
-					var cc = data.rooms[room].data[l][f];
-					var nc = $('#flayer-' + l + '-' + f)
-					if(nc.length){
-						
-						var img = new Image
-						img.src = cc.data
-						nc[0].getContext('2d').drawImage(img, 0, 0);
+		if(data.rooms && data.rooms[room]){
+		   if(data.rooms[room].data){
+				console.log('Room is saved.', data.rooms[room].data)
+				var layers = []
+				for(var l in data.rooms[room].data){
+					layers[l] = data.rooms[room].data[l].length
+				}
+				var w = data.rooms[room].width || 500,
+					h = data.rooms[room].height || 500
+
+				initCanvas(w, h, layers.length, layers)
+				for(var l in data.rooms[room].data){
+					for(var f in data.rooms[room].data[l]){
+						var cc = data.rooms[room].data[l][f];
+						var nc = $('#flayer-' + l + '-' + f)
+						if(nc.length){
+
+							var img = new Image
+							img.src = cc.data
+							nc[0].getContext('2d').drawImage(img, 0, 0);
+						}
 					}
 				}
+
+
+			} else {
+				addMessage("couldn't load canvas data... save file might be corrupted?")
 			}
-			
-			
 		} else {
 			console.log('New canvas')
 			initCanvas(500, 500, 1, [1])
@@ -334,9 +356,11 @@ onRoom = function(room){
 									a = ('00' + px[3].toString(16)).slice(-2)
 								var hex = "#" + ("00000000" + (r+g+b+a)).slice(-8);
 								
-								Brush.color(hex).update()
-								updateInterfaceHex(hex)
-								writeDefaults();
+								if(hex != Brush.brush().color){
+									Brush.color(hex).update()
+									updateInterfaceHex(hex)
+									writeDefaults();
+								}
 							}
 							break;
 						}
@@ -347,6 +371,7 @@ onRoom = function(room){
 				}
 			} else if(e == 'keyup'){
 				if(data.key == 82){
+					addPaletteEntryRgb(getColorSliderRgb())
 					$('.canvas-cursor.cursor-self').removeClass('pick-color')
 				}
 				if(data.key == 32){
@@ -364,9 +389,12 @@ onRoom = function(room){
 		clearTimeout(overlayTimeout);
 	});
 	
+	chatScript(room)
+	
 	colorScript(function(oldc, newc){
-		console.log(oldc, newc)
-		Brush.color(newc).update()
+		console.log(oldc, '->', newc)
+		addPaletteEntryRgb(newc)
+		Brush.color(rgb2hex(newc)).update()
 		writeDefaults();
 	})
 	

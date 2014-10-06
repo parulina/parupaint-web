@@ -223,9 +223,9 @@ var initParupaint = function(room){
 		
 		var overlay = $('<div class="overlay"></div>');
 			var oqstatus = $('<div class="qstatus overlay-piece"></div>')
-				var oqstatus_brush = $('<div class="qstatus_brush"></div>')
-				var oqstatus_message = $('<div class="qstatus_message"></div>')
-				var oqstatus_internet = $('<div class="qstatus_internet"></div>')
+				var oqstatus_brush = $('<div class="qstatus-brush"></div>')
+				var oqstatus_message = $('<div class="qstatus-message"></div>')
+				var oqstatus_internet = $('<div class="qstatus-internet"></div>')
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
 			var info = $('<div class="gui visible"></div>')
@@ -242,12 +242,22 @@ var initParupaint = function(room){
 							
 					var pick = $('<div class="hsl-select-pick"></div>').append(ap).append(lp).append(sp).append(hue)
 					
-					var palette = $('<div class="palette-storage"></div>'),
-							entry = $('<div class="palette-entry"></div>')
-					palette.append(entry)
+					var palette = $('<div class="palette-storage"></div>')
 				cspinner.append(pick).append(palette)
 				
 				var chatbox = $('<div class="chat-box overlay-piece"></div>');
+					var chatcontent = $('<div class="chat-content"></div>')
+					
+					
+						var chati = $('<textarea/>', {tabindex: '-1', class: 'chat-input'})
+						var ssize = $('<div/>', {class: 'ci-size'})
+					var chatinput = $('<div/>', {class: 'chat-input-box'}).append(chati).append(ssize)
+					
+				chatbox.append(chatcontent).append(chatinput)
+				
+		
+		
+		
 			info.append(cspinner).append(chatbox);
 		
 		overlay.append(info).append(oqstatus);
@@ -258,8 +268,13 @@ var initParupaint = function(room){
 		$('body').removeClass('room main').addClass('canvas').html('');
 		$('body').append(canvasworkarea).append(overlay);
 		
+		document.location.hash = room
 		
 		if(onRoom) onRoom(room);
 	}
 	
 };
+
+var getRoom = function(){
+	return document.location.hash.substr(1)
+}

@@ -15,6 +15,14 @@ function rgb2hsl(r, g, b) {
 	return {h:h, s:s, l:l};
 }
 
+function rgba2css(r, g, b, a){
+	if(typeof r == "object"){
+		g = r.g, b = r.b, a = r.a, r = r.r
+	}
+	if(a == undefined) a = 1
+	return 'rgba('+r+','+g+','+b+','+a+')'
+}
+
 
 function hsl2rgb(h, s, l){
     var r, g, b;
@@ -195,6 +203,20 @@ var setColorSliderHsl = function(h, s, l, a){
 
 
 
+var addPaletteEntryRgb = function(r, g, b, a){
+	if(typeof r == "object"){
+		g = r.g, b = r.b, a = r.a,
+		r = r.r
+	}
+	var storage = $('.palette-storage')
+	if(storage.length){
+		while(storage.children().length >= 16) {
+			storage.children().last().remove()
+		}
+		storage.prepend($('<div class="palette-entry"></div>').css('background-color', 'rgba('+r+', '+g+', '+b+', '+a/255+')'))
+	}
+}
+
 
 
 
@@ -204,7 +226,7 @@ colorScript = function(onchange){
 		oldcol = getColorSliderHexAlpha()
 	}).bind('mouseup', function(e){
 		if(getColorSliderHexAlpha() != oldcol){
-			onchange(oldcol, getColorSliderHexAlpha())
+			onchange(oldcol, getColorSliderRgb())
 		}
 	})
 	
@@ -242,26 +264,32 @@ colorScript = function(onchange){
 		if(w){
 			var hsl = getColorSliderHsl()
 			
+			var sliderstep = (wd/50)
+			
 			var a = $(e.target)
 			if(a.is('.light-pick')){
-				hsl.l += (wd/10);
+				hsl.l += sliderstep;
 				if(hsl.l < 0) hsl.l = 0;
 				if(hsl.l > 1) hsl.l = 1;
 			} else if(a.is('.alpha-pick')){
-				hsl.a += (wd/10);
+				hsl.a += sliderstep;
 				if(hsl.a < 0) hsl.a = 0;
 				if(hsl.a > 1) hsl.a = 1;
 			} else if(a.is('.hue-pick')){
-				hsl.h += (wd/20);
+				hsl.h += sliderstep;
 				if(hsl.h < 0) hsl.h += 1;
 				if(hsl.h > 1) hsl.h -= 1;
 			} else if(a.is('.saturation-pick')){
-				hsl.s += (wd/10);
+				hsl.s += sliderstep;
 				if(hsl.s < 0) hsl.s = 0;
 				if(hsl.s > 1) hsl.s = 1;
 			}
 			updateInterfaceHsl(hsl)
-			onchange(oldcol, getColorSliderHexAlpha())
+			
+			$(e.target).unbind('mouseout').bind('mouseout', function(e){
+				onchange(oldcol, getColorSliderRgb())
+				$(this).unbind('mouseout')
+			})
 			
 		}
 		
@@ -284,7 +312,6 @@ colorScript = function(onchange){
 			var sat = ((e.offsetX / $(this).width()))
 			setColorSliderHsl(null, sat, null, null)
 			var rgb = setPreviewColor()
-			console.log(rgb.a, rgb2hex(rgb))
 		}
 	})
 }
