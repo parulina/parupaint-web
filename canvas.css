@@ -421,16 +421,16 @@ canvas.focused{
 .chat-box{
 	font-size:13px;
 }
-.chat-box .chat-entry:before{
+.chat-entry:before{
 	content:attr(data-name);
 }
 
-.chat-box .chat-entry.is-admin:before{
+.chat-entry.is-admin:before{
 	content:"+" attr(data-name);
 }
 
 
-.chat-box .chat-entry:before{
+.chat-entry:before{
 	padding:0 3px;
 	margin-right:4px;
 	margin-left:2px;
@@ -441,7 +441,7 @@ canvas.focused{
     display: none;
 }
 
-.chat-box .chat-entry{
+.chat-entry{
 	background-color:rgba(255,255,255,0.5);
 	margin:4px;
 	padding:2px;
@@ -558,16 +558,40 @@ canvas.focused{
 	display:inline-block;
 }
 
+.qstatus-message .chat-entry:before{
+	text-align:center;
+	font-size:12px;
+	display:block;
+	padding:0;
+	margin:0;
+	border:none;
+	background-color:#D4D4D4;
+
+}
+.qstatus-message .chat-entry{
+	padding:0;
+	margin:1px;
+	background-color:transparent;
+}
+.qstatus-message .chat-message{
+	margin:0;
+	margin-top:2px;
+	background:#CCC;
+	font-size:12px;
+}
 .qstatus-message{
+	overflow:hidden;
 	flex-grow:1;
 	min-width:200px;
-	padding:4px;
+	font-size:16px;
 	background:linear-gradient(
 		#888, 
 		#BBC1BB);
 	
-	-webkit-user-select:all;
 	z-index:4;
+	overflow:auto;
+	-webkit-user-select:all;
+	pointer-events:all;
 }
 
 
@@ -575,8 +599,9 @@ canvas.focused{
 .qstatus-brush:after{
 	right:0;
 }
+
 .qstatus-brush:after, .qstatus-settings:before{
-	content:"v";
+	content:"\2193";
 	position:absolute;
 	top:0;
 	bottom:0;
@@ -594,7 +619,7 @@ canvas.focused{
 	position:relative;
 	background-color:#AAADAA;
 	pointer-events:all;
-	
+	z-index:3;
 
 
 }
@@ -605,19 +630,56 @@ canvas.focused{
 	background-color:#EEE;
 	border-bottom:none;
 }
+.qstatus-brush.panel-open:after, .qstatus-settings.panel-open:before{
+	background-color:transparent;
+	transform:translateY(10px);
+	transform-origin:50% 0;
+	opacity:0;
+	transition:all 100ms ease-out;
+	transition-property:transform, opacity;
+}
 .qstatus-panel{
 	height:0;
-	transition:height 200ms ease-out;
+	opacity:0;
+	transition:all 100ms ease-out;
+	transition-property:height,opacity;
 }
 
 .panel-open .qstatus-panel{
 	position:absolute;
 	padding-top:40px;
 	background-color:#EEE;
-	border-top:none;
+	border-top:none !important;
 	z-index: -1;
 	box-shadow:0px 0px 32px -16px #444;
+	opacity:1;
 }
+
+
+
+
+.panel-open .brush-panel:before,
+.panel-open .setting-panel:before{
+	position:absolute;
+	top:0;
+	left:0;
+	right:0;
+	height:40px;
+	padding:15px 40px 0;
+	font-size:16px;
+	font-family:"Helvetica";
+	text-decoration:underline;
+}
+.panel-open .brush-panel:before{
+	content:"Brush";
+}
+.panel-open .setting-panel:before{
+	content:"Menu";
+	text-align:right;
+}
+
+
+
 
 .panel-open .brush-panel{
 	height:400px;

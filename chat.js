@@ -7,12 +7,10 @@ var addMessage = function(msg, name, time, notify){
 	if(msg){
 		var box = $('.chat-content')
 		
-		var m = $('<div class="chat-message"></div>').html(msg.replace(new RegExp('\r?\n','g'), '<br />'))
+		var m = $('<div />',{class:'chat-message', html: msg.replace(new RegExp('\r?\n','g'), '<br />')})
+			
 		if(time) m.attr('data-time', time)
 		
-		if(notify){
-			$('.qstatus-message').html(m).parent().show()
-		}
 		if(name){
 			if(box.children('.chat-entry').length){
 				var last = box.children('.chat-entry').last()
@@ -25,6 +23,10 @@ var addMessage = function(msg, name, time, notify){
 		if(name) attrs['data-name'] = name
 		
 		var entry = $('<div/>', attrs).append(m)
+		if(notify){
+			console.log(m)
+			$('.qstatus-message').html(entry.clone()).parent().show()
+		}
 		
 		return box.append(entry)
 	}
