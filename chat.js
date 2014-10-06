@@ -11,7 +11,7 @@ var addMessage = function(msg, name, time, notify){
 		if(time) m.attr('data-time', time)
 		
 		if(notify){
-			$('.qstatus-message').html(m).show()
+			$('.qstatus-message').html(m).parent().show()
 		}
 		if(name){
 			if(box.children('.chat-entry').length){
@@ -30,9 +30,9 @@ var addMessage = function(msg, name, time, notify){
 	}
 }
 
-var addChatMessage = function(room, msg, name, time){
+var addChatMessage = function(room, msg, name, time, notify){
 	if(msg){
-		
+		if(!room) room = getRoom()
 		chrome.storage.local.get('rooms', function(d){
 			if(d.length){
 				if(d == undefined) 		d = {};
@@ -43,7 +43,7 @@ var addChatMessage = function(room, msg, name, time){
 				chrome.storage.local.set({rooms: d}, failSafe);
 			}
 			
-			addMessage(msg, name, time, true)
+			addMessage(msg, name, time, notify == undefined ? true : notify)
 			
 		})
 	}
@@ -51,12 +51,12 @@ var addChatMessage = function(room, msg, name, time){
 
 
 var sendChatMessage = function(msg, room){
-	if(room == undefined) room = getRoom()
+	if(!room) room = getRoom()
 	var name = $('.canvas-cursor.cursor-self').data('name')
 	var time = new Date().toTimeString().split(' ')[0]
 	
 	var addfunc = function(){
-		addChatMessage(room, msg, name, time)
+		addChatMessage(room, msg, name, time, false)
 	}
 	
 	if(room == getRoom()){
@@ -80,6 +80,6 @@ chatScript = function(room){
 		} else if(e.keyCode == 27){
 			overlayGone(true)
 		}
-		$('.chat-input-box .ci-size').html($(this).val())
+		console.log($('.chat-input-box .ci-size').html($(this).val()).html())
 	})
 }

@@ -174,7 +174,7 @@ canvas.focused{
 
 
 .overlay-piece{
-	background-color: rgba(0, 0, 0, 0.25);
+	background-color:rgba(0, 0, 0, 0.25);
 	box-shadow: 0px 0px 60px -20px black;
 	border: 1px solid rgb(195, 195, 195);
 	border-radius: 4px;
@@ -198,6 +198,9 @@ canvas.focused{
 	right:0;
 	left:0;
 	display:none;
+	width: 100%;
+	border-bottom: none;
+	z-index: 1;
 }
 .chat-box.overlay-piece{
 	width:45%; height:30%;
@@ -444,6 +447,10 @@ canvas.focused{
 	padding:2px;
 }
 
+.chat-content{
+	-webkit-user-select:all;
+}
+
 .chat-entry.is-admin .chat-message{
 	background-color:white;
 }
@@ -537,3 +544,95 @@ canvas.focused{
 
 
 
+
+
+
+
+
+
+.qstatus{
+	justify-content:space-between;
+}
+
+.qstatus > div{
+	display:inline-block;
+}
+
+.qstatus-message{
+	flex-grow:1;
+	min-width:200px;
+	padding:4px;
+	background:linear-gradient(
+		#888, 
+		#BBC1BB);
+	
+	-webkit-user-select:all;
+	z-index:4;
+}
+
+
+
+.qstatus-brush:after{
+	right:0;
+}
+.qstatus-brush:after, .qstatus-settings:before{
+	content:"v";
+	position:absolute;
+	top:0;
+	bottom:0;
+	width:16px;
+	text-align:center;
+	padding-top:15px;
+	background-color:#DDD;
+	border-bottom:1px solid #CCC;
+}
+.qstatus-brush, .qstatus-settings{
+
+	max-width:120px;
+	width:100%;
+	flex-shrink:1;
+	position:relative;
+	background-color:#AAADAA;
+	pointer-events:all;
+	
+
+
+}
+
+.qstatus-brush:hover:after,
+.qstatus-settings:hover:before,
+.qstatus-brush.panel-open:after, .qstatus-settings.panel-open:before{
+	background-color:#EEE;
+	border-bottom:none;
+}
+.qstatus-panel{
+	height:0;
+	transition:height 200ms ease-out;
+}
+
+.panel-open .qstatus-panel{
+	position:absolute;
+	padding-top:40px;
+	background-color:#EEE;
+	border-top:none;
+	z-index: -1;
+	box-shadow:0px 0px 32px -16px #444;
+}
+
+.panel-open .brush-panel{
+	height:400px;
+	border:1px solid #888;
+	border-left:none;
+	width:100%;
+	left:0;
+	border-bottom-right-radius:8px;
+}
+.panel-open .setting-panel{
+	border:1px solid #888;
+	border-right:none;
+	height:400px;
+	width:600px;
+	border-right:0;
+	right:0;
+	border-bottom-left-radius:8px;
+}

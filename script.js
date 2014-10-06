@@ -17,6 +17,24 @@ var overlayGone = function(now){
 	$('.overlay .qstatus').hide();
 };
 
+var overlayShow = function(full){
+	if(full){
+		if(!$('.overlay .gui').hasClass('visible')){
+			$('.overlay .gui').addClass('visible');
+
+			$('.overlay .qstatus').hide();
+		} else {
+			var ta = $('textarea.chat-input')
+			if(ta.is(':focus')){
+				ta.select()
+			}
+			ta.focus()
+		}
+	} else {
+		$('.overlay .qstatus').css({display:'flex'});
+	}
+}
+
 $(document).keydown(function(e){
 	switch(e.keyCode){
 			case 9:
@@ -28,24 +46,14 @@ $(document).keydown(function(e){
 					
 					if($('.overlay .gui').hasClass('visible')){
 						
-						var ta = $('textarea.chat-input')
-						if(ta.is(':focus')){
-							ta.select()
-						}
-						ta.focus()
-						
+						overlayShow(true)
 						return false;
 					}else{
 						if(qs.length){
 							if(qs.is(':visible')){
-								if(!$('.overlay .gui').hasClass('visible')){
-									$('.overlay .gui').addClass('visible');
-									
-									qs.hide();
-								}
+								overlayShow(true)
 							} else {
-								qs.show();
-								console.log('show quick')
+								overlayShow(false)
 							}
 						}
 					}
@@ -388,6 +396,18 @@ onRoom = function(room){
 	}).mouseover(function(e){
 		clearTimeout(overlayTimeout);
 	});
+	
+	$('.qstatus-brush, .qstatus-settings').click(function(e){
+		
+		
+		if(!$(e.target).is('.qstatus-panel')){
+			$(this).toggleClass('panel-open').children('.qstatus-panel').mouseout(function(e){
+				$(this).unbind('mouseout').parent().removeClass('panel-open')
+			})
+			
+		}
+		
+	})
 	
 	chatScript(room)
 	

@@ -223,9 +223,9 @@ var initParupaint = function(room){
 		
 		var overlay = $('<div class="overlay"></div>');
 			var oqstatus = $('<div class="qstatus overlay-piece"></div>')
-				var oqstatus_brush = $('<div class="qstatus-brush"></div>')
+				var oqstatus_brush = $('<div class="qstatus-brush"></div>').html($('<div/>', {class: 'qstatus-panel brush-panel'}))
 				var oqstatus_message = $('<div class="qstatus-message"></div>')
-				var oqstatus_internet = $('<div class="qstatus-internet"></div>')
+				var oqstatus_internet = $('<div class="qstatus-settings"></div>').html($('<div/>', {class: 'qstatus-panel setting-panel'}))
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
 			var info = $('<div class="gui visible"></div>')
