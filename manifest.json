@@ -1,18 +1,10 @@
 {
 	"manifest_version": 2,
-	"name": "parupaint-web",
-	"version": "0.2",
+	"name": "parupaint",
+	"version": "0.2.5",
 	"description":"parupaint chrome webapp.",
 	"author":"paru",
 	"short_name":"parupaint",
-	"commands": {
-		"reload-dev":{
-			"suggested_key":{
-				"default": "Ctrl+R"
-			},
-			"description":"reload for dev"
-		}
-	},
 	"app": {
 		"background": {
 			"scripts": [ "background.js" ],
