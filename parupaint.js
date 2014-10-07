@@ -1,5 +1,7 @@
 var manifest = chrome.runtime.getManifest();
 var url = 'http://draw.sqnya.se';
+var hidperm = { permissions: ['hid'] }
+
 
 var loadSqnyaImage = function(url2, callback){
 	var xhr = new XMLHttpRequest();
@@ -192,20 +194,56 @@ var initParupaint = function(room){
 		var container = $('<div class="show-area"></div>');
         
         
-			var tablet = $('<input/>', {type:'button', class: 'main-setting-panel set-tablet', value:'enable tablets'}),
-				clear = $('<input/>', {type: 'button',class:'main-setting-panel clear-settings', value:'clear settings'}),
+			var tablet = $('<input/>', {type:'button', class: 'main-setting-panel set-tablet', value:'enable tablets', alt:'requests permission from you to turn on tablet support.'}),
+				clear = $('<input/>', {type: 'button',class:'main-setting-panel clear-settings', value:'clear settings', alt:"clears the saved settings and rooms! you won't get them back."}),
 				room2 = $('<div/>', {class: 'main-setting-panel set-room'}).html($('<input/>', {type: 'text', class: 'new-room-input'})),
-				name2 = $('<div/>', {class: 'main-setting-panel set-name'}).html($('<input/>', {type: 'text', class: 'name-input'}))
+				name2 = $('<div/>', {class: 'main-setting-panel set-name'}).html($('<input/>', {type: 'text', class: 'name-input'})),
+				ctablet = $('<div/>', {class: 'chosen-tablet'})
 			
-		var settings = $('<div/>', {class: 'main-page-settings'}).append(tablet).append(clear).append(name2).append(room2)
+			
+		var settings = $('<div/>', {class: 'main-page-settings'}).append(ctablet).append(tablet).append(clear).append(name2).append(room2)
 		
-		var roomcounter = $('<div class="room-counter"></div>');
-		var roomstatus = $('<div class="room-status-bar"></div>').html(roomcounter);
+		var roomstatus = $('<div class="room-status-bar"></div>').append($('<div/>', {class: 'room-counter'}));
 		
 		var infoheader = $('<div class="room-info-header"></div>').append(settings).append(title).append(header);
 		
+		
+		
+		chrome.storage.local.get('last_tablet', function(d){
+			if(d && d.last_tablet){
+				 $('.chosen-tablet').text((d.last_tablet.name || 'Mouse/unknown'))
+			}
+		})
+		chrome.permissions.contains(hidperm, function(e){
+			if(e){
+				$('input.set-tablet').addClass('enabled')
+			}
+		})
+		
 		$('body').removeClass('room canvas').addClass('main').html('');
 		$('body').append(infoheader).append(roomstatus).append(container);
+		
+		$('input.set-tablet').click(function(e){
+			
+			
+			chrome.permissions.contains(hidperm, function(e){
+				if(e){
+					chrome.permissions.remove(hidperm, function(){
+						$('input.set-tablet').removeClass('enabled')
+					})
+				} else {
+					chrome.permissions.request(hidperm, function(r){
+						if(r){
+							$('input.set-tablet').addClass('enabled')
+						}
+					})
+				}
+			})
+		})
+		$('input.clear-settings').click(function(e){
+			
+			chrome.storage.local.clear()
+		})
 		
 		$('input.new-room-input').keypress(function(e){
 			if(e.keyCode == 13){

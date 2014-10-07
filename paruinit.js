@@ -7,15 +7,25 @@ $$ = function(callback){ chrome.runtime.getBackgroundPage(function(page){ callba
 var tabletConnection = {connection: null, pressure:0, x: 0, y: 0, name:''};
 
 
+var devs = manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices
 
 var selectTablet = function(vendor, product){
     if(vendor != undefined){
         console.log('setting local data last tablet to: ' + vendor);
-        chrome.storage.local.set({last_tablet: {vendorId: vendor, productId: product}}, function(){});
+		
+		var data = {vendorId: vendor, productId: product}
+		if(vendor){
+			for(var i in devs){
+				if(devs[i].vendorId == vendor && devs[i].productId == product){
+					data.name = devs[i].name
+				}
+			}
+		}
+        chrome.storage.local.set({last_tablet: data}, function(){});
     }
     $('#alert-message').remove();
     $('body').removeClass('loading');
-    initParupaint('test-thing');
+    initParupaint();
 };
 
 
@@ -24,9 +34,28 @@ $(function(){
         selectTablet(0)
 
     } else {
-
-        chrome.hid.getDevices({filters: manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices}, function(devlist){
-            console.log(devlist);
+		
+		var devthing = {filters: devs}
+		
+		try{
+			chrome.hid.getDevices(devthing, function(){});
+		} catch(e){
+			/*
+			var ee = $('<div class="error"></div>').append(e).append('<br/>Tablet detection only works in chrome dev channel.<br/>Click to continue.');
+			$('#alert-message').effect('shake').prepend(ee);
+			$('html').click(function(){
+				$('#alert-message div.error').remove();
+				selectTablet(0)
+			});
+			
+			return 1;
+			*/
+			
+			devthing = {vendorId: devs[0].vendorId, productId: devs[0].productId}
+		}
+		console.log(devthing)
+        chrome.hid.getDevices(devthing, function(devlist){
+            console.log('devlist:', devlist);
 
             var connectTablet = function(vendor, product, callback){
                 chrome.hid.getDevices({ "vendorId": parseInt(vendor), "productId": parseInt(product)}, function(dev) {
@@ -65,10 +94,11 @@ $(function(){
 
 
             if(devlist.length){
-                $('#alert-message').text('');
+                $('#alert-message').text('Connecting...');
 
 
                 var listTablets = function(){
+					$('#alert-message').text('');
                     $('#alert-message').append('<a href="#" data-id="-1">Don\'t use any tablet.</a>');
                     for(var i in devlist){
                         console.log(devlist[i]);
@@ -96,6 +126,7 @@ $(function(){
 
                 chrome.storage.local.get('last_tablet', function(data){
 
+					console.log(data.last_tablet)
                     if(data.last_tablet == undefined) {
                         console.log('Hmmm, first run...');
                         if(devlist.length >= 2){
