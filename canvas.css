@@ -112,6 +112,7 @@ body.canvas{
 	padding:60px;
 }
 
+
 .canvas-workarea,.checker-bg, .color-spinner .alpha-pick:before,
 .preview-col:before, .palette-storage .palette-entry:before,
 .canvas-cursor.pick-color:before, .qstatus-piece.preview-col:before{
@@ -549,6 +550,7 @@ canvas.focused{
 
 
 
+
 .qstatus-brush.panel-open .preview-col{
 	transition:bottom 100ms linear;
 	bottom:100%;
@@ -590,6 +592,7 @@ canvas.focused{
 	height: 15px;
 	border-radius: 2px;
 	padding: 4px;
+	margin-left: 12px;
 }
 
 
@@ -729,12 +732,15 @@ canvas.focused{
 
 
 .panel-open .brush-panel{
-	height:400px;
+	min-height: 16px;
 	border:1px solid #888;
 	border-left:none;
 	width:100%;
 	left:0;
 	border-bottom-right-radius:8px;
+	overflow: auto;
+	height: auto;
+	max-height: 400px;
 }
 .panel-open .setting-panel{
 	border:1px solid #888;
@@ -745,3 +751,25 @@ canvas.focused{
 	right:0;
 	border-bottom-left-radius:8px;
 }
+
+.qstatus-brush.panel-open .player-list{
+	display:block;
+}
+.qstatus-brush .player-list{
+    padding: 0;
+
+    margin: 0;
+    border-top: 1px solid #777;
+    display: none;
+    -webkit-user-select: all;
+}
+
+.player-list li.player-list-entry{
+    padding-left: 16px;
+    padding-top: 4px;
+}
+
+
+
+
+

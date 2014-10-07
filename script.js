@@ -404,15 +404,33 @@ onRoom = function(room){
 	});
 	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
-		
-		
-		if(!$(e.target).is('.qstatus-panel')){
-			$(this).toggleClass('panel-open').children('.qstatus-panel').mouseout(function(e){
-				$(this).unbind('mouseout').parent().removeClass('panel-open')
-			})
+		var toq = null
+		if(!$('.qstatus-panel').has(e.target).length){
+			var t = $(this)
+			$('.qstatus-brush, .qstatus-settings').removeClass('panel-open')
 			
+			t.toggleClass('panel-open')
+			/*.mouseout(function(){
+				if(toq) clearTimeout(toq)
+				toq = setTimeout(function(){
+					t.removeClass('panel-open')
+				}, 800)
+			}).mouseenter(function(){
+				if(toq) clearTimeout(toq)
+			})
+			*/
 		}
 		
+	})
+	
+	$('html').click(function(e){
+		console.log(e.target)
+		var qs = $('.qstatus-brush, .qstatus-settings')
+		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
+			if(qs.hasClass('panel-open')){
+				qs.removeClass('panel-open')
+			}
+		}
 	})
 	
 	chatScript(room)
