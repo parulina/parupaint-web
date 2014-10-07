@@ -189,21 +189,41 @@ var initParupaint = function(room){
 		var title = $('<h1 class="title"></h1>').text('parupaint');
 		var header = $('<h2></h2>').text('for chrome (beta)');
 		var container = $('<div class="show-area"></div>');
-		var input = $('<div class="room-input"></div>').html('<input class="new-room-input" type="text"></input>')//.append('<input type="button" value="offline room"></input>');
-		
+        
+        
+			var tablet = $('<input/>', {type:'button', class: 'main-setting-panel set-tablet', value:'enable tablets'}),
+				clear = $('<input/>', {type: 'button',class:'main-setting-panel clear-settings', value:'clear settings'}),
+				room2 = $('<div/>', {class: 'main-setting-panel set-room'}).html($('<input/>', {type: 'text', class: 'new-room-input'})),
+				name2 = $('<div/>', {class: 'main-setting-panel set-name'}).html($('<input/>', {type: 'text', class: 'name-input'}))
+			
+		var settings = $('<div/>', {class: 'main-page-settings'}).append(tablet).append(clear).append(name2).append(room2)
 		
 		var roomcounter = $('<div class="room-counter"></div>');
 		var roomstatus = $('<div class="room-status-bar"></div>').html(roomcounter);
 		
-		var infoheader = $('<div class="room-info-header"></div>').append(input).append(title).append(header);
+		var infoheader = $('<div class="room-info-header"></div>').append(settings).append(title).append(header);
 		
 		$('body').removeClass('room canvas').addClass('main').html('');
 		$('body').append(infoheader).append(roomstatus).append(container);
 		
 		$('input.new-room-input').keypress(function(e){
 			if(e.keyCode == 13){
-				initParupaint($(this).val());
-				$(this).val('');
+				chrome.storage.local.get('name', function(d){
+					if(d && d.name && d.name.length){
+						
+						initParupaint($(e.target).val());
+						$(e.target).val('');
+					} else {
+						console.log("name isn't valid!",d)
+						return $('input.name-input').focus().select()
+					}
+				})
+			}
+		});
+		$('input.name-input').keypress(function(e){
+			if(e.keyCode == 13){
+				chrome.storage.local.set({name: $(this).val()})
+				console.log('set name to: ', $(this).val())
 			}
 		});
 		
