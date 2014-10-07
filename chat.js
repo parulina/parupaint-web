@@ -3,13 +3,41 @@
 //   chat-entry
 //     chat-message
 
+
+var messageQueueTimer = null
+var clearMessageQueue = function(delay){
+	console.log('clearmessagequeue', delay)
+	if(delay && !messageQueueTimer){
+		messageQueueTimer = setInterval(clearMessageQueue, delay)
+		console.log('init')
+	} else {
+		if($('.qstatus-message').children().length){
+			$('.qstatus-message').children().first().remove()
+			console.log('removed first')
+		}else{
+			clearInterval(messageQueueTimer)
+			messageQueueTimer = null
+			console.log('stop')
+		}
+	}
+}
+
 var addMessage = function(msg, name, time, notify){
 	if(msg){
 		var box = $('.chat-content')
+		var attrs = {class:'chat-entry'}
+		if(name) attrs['data-name'] = name
 		
 		var m = $('<div />',{class:'chat-message', html: msg.replace(new RegExp('\r?\n','g'), '<br />')})
-			
 		if(time) m.attr('data-time', time)
+			
+		if(notify){
+			$('.qstatus-message').append($('<div/>', attrs).html(m.clone()))
+			if(!messageQueueTimer){
+				//clearMessageQueue(3000)
+			}
+			overlayShow(false)
+		}
 		
 		if(name){
 			if(box.children('.chat-entry').length){
@@ -19,14 +47,8 @@ var addMessage = function(msg, name, time, notify){
 				}
 			}
 		}
-		var attrs = {class:'chat-entry'}
-		if(name) attrs['data-name'] = name
 		
 		var entry = $('<div/>', attrs).append(m)
-		if(notify){
-			console.log(m)
-			$('.qstatus-message').html(entry.clone()).parent().show()
-		}
 		
 		return box.append(entry)
 	}

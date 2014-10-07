@@ -31,6 +31,9 @@ var overlayShow = function(full){
 			ta.focus()
 		}
 	} else {
+		if($('.overlay .gui').hasClass('visible')){
+			$('.overlay .gui').removeClass('visible');
+		}
 		$('.overlay .qstatus').css({display:'flex'});
 	}
 }
