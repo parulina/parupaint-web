@@ -130,10 +130,10 @@ var Brush = {
 		return this.brushes[this.cbrush];
 	},
 	brushname: function(){
-		return this.brushnames[this.cbrush];
+		return this.brushnames[this.cbrush]
 	},
 	size: function(size, cursor){
-	
+		if(size == undefined) return this.brush().size
 		if(cursor == undefined){
 			cursor = $('.canvas-cursor.cursor-self');
 		}
@@ -145,13 +145,14 @@ var Brush = {
 		return this;
 	},
 	color: function(color, cursor){
+		if(color == undefined) return this.brush().color
 		if(cursor == undefined){
 			cursor = $('.canvas-cursor.cursor-self');
 		}
 		if(cursor.length){
 			var cssrgba = rgba2css((color[0] == '#') ? hex2rgb(color) : color)
 			cursor.data('color', color);
-			cursor.css({borderColor: cssrgba, 'background-color': cssrgba})
+			cursor.css({'borderColor': cssrgba, 'background-color': cssrgba})
 			if(cursor.hasClass('cursor-self')) this.brush().color = color;
 		}
 		return this;

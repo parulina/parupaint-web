@@ -659,6 +659,7 @@ canvas.focused{
 	overflow: hidden;
 	position:relative;
 	padding-bottom: 20px;
+	min-height: 20px;
 }
 .qstatus-message:hover .chat-message{
 	top:0;
@@ -668,6 +669,9 @@ canvas.focused{
 }
 .qstatus-message:hover .chat-entry{
 	overflow:auto;
+}
+.qstatus-message .chat-message:after{
+	display:none;
 }
 .qstatus-message .chat-message{
 	margin:0;

@@ -280,7 +280,7 @@ colorScript = function(onchange){
 				if(hsl.h < 0) hsl.h += 1;
 				if(hsl.h > 1) hsl.h -= 1;
 			} else if(a.is('.saturation-pick')){
-				hsl.s += sliderstep;
+				hsl.s -= sliderstep;
 				if(hsl.s < 0) hsl.s = 0;
 				if(hsl.s > 1) hsl.s = 1;
 			}

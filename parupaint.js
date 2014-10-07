@@ -209,9 +209,14 @@ var initParupaint = function(room){
 		
 		
 		
-		chrome.storage.local.get('last_tablet', function(d){
-			if(d && d.last_tablet){
-				 $('.chosen-tablet').text((d.last_tablet.name || 'Mouse/unknown'))
+		chrome.storage.local.get(['last_tablet', 'name'], function(d){
+			if(d){
+				if(d.last_tablet){
+					$('.chosen-tablet').text((d.last_tablet.name || 'Mouse/unknown'))
+				}
+				if(d.name){
+					$('input.name-input').val(d.name)
+				}
 			}
 		})
 		chrome.permissions.contains(hidperm, function(e){

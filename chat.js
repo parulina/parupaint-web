@@ -34,7 +34,7 @@ var addMessage = function(msg, name, time, notify){
 		if(notify){
 			$('.qstatus-message').append($('<div/>', attrs).html(m.clone()))
 			if(!messageQueueTimer){
-				//clearMessageQueue(3000)
+				clearMessageQueue(3000)
 			}
 			overlayShow(false)
 		}
