@@ -114,7 +114,7 @@ body.canvas{
 
 .canvas-workarea,.checker-bg, .color-spinner .alpha-pick:before,
 .preview-col:before, .palette-storage .palette-entry:before,
-.canvas-cursor.pick-color:before{
+.canvas-cursor.pick-color:before, .qstatus-piece.preview-col:before{
 	background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABn0lEQVR4Xu3ZQRKDIAwFUN14De9/K93oHdzY0hlmHMY2SAL5DXHZim2eAQKM5/saFK91XRV/fRhGB/AM8C7gY4DmKOSDoM8CPg1q9kD8OmCapg/QcRxVoKALoRh8jLwGAixACD4N+O4zblpAAvwKVBoBDoAKUHpMgAKggo/pLokAA5Ab/LXPl7RJxwwIAE4gnLYBQx1g33f2HM9BMAEQ3mQpgjqA5GqwBMEUQEkmmAN4imAS4AmCWYBcBNMAOQjmASiELgB+IXQD8A2hK4A7hO4AUoQuAa4I3QJEhHHbtrPGbmvuZuU8z7m3VrlvXJblLFlFSf0bCACqWJAK9u45MABaCFAAGghwAK0RIAFaIsACtEKABmiB8BcAAaJWsQQN0OJ8Hhag1fk8JEDL83k4AGpdIHk0HcYWKAAq+FjLSyLAAOQGf13QlLRJF0QQAJxAOG0huoDEhggHQT0DJAA4FaM6QNgRktrwKMkEUwAlmWAO4CmCSYAnCGYBchFMA+QgmAegZhgHQDgZot5Sze89AzwDAA5Ha6Y49WzvAspd4AXk+BDRuCM1ygAAAABJRU5ErkJggg==');
 	background-repeat:repeat;
 }
@@ -549,7 +549,53 @@ canvas.focused{
 
 
 
+.qstatus-brush.panel-open .preview-col{
+	transition:bottom 100ms linear;
+	bottom:100%;
+}
+.qstatus-piece.preview-col{
+	opacity:1;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: red;
+	border: 2px solid rgb(224, 224, 224);
+	outline: 1px solid rgb(186, 180, 180);
+}
+.qstatus-piece.preview-col:before{
+	position:absolute;
+	top:0; left:0;
+	right:0; bottom:0;
+	content:" ";
+	background-size:8px 8px;
+	z-index: -1;
+}
 
+.qstatus-piece.preview-col:after {
+	content:attr(data-brush-name);
+	display: block;
+	text-align: center;
+	background: none;
+	background-color: rgba(234, 234, 234, 0.9);
+	font-size: 12px;
+	margin: auto;
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	width: 32px;
+	height: 15px;
+	border-radius: 2px;
+	padding: 4px;
+}
+
+
+.qstatus.visible{
+	display:flex;
+}
 .qstatus{
 	justify-content:space-between;
 }
@@ -561,7 +607,6 @@ canvas.focused{
 .qstatus-message .chat-entry:before{
 	text-align:center;
 	font-size:12px;
-	display:block;
 	padding:0;
 	margin:0;
 	border:none;
@@ -637,6 +682,7 @@ canvas.focused{
 	opacity:0;
 	transition:all 100ms ease-out;
 	transition-property:transform, opacity;
+	pointer-events: none;
 }
 .qstatus-panel{
 	height:0;
@@ -671,11 +717,12 @@ canvas.focused{
 	text-decoration:underline;
 }
 .panel-open .brush-panel:before{
-	content:"Brush";
+	content:"Painters";
+	padding-left:8px;
 }
 .panel-open .setting-panel:before{
 	content:"Menu";
-	text-align:right;
+	left: auto;
 }
 
 

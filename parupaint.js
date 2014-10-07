@@ -143,6 +143,7 @@ var updateCallbacks = function(cb){
 			return cb('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
 		}
 	}).mousedown(function(e){
+		if(e.button == 1) return false;
 		if(cb){
 			tmouse.oldx = e.offsetX;
 			tmouse.oldy = e.offsetY;
@@ -242,13 +243,13 @@ var initParupaint = function(room){
 		
 		
 		var overlay = $('<div class="overlay"></div>');
-			var oqstatus = $('<div class="qstatus overlay-piece"></div>')
-				var oqstatus_brush = $('<div class="qstatus-brush"></div>').html($('<div/>', {class: 'qstatus-panel brush-panel'}))
+			var oqstatus = $('<div class="qstatus overlay-piece visible"></div>')
+				var oqstatus_brush = $('<div class="qstatus-brush"></div>').append($('<div/>', {class: 'qstatus-piece preview-col'})).append($('<div/>', {class: 'qstatus-panel brush-panel'}))
 				var oqstatus_message = $('<div class="qstatus-message"></div>')
-				var oqstatus_internet = $('<div class="qstatus-settings"></div>').html($('<div/>', {class: 'qstatus-panel setting-panel'}))
+				var oqstatus_internet = $('<div class="qstatus-settings"></div>').append($('<div/>', {class: 'qstatus-piece qinfo'})).append($('<div/>', {class: 'qstatus-panel setting-panel'}))
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
-			var info = $('<div class="gui visible"></div>')
+			var info = $('<div class="gui"></div>')
 				var cspinner = $('<div class="color-spinner overlay-piece"></div>');
 					
 					var selectorcode = '<div class="color-selector"></div>';

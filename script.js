@@ -14,7 +14,7 @@ var overlayGone = function(now){
 	
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
-	$('.overlay .qstatus').hide();
+	$('.overlay .qstatus').removeClass('visible');
 };
 
 var overlayShow = function(full){
@@ -22,7 +22,7 @@ var overlayShow = function(full){
 		if(!$('.overlay .gui').hasClass('visible')){
 			$('.overlay .gui').addClass('visible');
 
-			$('.overlay .qstatus').hide();
+			$('.overlay .qstatus').removeClass('visible');
 		} else {
 			var ta = $('textarea.chat-input')
 			if(ta.is(':focus')){
@@ -31,7 +31,7 @@ var overlayShow = function(full){
 			ta.focus()
 		}
 	} else {
-		$('.overlay .qstatus').css({display:'flex'});
+		$('.overlay .qstatus').addClass('visible');
 	}
 }
 
@@ -117,6 +117,7 @@ var Brush = {
 	bmove:2,
 	
 	cbrush:0,
+	brushnames:['brush','eraser'],
 	brushes:[
 		{size:1, color:'#000'},
 		{size:16, color:'#00000000'}
@@ -124,6 +125,9 @@ var Brush = {
 	brush: function(b){
 		if(b != undefined) 	this.cbrush = b;
 		return this.brushes[this.cbrush];
+	},
+	brushname: function(){
+		return this.brushnames[this.cbrush];
 	},
 	size: function(size, cursor){
 	
@@ -158,6 +162,8 @@ var Brush = {
 		if(this.cbrush == 1){
 			cursor.addClass('eraser')
 		}
+		var cssrgba = rgba2css((this.brush().color[0] == '#') ? hex2rgb(this.brush().color) : this.brush().color)
+		$('.qstatus-piece.preview-col').css('background-color', cssrgba).attr('data-brush-name', this.brushname())
 		return this;
 	}
 }
