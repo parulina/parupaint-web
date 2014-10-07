@@ -14,7 +14,7 @@ var overlayGone = function(now){
 	
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
-	$('.overlay .qstatus').hide();
+	$('.overlay .qstatus').removeClass('visible');
 };
 
 var overlayShow = function(full){
@@ -22,7 +22,7 @@ var overlayShow = function(full){
 		if(!$('.overlay .gui').hasClass('visible')){
 			$('.overlay .gui').addClass('visible');
 
-			$('.overlay .qstatus').hide();
+			$('.overlay .qstatus').removeClass('visible');
 		} else {
 			var ta = $('textarea.chat-input')
 			if(ta.is(':focus')){
@@ -34,7 +34,7 @@ var overlayShow = function(full){
 		if($('.overlay .gui').hasClass('visible')){
 			$('.overlay .gui').removeClass('visible');
 		}
-		$('.overlay .qstatus').css({display:'flex'});
+		$('.overlay .qstatus').addClass('visible');
 	}
 }
 
@@ -120,6 +120,7 @@ var Brush = {
 	bmove:2,
 	
 	cbrush:0,
+	brushnames:['brush','eraser'],
 	brushes:[
 		{size:1, color:'#000'},
 		{size:16, color:'#00000000'}
@@ -127,6 +128,9 @@ var Brush = {
 	brush: function(b){
 		if(b != undefined) 	this.cbrush = b;
 		return this.brushes[this.cbrush];
+	},
+	brushname: function(){
+		return this.brushnames[this.cbrush];
 	},
 	size: function(size, cursor){
 	
@@ -161,6 +165,8 @@ var Brush = {
 		if(this.cbrush == 1){
 			cursor.addClass('eraser')
 		}
+		var cssrgba = rgba2css((this.brush().color[0] == '#') ? hex2rgb(this.brush().color) : this.brush().color)
+		$('.qstatus-piece.preview-col').css('background-color', cssrgba).attr('data-brush-name', this.brushname())
 		return this;
 	}
 }
@@ -401,15 +407,36 @@ onRoom = function(room){
 	});
 	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
-		
-		
-		if(!$(e.target).is('.qstatus-panel')){
-			$(this).toggleClass('panel-open').children('.qstatus-panel').mouseout(function(e){
-				$(this).unbind('mouseout').parent().removeClass('panel-open')
-			})
+		var toq = null
+		if(!$('.qstatus-panel').has(e.target).length){
+			var t = $(this)
+			$('.qstatus-brush, .qstatus-settings').removeClass('panel-open')
 			
+			t.toggleClass('panel-open')
+			/*.mouseout(function(){
+				if(toq) clearTimeout(toq)
+				toq = setTimeout(function(){
+					t.removeClass('panel-open')
+				}, 800)
+			}).mouseenter(function(){
+				if(toq) clearTimeout(toq)
+			})
+			*/
 		}
 		
+	})
+	
+	$('html').click(function(e){
+		console.log(e.target)
+		var qs = $('.qstatus-brush, .qstatus-settings')
+		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
+			if(qs.hasClass('panel-open')){
+				qs.removeClass('panel-open')
+			}
+		}
+	})
+	$(window).scroll(function(){
+		if($('.qstatus-brush, .qstatus-settings').hasClass('panel-open')) return false;
 	})
 	
 	chatScript(room)
