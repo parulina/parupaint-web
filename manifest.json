@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "parupaint",
-	"version": "0.2.5",
+	"version": "0.2.9",
 	"description":"parupaint chrome webapp.",
 	"author":"paru",
 	"short_name":"parupaint",
