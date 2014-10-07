@@ -432,6 +432,9 @@ onRoom = function(room){
 			}
 		}
 	})
+	$(window).scroll(function(){
+		if($('.qstatus-brush, .qstatus-settings').hasClass('panel-open')) return false;
+	})
 	
 	chatScript(room)
 	
