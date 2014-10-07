@@ -12,10 +12,13 @@
 		}
 	},
 	"permissions": [
+		"storage"
+	],
+    "optional_permissions":[
 		"http://draw.sqnya.se/*",
-		"storage", "hid", "usb", {"usbDevices":[
-			{ "vendorId": 1386, "productId": 20},
-			{ "vendorId": 5935, "productId": 52}
+         "hid", {"usbDevices":[
+			{ "vendorId": 1386, "productId": 20, "name": "Waltop Slimline"},
+			{ "vendorId": 5935, "productId": 52, "name": "Wacom Graphire 3"}
 		]}
-	]
+    ]
 }

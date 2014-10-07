@@ -1,5 +1,7 @@
 var manifest = chrome.runtime.getManifest();
 var url = 'http://draw.sqnya.se';
+var hidperm = { permissions: ['hid'] }
+
 
 var loadSqnyaImage = function(url2, callback){
 	var xhr = new XMLHttpRequest();
@@ -143,6 +145,7 @@ var updateCallbacks = function(cb){
 			return cb('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
 		}
 	}).mousedown(function(e){
+		if(e.button == 1) return false;
 		if(cb){
 			tmouse.oldx = e.offsetX;
 			tmouse.oldy = e.offsetY;
@@ -189,21 +192,77 @@ var initParupaint = function(room){
 		var title = $('<h1 class="title"></h1>').text('parupaint');
 		var header = $('<h2></h2>').text('for chrome (beta)');
 		var container = $('<div class="show-area"></div>');
-		var input = $('<div class="room-input"></div>').html('<input class="new-room-input" type="text"></input>')//.append('<input type="button" value="offline room"></input>');
+        
+        
+			var tablet = $('<input/>', {type:'button', class: 'main-setting-panel set-tablet', value:'enable tablets', alt:'requests permission from you to turn on tablet support.'}),
+				clear = $('<input/>', {type: 'button',class:'main-setting-panel clear-settings', value:'clear settings', alt:"clears the saved settings and rooms! you won't get them back."}),
+				room2 = $('<div/>', {class: 'main-setting-panel set-room'}).html($('<input/>', {type: 'text', class: 'new-room-input'})),
+				name2 = $('<div/>', {class: 'main-setting-panel set-name'}).html($('<input/>', {type: 'text', class: 'name-input'})),
+				ctablet = $('<div/>', {class: 'chosen-tablet'})
+			
+			
+		var settings = $('<div/>', {class: 'main-page-settings'}).append(ctablet).append(tablet).append(clear).append(name2).append(room2)
+		
+		var roomstatus = $('<div class="room-status-bar"></div>').append($('<div/>', {class: 'room-counter'}));
+		
+		var infoheader = $('<div class="room-info-header"></div>').append(settings).append(title).append(header);
 		
 		
-		var roomcounter = $('<div class="room-counter"></div>');
-		var roomstatus = $('<div class="room-status-bar"></div>').html(roomcounter);
 		
-		var infoheader = $('<div class="room-info-header"></div>').append(input).append(title).append(header);
+		chrome.storage.local.get('last_tablet', function(d){
+			if(d && d.last_tablet){
+				 $('.chosen-tablet').text((d.last_tablet.name || 'Mouse/unknown'))
+			}
+		})
+		chrome.permissions.contains(hidperm, function(e){
+			if(e){
+				$('input.set-tablet').addClass('enabled')
+			}
+		})
 		
 		$('body').removeClass('room canvas').addClass('main').html('');
 		$('body').append(infoheader).append(roomstatus).append(container);
 		
+		$('input.set-tablet').click(function(e){
+			
+			
+			chrome.permissions.contains(hidperm, function(e){
+				if(e){
+					chrome.permissions.remove(hidperm, function(){
+						$('input.set-tablet').removeClass('enabled')
+					})
+				} else {
+					chrome.permissions.request(hidperm, function(r){
+						if(r){
+							$('input.set-tablet').addClass('enabled')
+						}
+					})
+				}
+			})
+		})
+		$('input.clear-settings').click(function(e){
+			
+			chrome.storage.local.clear()
+		})
+		
 		$('input.new-room-input').keypress(function(e){
 			if(e.keyCode == 13){
-				initParupaint($(this).val());
-				$(this).val('');
+				chrome.storage.local.get('name', function(d){
+					if(d && d.name && d.name.length){
+						
+						initParupaint($(e.target).val());
+						$(e.target).val('');
+					} else {
+						console.log("name isn't valid!",d)
+						return $('input.name-input').focus().select()
+					}
+				})
+			}
+		});
+		$('input.name-input').keypress(function(e){
+			if(e.keyCode == 13){
+				chrome.storage.local.set({name: $(this).val()})
+				console.log('set name to: ', $(this).val())
 			}
 		});
 		
@@ -222,13 +281,13 @@ var initParupaint = function(room){
 		
 		
 		var overlay = $('<div class="overlay"></div>');
-			var oqstatus = $('<div class="qstatus overlay-piece"></div>')
-				var oqstatus_brush = $('<div class="qstatus-brush"></div>').html($('<div/>', {class: 'qstatus-panel brush-panel'}))
+			var oqstatus = $('<div class="qstatus overlay-piece visible"></div>')
+				var oqstatus_brush = $('<div class="qstatus-brush"></div>').append($('<div/>', {class: 'qstatus-piece preview-col'})).append($('<div/>', {class: 'qstatus-panel brush-panel'}))
 				var oqstatus_message = $('<div class="qstatus-message"></div>')
-				var oqstatus_internet = $('<div class="qstatus-settings"></div>').html($('<div/>', {class: 'qstatus-panel setting-panel'}))
+				var oqstatus_internet = $('<div class="qstatus-settings"></div>').append($('<div/>', {class: 'qstatus-piece qinfo'})).append($('<div/>', {class: 'qstatus-panel setting-panel'}))
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
-			var info = $('<div class="gui visible"></div>')
+			var info = $('<div class="gui"></div>')
 				var cspinner = $('<div class="color-spinner overlay-piece"></div>');
 					
 					var selectorcode = '<div class="color-selector"></div>';
