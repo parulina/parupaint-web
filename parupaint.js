@@ -307,7 +307,7 @@ var initParupaint = function(room){
 		var overlay = $('<div class="overlay"></div>');
 			var oqstatus = $('<div class="qstatus overlay-piece visible"></div>')
 				var oqstatus_brush = $('<div/>', {class: 'qstatus-brush', title:'[#artists] - [current brush]'}).append($('<div/>', {class: 'qstatus-piece preview-col'})).append($('<div/>', {class: 'qstatus-panel brush-panel'}))
-				var oqstatus_message = $('<div class="qstatus-message"></div>')
+				var oqstatus_message = $('<div/>', {class: 'qstatus-message', title:'↡ pull down for overlay ↡'})
 				
 					//todo: oqstatus_internet should have status for current room and internet
 				

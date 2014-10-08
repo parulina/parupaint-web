@@ -15,6 +15,7 @@
 		"storage"
 	],
     "optional_permissions":[
+		"alwaysOnTopWindows",
 		"http://draw.sqnya.se/*",
          "hid", {"usbDevices":[
 			{ "vendorId": 1386, "productId": 20, "name": "Waltop Slimline"},

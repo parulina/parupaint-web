@@ -112,6 +112,37 @@ $(document).keydown(function(e){
 				
 				break;
 			}
+			
+			case 123:
+			{
+				var fperm = {permissions:['alwaysOnTopWindows']}
+				chrome.permissions.contains(fperm, function(e){
+					console.log(e)
+					if(e){
+						if(chrome.app.window.current().isAlwaysOnTop()){
+							console.log('always on top -> false')
+							return chrome.app.window.current().setAlwaysOnTop(false)
+						}
+						console.log('always on top -> true')
+						return chrome.app.window.current().setAlwaysOnTop(true)
+						
+					} else {
+						chrome.permissions.request(fperm)
+					}
+				})
+				break;
+			}
+			case 13:
+			{
+				if(e.altKey){
+					if(chrome.app.window.current().isFullscreen()){
+						return chrome.app.window.current().restore()
+					}
+					return chrome.app.window.current().fullscreen()
+					
+				}
+				break;
+			}
 	}
 })
 
@@ -471,8 +502,24 @@ onRoom = function(room){
 		clearTimeout(overlayTimeout);
 	});
 	
-	$('.qstatus-message').click(function(e){
-		overlayShow(true)
+	$('.qstatus-message').mousedown(function(e){
+		
+		var x = e.offsetX, y = e.offsetY
+		$(this).mousemove(function(e){
+			if(e.which == 1){
+
+				var dx = (e.offsetX - x), dy = (e.offsetY - y);
+				console.log(y, e.offsetY)
+				if(dy > 15){
+					overlayShow(true)
+				}
+			}
+			
+		}).mouseout(function(){
+			$(this).unbind('mouseout mouseup mousemove')
+		}).mouseup(function(){
+			$(this).unbind('mouseout mouseup mousemove')
+		})
 	})
 	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
@@ -482,15 +529,6 @@ onRoom = function(room){
 			$('.qstatus-brush, .qstatus-settings').removeClass('panel-open')
 			
 			t.toggleClass('panel-open')
-			/*.mouseout(function(){
-				if(toq) clearTimeout(toq)
-				toq = setTimeout(function(){
-					t.removeClass('panel-open')
-				}, 800)
-			}).mouseenter(function(){
-				if(toq) clearTimeout(toq)
-			})
-			*/
 		}
 		
 	})
@@ -507,8 +545,9 @@ onRoom = function(room){
 	})
 	
 	
-	$('html').click(function(e){
+	$('html').mousedown(function(e){
 		console.log(e.target, $('.gui').has($(e.target)))
+		
 		var qs = $('.qstatus-brush, .qstatus-settings')
 		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
 			if(qs.hasClass('panel-open')){
@@ -516,7 +555,7 @@ onRoom = function(room){
 			}
 		}
 		if(!$('.gui, .qstatus').has($(e.target)).length){
-			if($('.gui.visible').length) overlayGone()
+			if($('.gui.visible').length) overlayShow(false)
 		}
 	})
 	

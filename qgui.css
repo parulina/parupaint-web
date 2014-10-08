@@ -27,6 +27,8 @@
 	border: 2px solid rgb(224, 224, 224);
 	outline: 1px solid rgb(186, 180, 180);
 }
+
+
 .qstatus-piece.preview-col:before{
 	position:absolute;
 	top:0; left:0;
@@ -67,8 +69,12 @@
 	margin-right: 8px;
 	content:attr(data-label) "\00a0 \00b7 \00a0" attr(data-label-2) "\00a0 \00b7 \00a0" attr(data-label-3);
 	-webkit-animation:qinfo-flash 1.2s linear;
+	background-color: #F5BAC8;
 }
 
+.qstatus-piece.qinfo.online:after{
+	background-color: #B6DFBE;
+}
 
 @-webkit-keyframes qstatus-show {
 	0% {margin-top:-40px; opacity:0;}
@@ -176,10 +182,10 @@
 	margin:auto;
 	height: 1px;
 	font-size: 13px;
-	background-color: rgba(230, 249, 233, 1);
+	background-color: rgba(188, 199, 190, 1);
 	text-align:center;
 	box-shadow: 0 0 16px 1px white;
-	color: rgb(242, 242, 242);
+	color: rgb(232, 227, 227);
 }
 
 
