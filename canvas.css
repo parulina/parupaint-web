@@ -171,7 +171,7 @@ canvas{
 	pointer-events: none;
 }
 canvas.partial-focused{
-	opacity:0.1;
+	opacity:0.3;
 	display:block;
 }
 canvas.focused{

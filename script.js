@@ -15,6 +15,7 @@ var overlayGone = function(now){
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
 	$('.overlay .qstatus').removeClass('visible');
+	$('#mouse-pool').focus()
 };
 
 var overlayShow = function(full){
@@ -61,9 +62,8 @@ $(document).keydown(function(e){
 						}
 					}
 					
-					
 				}
-				break;
+				return false;
 			}
 			case 116:
 			{
@@ -72,6 +72,7 @@ $(document).keydown(function(e){
 			case 27:
 			{
 				overlayGone(true)
+				
 				break;
 			}
 	}
@@ -166,7 +167,7 @@ var Brush = {
 			cursor.addClass('eraser')
 		}
 		var cssrgba = rgba2css((this.brush().color[0] == '#') ? hex2rgb(this.brush().color) : this.brush().color)
-		$('.qstatus-piece.preview-col').css('background-color', cssrgba).attr('data-brush-name', this.brushname())
+		$('.qstatus-piece.preview-col').css('background-color', cssrgba).attr('data-label', this.brushname())
 		return this;
 	}
 }
@@ -274,7 +275,7 @@ onRoom = function(room){
 			}
 		} else {
 			console.log('New canvas')
-			initCanvas(500, 500, 1, [1])
+			initCanvas(500, 500, 2, [2, 2])
 		}
 		
 		
@@ -320,6 +321,7 @@ onRoom = function(room){
 					drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
 				}
 			}else if(e == 'mousedown'){
+				console.log('asd')
 				if(data.button == Brush.beraser){
 					var newbrush = Brush.cbrush == 0 ? 1 : 0;
 					Brush.brush(newbrush)
@@ -329,6 +331,10 @@ onRoom = function(room){
 				}
 				else if(data.button == 1){
 					$('.canvas-cursor.cursor-self').addClass('drawing')
+				}
+				else if(data.button == Brush.bmove){
+					$('#mouse-pool').focus()
+					return false;
 				}
 			}else if(e == 'mouseup'){
 				if(data.button == 1){
@@ -385,6 +391,26 @@ onRoom = function(room){
 						{
 							return !(Brush.tmoving = true)
 						}
+						case 65: // a
+						{
+							overlayShow(false)
+							return advanceCanvas(null, -1)
+						}
+						case 83: // s
+						{
+							overlayShow(false)
+							return advanceCanvas(null, 1)
+						}
+						case 68: // d
+						{
+							overlayShow(false)
+							return advanceCanvas(-1)
+						}
+						case 70: // f
+						{
+							overlayShow(false)
+							return advanceCanvas(1)
+						}
 				}
 			} else if(e == 'keyup'){
 				if(data.key == 82){
@@ -406,6 +432,10 @@ onRoom = function(room){
 		clearTimeout(overlayTimeout);
 	});
 	
+	$('.qstatus-message').click(function(e){
+		overlayShow(true)
+	})
+	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
 		var toq = null
 		if(!$('.qstatus-panel').has(e.target).length){
@@ -425,6 +455,7 @@ onRoom = function(room){
 		}
 		
 	})
+	
 	
 	$('html').click(function(e){
 		console.log(e.target)

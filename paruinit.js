@@ -25,7 +25,7 @@ var selectTablet = function(vendor, product){
     }
     $('#alert-message').remove();
     $('body').removeClass('loading');
-    initParupaint('test-thing');
+    initParupaint('test');
 };
 
 

@@ -12,18 +12,18 @@
 }
 
 
-.qstatus-brush.panel-open .preview-col{
-	transition:bottom 100ms linear;
-	bottom:100%;
+.panel-open .qstatus-piece{
+	transition:bottom 200ms ease-out;
+	bottom:100% !important;
 }
-.qstatus-piece.preview-col{
+.qstatus-piece{
 	opacity:1;
 	position: absolute;
 	top: 0;
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background-color: red;
+	background-color: transparent;
 	border: 2px solid rgb(224, 224, 224);
 	outline: 1px solid rgb(186, 180, 180);
 }
@@ -36,8 +36,8 @@
 	z-index: -1;
 }
 
-.qstatus-piece.preview-col:after {
-	content:attr(data-brush-name);
+.qstatus-piece.preview-col:after, .qstatus-piece.qinfo:after{
+	content:attr(data-label) attr(data-label-2) attr(data-label-3) attr(data-label-4);
 	display: block;
 	text-align: center;
 	background: none;
@@ -53,7 +53,18 @@
 	height: 15px;
 	border-radius: 2px;
 	padding: 4px;
-	margin-left: 12px;
+}
+.qstatus-piece.preview-col:after{
+	margin-left:15px !important;
+}
+@-webkit-keyframes qinfo-flash{
+	0% {box-shadow:0 0 32px 2px #CCC inset;}
+	100% {box-shadow:0 0 0 0 transparent inset;}
+}
+.qstatus-piece.qinfo:after{
+	width:64px;
+	content:attr(data-label) "\00a0 \00b7 \00a0" attr(data-label-2) attr(data-label-3) attr(data-label-4);
+	-webkit-animation:qinfo-flash 1.2s linear;
 }
 
 
@@ -238,6 +249,7 @@
 .panel-open .setting-panel:before{
 	content:"Menu";
 	left: auto;
+	padding-right:34px;
 }
 
 
