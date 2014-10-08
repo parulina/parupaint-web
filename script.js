@@ -1,3 +1,36 @@
+
+var updateInfo = function(){
+	var layer = $('canvas.focused').data('layer'),
+		frame = $('canvas.focused').data('frame'),
+		connected = false ? 'connected' : 'offline',// todo socket
+		room = getRoom(),
+		width = parseInt($('canvas.focused')[0].width),
+		height = parseInt($('canvas.focused')[0].height)
+	
+	
+	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame).attr('data-label-3', connected)
+	$('.qstatus-message').attr('data-label', room)
+	$('.qstatus-piece.qinfo').toggleClass('online', navigator.onLine)
+	
+	var players = $('.canvas-cursor').not('.cursor-self')
+	$('.qstatus-piece.preview-col').attr('data-label-2', players.length)
+	
+	var list = $('<ul/>', {class: 'player-list'}).text("You're quite lonely.")
+	
+	if(players.length){
+		list.html('')
+		players.each(function(k, e){
+			list.append($('<li/>', {class: 'player-list-entry'}).text('painter'))
+		})
+	}
+	$('.brush-panel').html(list)
+	
+	
+	document.title = 	'[' + players.length + ' artists]' +
+						'['+width+' × '+height+']' + 
+						' in room ' + room
+}
+
 var overlayTimeout = null;
 var overlayGone = function(now){
 	if(now){
@@ -15,6 +48,7 @@ var overlayGone = function(now){
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
 	$('.overlay .qstatus').removeClass('visible');
+	$('#mouse-pool').focus()
 };
 
 var overlayShow = function(full){
@@ -43,7 +77,11 @@ $(document).keydown(function(e){
 			case 9:
 			{
 				if(e.shiftKey){
-					overlayGone(true)
+					if($('.gui.visible').length) {
+						overlayShow(false)
+					}else {
+						overlayGone(true)
+					}
 				}else{
 					var qs = $('.overlay .qstatus');
 					
@@ -61,9 +99,8 @@ $(document).keydown(function(e){
 						}
 					}
 					
-					
 				}
-				break;
+				return false;
 			}
 			case 116:
 			{
@@ -72,6 +109,38 @@ $(document).keydown(function(e){
 			case 27:
 			{
 				overlayGone(true)
+				
+				break;
+			}
+			
+			case 123:
+			{
+				var fperm = {permissions:['alwaysOnTopWindows']}
+				chrome.permissions.contains(fperm, function(e){
+					console.log(e)
+					if(e){
+						if(chrome.app.window.current().isAlwaysOnTop()){
+							console.log('always on top -> false')
+							return chrome.app.window.current().setAlwaysOnTop(false)
+						}
+						console.log('always on top -> true')
+						return chrome.app.window.current().setAlwaysOnTop(true)
+						
+					} else {
+						chrome.permissions.request(fperm)
+					}
+				})
+				break;
+			}
+			case 13:
+			{
+				if(e.altKey){
+					if(chrome.app.window.current().isFullscreen()){
+						return chrome.app.window.current().restore()
+					}
+					return chrome.app.window.current().fullscreen()
+					
+				}
 				break;
 			}
 	}
@@ -167,7 +236,7 @@ var Brush = {
 			cursor.addClass('eraser')
 		}
 		var cssrgba = rgba2css((this.brush().color[0] == '#') ? hex2rgb(this.brush().color) : this.brush().color)
-		$('.qstatus-piece.preview-col').css('background-color', cssrgba).attr('data-brush-name', this.brushname())
+		$('.qstatus-piece.preview-col').css('background-color', cssrgba).attr('data-label', this.brushname())
 		return this;
 	}
 }
@@ -275,7 +344,7 @@ onRoom = function(room){
 			}
 		} else {
 			console.log('New canvas')
-			initCanvas(500, 500, 1, [1])
+			initCanvas(500, 500, 2, [2, 2])
 		}
 		
 		
@@ -321,6 +390,7 @@ onRoom = function(room){
 					drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
 				}
 			}else if(e == 'mousedown'){
+				console.log('button', data.button)
 				if(data.button == Brush.beraser){
 					var newbrush = Brush.cbrush == 0 ? 1 : 0;
 					Brush.brush(newbrush)
@@ -330,6 +400,10 @@ onRoom = function(room){
 				}
 				else if(data.button == 1){
 					$('.canvas-cursor.cursor-self').addClass('drawing')
+				}
+				else if(data.button == Brush.bmove){
+					$('#mouse-pool').focus()
+					return false;
 				}
 			}else if(e == 'mouseup'){
 				if(data.button == 1){
@@ -386,6 +460,26 @@ onRoom = function(room){
 						{
 							return !(Brush.tmoving = true)
 						}
+						case 65: // a
+						{
+							overlayShow(false)
+							return advanceCanvas(null, -1)
+						}
+						case 83: // s
+						{
+							overlayShow(false)
+							return advanceCanvas(null, 1)
+						}
+						case 68: // d
+						{
+							overlayShow(false)
+							return advanceCanvas(-1)
+						}
+						case 70: // f
+						{
+							overlayShow(false)
+							return advanceCanvas(1)
+						}
 				}
 			} else if(e == 'keyup'){
 				if(data.key == 82){
@@ -398,7 +492,9 @@ onRoom = function(room){
 				}
 			}
 		});
+		updateInfo()
 	});
+	
 	
 	$('.gui .color-spinner').mouseout(function(e){
 		clearTimeout(overlayTimeout);
@@ -407,6 +503,26 @@ onRoom = function(room){
 		clearTimeout(overlayTimeout);
 	});
 	
+	$('.qstatus-message').mousedown(function(e){
+		
+		var x = e.offsetX, y = e.offsetY
+		$(this).mousemove(function(e){
+			if(e.which == 1){
+
+				var dx = (e.offsetX - x), dy = (e.offsetY - y);
+				console.log(y, e.offsetY)
+				if(dy > 15){
+					overlayShow(true)
+				}
+			}
+			
+		}).mouseout(function(){
+			$(this).unbind('mouseout mouseup mousemove')
+		}).mouseup(function(){
+			$(this).unbind('mouseout mouseup mousemove')
+		})
+	})
+	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
 		var toq = null
 		if(!$('.qstatus-panel').has(e.target).length){
@@ -414,28 +530,37 @@ onRoom = function(room){
 			$('.qstatus-brush, .qstatus-settings').removeClass('panel-open')
 			
 			t.toggleClass('panel-open')
-			/*.mouseout(function(){
-				if(toq) clearTimeout(toq)
-				toq = setTimeout(function(){
-					t.removeClass('panel-open')
-				}, 800)
-			}).mouseenter(function(){
-				if(toq) clearTimeout(toq)
-			})
-			*/
 		}
 		
 	})
 	
-	$('html').click(function(e){
-		console.log(e.target)
+	$('.setting-quit-btn').click(function(){
+		if($(this).hasClass('confirm')){
+			initParupaint()
+		} else {
+			$(this).addClass('confirm')
+			$(this).mouseout(function(){
+				$(this).removeClass('confirm').unbind('mouseout')
+			})
+		}
+	})
+	
+	
+	$('html').mousedown(function(e){
+		console.log(e.target, $('.gui').has($(e.target)))
+		
 		var qs = $('.qstatus-brush, .qstatus-settings')
 		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
 			if(qs.hasClass('panel-open')){
 				qs.removeClass('panel-open')
 			}
 		}
+		if(!$('.gui, .qstatus').has($(e.target)).length){
+			if($('.gui.visible').length) overlayShow(false)
+		}
 	})
+	
+	
 	$(window).scroll(function(){
 		if($('.qstatus-brush, .qstatus-settings').hasClass('panel-open')) return false;
 	})
@@ -448,6 +573,5 @@ onRoom = function(room){
 		Brush.color(rgb2hex(newc)).update()
 		writeDefaults();
 	})
-	
 }
 

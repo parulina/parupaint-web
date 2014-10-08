@@ -72,9 +72,34 @@ var updateRooms = function(){
 
 var focusCanvas = function(layer, frame){
 	
-	$('canvas').removeClass('focused partial-focused').filter('[data-layer='+layer+']').addClass('partial-focused').filter('[data-frame='+frame+']').addClass('focused');
+	$('canvas').removeClass('focused partial-focused').filter('[data-frame='+frame+']').addClass('partial-focused').filter('[data-layer='+layer+']').addClass('focused');
+	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame)
 }
 
+var advanceCanvas = function(nlayer, nframe){
+	var canvas = $('canvas.focused')
+	if(canvas.length){
+		var layer = canvas.data('layer'),
+			frame = canvas.data('frame'),
+			maxlayers = $('canvas[data-frame='+frame+']').length,
+			maxframes = $('canvas[data-layer='+layer+']').length
+		if(typeof nlayer == "number"){
+			var nl = (layer + nlayer >= maxlayers ? ((layer + nlayer) % maxlayers) : layer + nlayer)
+			var cc = $('canvas[data-frame='+frame+'][data-layer='+nl+']')
+			if(cc.length){
+				focusCanvas(nl, frame)
+			}
+		}
+		if(typeof nframe == "number"){
+			var nf = (frame + nframe >= maxframes ? ((frame + nframe) % maxframes) : frame + nframe)
+			var cc = $('canvas[data-frame='+nf+'][data-layer='+layer+']')
+			if(cc.length){
+				focusCanvas(layer, nf)
+			}
+		}
+	}
+	
+}
 
 
 // empty layers & frames for resize
@@ -145,11 +170,10 @@ var updateCallbacks = function(cb){
 			return cb('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
 		}
 	}).mousedown(function(e){
-		if(e.button == 1) return false;
 		if(cb){
 			tmouse.oldx = e.offsetX;
 			tmouse.oldy = e.offsetY;
-			return cb('mousedown', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
+			return cb('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
 		}
 	}).mouseup(function(e){
 		if(cb){
@@ -287,9 +311,21 @@ var initParupaint = function(room){
 		
 		var overlay = $('<div class="overlay"></div>');
 			var oqstatus = $('<div class="qstatus overlay-piece visible"></div>')
-				var oqstatus_brush = $('<div class="qstatus-brush"></div>').append($('<div/>', {class: 'qstatus-piece preview-col'})).append($('<div/>', {class: 'qstatus-panel brush-panel'}))
-				var oqstatus_message = $('<div class="qstatus-message"></div>')
-				var oqstatus_internet = $('<div class="qstatus-settings"></div>').append($('<div/>', {class: 'qstatus-piece qinfo'})).append($('<div/>', {class: 'qstatus-panel setting-panel'}))
+				var oqstatus_brush = $('<div/>', {class: 'qstatus-brush', title:'[#artists] - [current brush]'}).append($('<div/>', {class: 'qstatus-piece preview-col'})).append($('<div/>', {class: 'qstatus-panel brush-panel'}))
+				var oqstatus_message = $('<div/>', {class: 'qstatus-message', title:'↡ pull down for overlay ↡'})
+				
+					//todo: oqstatus_internet should have status for current room and internet
+				
+						var exitbtn = $('<div/>', {tabindex:'3',type:'button', class:'setting-quit-btn', 'data-label':'quit'})
+				
+						var toprow = $('<div/>', {class:'setting-top-row'}),
+							middlerow = $('<div/>', {class: 'setting-middle-row'}),
+							bottomrow = $('<div/>', {class: 'setting-bottom-row'})
+						
+						bottomrow.append(exitbtn)
+						
+					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow).append(middlerow).append(bottomrow)
+				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'})).append(panel)
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
 			var info = $('<div class="gui"></div>')

@@ -1,8 +1,8 @@
 {
 	"manifest_version": 2,
 	"name": "parupaint",
-	"version": "0.2.9",
-	"description":"parupaint chrome webapp.",
+	"version": "0.3.0",
+	"description":"draw with others!",
 	"author":"paru",
 	"short_name":"parupaint",
 	"app": {
@@ -14,11 +14,12 @@
 	"permissions": [
 		"storage"
 	],
-    "optional_permissions":[
+	"optional_permissions":[
+		"alwaysOnTopWindows",
 		"http://draw.sqnya.se/*",
-         "hid", {"usbDevices":[
+        	"hid", {"usbDevices":[
 			{ "vendorId": 1386, "productId": 20, "name": "Waltop Slimline"},
 			{ "vendorId": 5935, "productId": 52, "name": "Wacom Graphire 3"}
 		]}
-    ]
+	]
 }
