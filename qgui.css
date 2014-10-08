@@ -62,8 +62,9 @@
 	100% {box-shadow:0 0 0 0 transparent inset;}
 }
 .qstatus-piece.qinfo:after{
-	width:64px;
-	content:attr(data-label) "\00a0 \00b7 \00a0" attr(data-label-2) attr(data-label-3) attr(data-label-4);
+	width: 68px;
+	margin-right: 8px;
+	content:attr(data-label) "\00a0 \00b7 \00a0" attr(data-label-2) "\00a0 \00b7 \00a0" attr(data-label-3);
 	-webkit-animation:qinfo-flash 1.2s linear;
 }
 

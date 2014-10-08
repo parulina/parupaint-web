@@ -39,12 +39,13 @@
 
 .canvas-cursor.eraser.drawing:after{
 	-webkit-animation:eraser-frames 5s linear infinite;
+	box-shadow:none;
 }
 .canvas-cursor.eraser:after{
 	border-style: dashed;
 }
 .canvas-cursor.drawing:after{
-	border-width: 2px;
+	box-shadow:0 0 1px 1px black;
 }
 .canvas-cursor.admin:after{
 	background-color: rgba(240, 201, 0, 0.12);

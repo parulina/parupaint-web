@@ -1,3 +1,15 @@
+
+var updateInfo = function(){
+	var layer = $('canvas.focused').data('layer'),
+		frame = $('canvas.focused').data('frame'),
+		connected = false ? 'connected' : 'offline',// todo socket
+		room = getRoom()
+	
+	
+	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame).attr('data-label-3', connected).attr('data-label-4', room)
+	$('.qstatus-piece.qinfo').toggleClass('online', navigator.onLine)
+}
+
 var overlayTimeout = null;
 var overlayGone = function(now){
 	if(now){
@@ -44,7 +56,11 @@ $(document).keydown(function(e){
 			case 9:
 			{
 				if(e.shiftKey){
-					overlayGone(true)
+					if($('.gui.visible').length) {
+						overlayShow(false)
+					}else {
+						overlayGone(true)
+					}
 				}else{
 					var qs = $('.overlay .qstatus');
 					
@@ -321,7 +337,7 @@ onRoom = function(room){
 					drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
 				}
 			}else if(e == 'mousedown'){
-				console.log('asd')
+				console.log('button', data.button)
 				if(data.button == Brush.beraser){
 					var newbrush = Brush.cbrush == 0 ? 1 : 0;
 					Brush.brush(newbrush)

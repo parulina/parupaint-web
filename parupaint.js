@@ -170,8 +170,6 @@ var updateCallbacks = function(cb){
 			return cb('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
 		}
 	}).mousedown(function(e){
-		console.log(e.button,e.which)
-		if(e.which == 1) return false;
 		if(cb){
 			tmouse.oldx = e.offsetX;
 			tmouse.oldy = e.offsetY;
