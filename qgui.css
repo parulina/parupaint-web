@@ -210,6 +210,15 @@
 	transition-property:transform, opacity;
 	pointer-events: none;
 }
+.qstatus-panel > *{
+	display:none;
+	pointer-events:none;
+}
+
+.panel-open .qstatus-panel > *{
+	pointer-events:inherit;
+	display:inherit;
+}
 .qstatus-panel{
 	height:0;
 	opacity:0;
@@ -274,6 +283,9 @@
 	border-right:0;
 	right:0;
 	border-bottom-left-radius:8px;
+	display:flex;
+	flex-direction:column;
+	justify-content:space-between;
 }
 
 .qstatus-brush.panel-open .player-list{
@@ -293,3 +305,46 @@
     padding-top: 4px;
 }
 
+
+.setting-top-row, .setting-bottom-row{
+	flex-shrink:0;
+	flex-basis:80px;
+	background-color:#CCC;
+}
+
+.setting-middle-row{
+	flex-grow:1;
+}
+.setting-bottom-row{
+	display:flex;
+	justify-content:flex-end;
+}
+
+.setting-panel div[type="button"]{
+	flex-basis:100px;
+	flex-shrink:1;
+	border:none;
+	position:relative;
+}
+.setting-panel div[type="button"][data-label]:before{
+	content:attr(data-label);
+	position:absolute;
+	top:0; left:0; right:0; bottom:0;
+	max-width:100px;
+	max-height:28px;
+	margin:auto;
+	text-align:center;
+	font-size:18px;
+	color: rgb(253, 209, 209);
+}
+
+.setting-quit-btn.confirm:before{
+	content:"are you sure?" !important;
+	max-height:50px !important;
+}
+.setting-quit-btn{
+	background: rgb(232, 109, 109);
+}
+.setting-quit-btn:hover{
+	background: rgb(255, 152, 152);
+}

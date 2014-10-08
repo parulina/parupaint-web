@@ -310,7 +310,19 @@ var initParupaint = function(room){
 			var oqstatus = $('<div class="qstatus overlay-piece visible"></div>')
 				var oqstatus_brush = $('<div class="qstatus-brush"></div>').append($('<div/>', {class: 'qstatus-piece preview-col'})).append($('<div/>', {class: 'qstatus-panel brush-panel'}))
 				var oqstatus_message = $('<div class="qstatus-message"></div>')
-				var oqstatus_internet = $('<div class="qstatus-settings"></div>').append($('<div/>', {class: 'qstatus-piece qinfo'})).append($('<div/>', {class: 'qstatus-panel setting-panel'}))
+				
+					//todo: oqstatus_internet should have status for current room and internet
+				
+						var exitbtn = $('<div/>', {tabindex:'3',type:'button', class:'setting-quit-btn', 'data-label':'quit'})
+				
+						var toprow = $('<div/>', {class:'setting-top-row'}),
+							middlerow = $('<div/>', {class: 'setting-middle-row'}),
+							bottomrow = $('<div/>', {class: 'setting-bottom-row'})
+						
+						bottomrow.append(exitbtn)
+						
+					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow).append(middlerow).append(bottomrow)
+				var oqstatus_internet = $('<div class="qstatus-settings"></div>').append($('<div/>', {class: 'qstatus-piece qinfo'})).append(panel)
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
 			var info = $('<div class="gui"></div>')

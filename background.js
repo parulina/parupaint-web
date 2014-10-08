@@ -12,9 +12,6 @@ chrome.app.runtime.onLaunched.addListener(function() {
 		window.onRestored.addListener(function(){
 			console.log('restored...');
 		});
-		window.onRemoved.addListener(function(){
-		   //chrome.runtime
-		});
 
 	});
 })

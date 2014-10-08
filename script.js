@@ -456,16 +456,32 @@ onRoom = function(room){
 		
 	})
 	
+	$('.setting-quit-btn').click(function(){
+		if($(this).hasClass('confirm')){
+			initParupaint()
+		} else {
+			$(this).addClass('confirm')
+			$(this).mouseout(function(){
+				$(this).removeClass('confirm').unbind('mouseout')
+			})
+		}
+	})
+	
 	
 	$('html').click(function(e){
-		console.log(e.target)
+		console.log(e.target, $('.gui').has($(e.target)))
 		var qs = $('.qstatus-brush, .qstatus-settings')
 		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
 			if(qs.hasClass('panel-open')){
 				qs.removeClass('panel-open')
 			}
 		}
+		if(!$('.gui, .qstatus').has($(e.target)).length){
+			if($('.gui.visible').length) overlayGone()
+		}
 	})
+	
+	
 	$(window).scroll(function(){
 		if($('.qstatus-brush, .qstatus-settings').hasClass('panel-open')) return false;
 	})
