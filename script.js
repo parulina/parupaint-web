@@ -551,11 +551,15 @@ onRoom = function(room){
 		var qs = $('.qstatus-brush, .qstatus-settings')
 		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
 			if(qs.hasClass('panel-open')){
-				qs.removeClass('panel-open')
+				return qs.removeClass('panel-open')
 			}
 		}
-		if(!$('.gui, .qstatus').has($(e.target)).length){
+		if(!$('#mouse-pool').has($(e.target)).length && !$('.gui, .qstatus').has($(e.target)).length){
 			if($('.gui.visible').length) overlayShow(false)
+			else if($('.qstatus.visible').length) overlayGone()
+			else{
+				overlayShow(false)
+			}
 		}
 	})
 	
