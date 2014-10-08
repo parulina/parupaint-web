@@ -49,13 +49,14 @@
 	right: 0;
 	top: 0;
 	bottom: 0;
-	width: 32px;
 	height: 15px;
 	border-radius: 2px;
 	padding: 4px;
 }
 .qstatus-piece.preview-col:after{
 	margin-left:15px !important;
+	width: 60px;
+	content:attr(data-label-2) "\00a0 \00b7 \00a0" attr(data-label);
 }
 @-webkit-keyframes qinfo-flash{
 	0% {box-shadow:0 0 32px 2px #CCC inset;}
@@ -149,6 +150,7 @@
 	top:100%;
 	transform: translateY(-100%);
 	-webkit-animation:chat-scroll 3s steps(4) infinite;
+
 	border: none !important;
 }
 .qstatus-message{
@@ -166,6 +168,19 @@
 	pointer-events:all;
 }
 
+
+.qstatus-message:before{
+	content: "[" attr(data-label) "]";
+	position:absolute;
+	top: -15px; left:0; bottom:0; right:0;
+	margin:auto;
+	height: 1px;
+	font-size: 13px;
+	background-color: rgba(230, 249, 233, 1);
+	text-align:center;
+	box-shadow: 0 0 16px 1px white;
+	color: rgb(242, 242, 242);
+}
 
 
 .qstatus-brush:after{
@@ -253,7 +268,7 @@
 	text-decoration:underline;
 }
 .panel-open .brush-panel:before{
-	content:"Painters";
+	content: "Artists";
 	padding-left:8px;
 }
 .panel-open .setting-panel:before{

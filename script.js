@@ -3,11 +3,32 @@ var updateInfo = function(){
 	var layer = $('canvas.focused').data('layer'),
 		frame = $('canvas.focused').data('frame'),
 		connected = false ? 'connected' : 'offline',// todo socket
-		room = getRoom()
+		room = getRoom(),
+		width = parseInt($('canvas.focused')[0].width),
+		height = parseInt($('canvas.focused')[0].height)
 	
 	
-	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame).attr('data-label-3', connected).attr('data-label-4', room)
+	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame).attr('data-label-3', connected)
+	$('.qstatus-message').attr('data-label', room)
 	$('.qstatus-piece.qinfo').toggleClass('online', navigator.onLine)
+	
+	var players = $('.canvas-cursor').not('.cursor-self')
+	$('.qstatus-piece.preview-col').attr('data-label-2', players.length)
+	
+	var list = $('<ul/>', {class: 'player-list'}).text("You're quite lonely.")
+	
+	if(players.length){
+		list.html('')
+		players.each(function(k, e){
+			list.append($('<li/>', {class: 'player-list-entry'}).text('painter'))
+		})
+	}
+	$('.brush-panel').html(list)
+	
+	
+	document.title = 	'[' + players.length + ' artists]' +
+						'['+width+' × '+height+']' + 
+						' in room ' + room
 }
 
 var overlayTimeout = null;
@@ -439,7 +460,9 @@ onRoom = function(room){
 				}
 			}
 		});
+		updateInfo()
 	});
+	
 	
 	$('.gui .color-spinner').mouseout(function(e){
 		clearTimeout(overlayTimeout);
@@ -510,6 +533,5 @@ onRoom = function(room){
 		Brush.color(rgb2hex(newc)).update()
 		writeDefaults();
 	})
-	
 }
 
