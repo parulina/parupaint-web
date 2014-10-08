@@ -504,22 +504,9 @@ onRoom = function(room){
 	
 	$('.qstatus-message').mousedown(function(e){
 		
-		var x = e.offsetX, y = e.offsetY
-		$(this).mousemove(function(e){
-			if(e.which == 1){
-
-				var dx = (e.offsetX - x), dy = (e.offsetY - y);
-				console.log(y, e.offsetY)
-				if(dy > 15){
-					overlayShow(true)
-				}
-			}
-			
-		}).mouseout(function(){
-			$(this).unbind('mouseout mouseup mousemove')
-		}).mouseup(function(){
-			$(this).unbind('mouseout mouseup mousemove')
-		})
+		if(!$('.gui.visible').length){
+			overlayShow(true)
+		}
 	})
 	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
