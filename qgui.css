@@ -73,7 +73,7 @@
 }
 
 .qstatus-piece.qinfo.online:after{
-	background-color: #B6DFBE;
+	background-color: #ADFFBD;
 }
 
 @-webkit-keyframes qstatus-show {
@@ -100,7 +100,7 @@
 	padding: 2px;
 	margin: 0;
 	border:none;
-	background-color: rgba(212, 212, 212, 0.47); 
+	background-color: rgba(212, 212, 212, 0.47);
 	bottom: 0;
 
 	position: absolute;
@@ -166,9 +166,9 @@
 	min-width:200px;
 	font-size:16px;
 	background:linear-gradient(
-		#888, 
+		#888,
 		#BBC1BB);
-	
+
 	z-index:4;
 	-webkit-user-select:all;
 	pointer-events:all;

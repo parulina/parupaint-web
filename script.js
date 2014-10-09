@@ -2,7 +2,7 @@
 var updateInfo = function(){
 	var layer = $('canvas.focused').data('layer'),
 		frame = $('canvas.focused').data('frame'),
-		connected = false ? 'connected' : 'offline',// todo socket
+		connected = false ? 'multi' : 'single',// todo socket
 		room = getRoom(),
 		width = parseInt($('canvas.focused')[0].width),
 		height = parseInt($('canvas.focused')[0].height)
@@ -28,7 +28,7 @@ var updateInfo = function(){
 	
 	document.title = 	'[' + players.length + ' artists]' +
 						'['+width+' × '+height+']' + 
-						' in room ' + room
+						' in [' + room + ']'
 }
 
 var overlayTimeout = null;
