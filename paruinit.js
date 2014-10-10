@@ -28,6 +28,17 @@ var selectTablet = function(vendor, product){
     initParupaint('test');
 };
 
+var getUsbList = function(){
+	
+	var rdevs = []
+
+	for(var pid in devs){
+		var d = devs[pid]
+		rdevs.push({vendorId: d.vendorId, productId: d.productId})
+	}
+	return rdevs
+}
+
 
 $(function(){
     if(!chrome.hid){
@@ -35,7 +46,8 @@ $(function(){
 
     } else {
 		
-		var devthing = {filters: devs}
+		var rdevs = getUsbList()
+		var devthing = {filters: rdevs}
 		
 		try{
 			chrome.hid.getDevices(devthing, function(){});
@@ -50,13 +62,12 @@ $(function(){
 			
 			return 1;
 			*/
-			
-			devthing = {vendorId: devs[0].vendorId, productId: devs[0].productId}
+			console.log('beta getDevices', e)
+			devthing = {vendorId: rdevs[0].vendorId, productId: rdevs[0].productId}
 		}
-		console.log(devthing)
+		console.log('devices:', devthing)
         chrome.hid.getDevices(devthing, function(devlist){
-            console.log('devlist:', devlist);
-
+			console.log('available devices:', devlist)
             var connectTablet = function(vendor, product, callback){
                 chrome.hid.getDevices({ "vendorId": parseInt(vendor), "productId": parseInt(product)}, function(dev) {
                     if(!dev || !dev.length){
