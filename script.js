@@ -414,6 +414,7 @@ onRoom = function(room){
 
 				}
 			} else if(e == 'mousewheel'){
+				console.log(data.target)
 				var a = data.scroll > 0 ? 2 : 0.5;
 				var cursor = $('.canvas-cursor.cursor-self')
 				var s = parseInt(cursor.data('size'))
@@ -492,6 +493,7 @@ onRoom = function(room){
 			}
 		});
 		updateInfo()
+		updateFrameinfoSlow()
 	});
 	
 	
@@ -531,9 +533,15 @@ onRoom = function(room){
 		}
 	})
 	
+	$('.flayer-list').bind('mousewheel', function(e){ this.scrollLeft -= (e.originalEvent.wheelDelta) }).click(function(e){
+		var f = parseInt($(e.target).data('frame')),
+			l = parseInt($(e.target).parent().data('layer'))
+		console.log('click on', l, f)
+		focusCanvas(l, f)
+	})
+	
 	
 	$('html').mousedown(function(e){
-		console.log(e.target, $('.gui').has($(e.target)))
 		
 		var qs = $('.qstatus-brush, .qstatus-settings')
 		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){

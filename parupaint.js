@@ -13,6 +13,26 @@ var loadSqnyaImage = function(url2, callback){
 }
 
 
+var updateFrameinfoSlow = function(){
+	var list = []
+	$('.flayer-list').html('')
+	
+	$('.canvas-pool canvas[data-frame=0]').each(function(k, e){
+		var l = $(e).data('layer')
+		
+		var fls = $('.flayer-list')
+		if(fls.length){
+			if(list[l] == undefined) list[l] = $('<div/>', {class: 'flayer-info-layer', 'data-layer':l, id:('list-flayer-' + l)})
+			for(var f = 0; f < $('.canvas-pool canvas[data-layer='+l+']').length; f++){
+				list[l].append($('<div/>', {class:'flayer-info-frame', id:('list-flayer-' + l + '-' + f), 'data-frame':f}))
+			}
+		}
+	})
+	for(var i = 0; i < list.length; i++){ //standard loop is important so that layers get in order
+		$('.flayer-list').append(list[i])
+	}
+}
+
 var updateRooms = function(){
 	var jj = $.ajax(url + '/info').done(function(data2) {
 		
@@ -195,7 +215,7 @@ var updateCallbacks = function(cb){
         
 		var wd = e.originalEvent.wheelDelta / 100;
 		var ed = e.originalEvent.detail;
-		if(wd || ed) return cb('mousewheel', {scroll: wd || ed})
+		if(wd || ed) return cb('mousewheel', {scroll: wd || ed, target: e.target})
 		
     })
 }
@@ -323,7 +343,7 @@ var initParupaint = function(room){
 				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'})).append(panel)
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			
-			var info = $('<div class="gui"></div>')
+			var info = $('<div/>', {class: 'gui visible'})
 				var cspinner = $('<div class="color-spinner overlay-piece"></div>');
 					
 					var selectorcode = '<div class="color-selector"></div>';
@@ -351,9 +371,15 @@ var initParupaint = function(room){
 				chatbox.append(chatcontent).append(chatinput)
 				
 		
+			var flalist = $('<div/>', {class: 'flayer-list-container overlay-piece'}),
+				flacontainer = $('<div/>', {class: 'flayer-list'}),
+				flainfo = $('<div/>', {class: 'flayer-info'})
+			flalist.append(flainfo).append(flacontainer)
 		
 		
-			info.append(cspinner).append(chatbox);
+			info.append(cspinner).append(chatbox).append(flalist);
+		
+		
 		
 		overlay.append(info).append(oqstatus);
 		
@@ -364,6 +390,8 @@ var initParupaint = function(room){
 		$('body').append(canvasworkarea).append(overlay);
 		
 		document.location.hash = room
+		
+		
 		
 		if(onRoom) onRoom(room);
 	}
