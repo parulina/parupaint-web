@@ -91,9 +91,12 @@ var updateRooms = function(){
 
 
 var focusCanvas = function(layer, frame){
-	
-	$('canvas').removeClass('focused partial-focused').filter('[data-frame='+frame+']').addClass('partial-focused').filter('[data-layer='+layer+']').addClass('focused');
+	if(!$('.canvas-pool canvas[data-layer='+layer+'][data-frame='+frame+']').length) return false;
+	$('.canvas-pool canvas').removeClass('focused partial-focused').filter('[data-frame='+frame+']').addClass('partial-focused').filter('[data-layer='+layer+']').addClass('focused');
 	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame)
+	$('.flayer-list .flayer-info-frame').removeClass('focused')
+	$('.flayer-list .flayer-info-layer[data-layer='+layer+'] .flayer-info-frame[data-frame='+frame+']').addClass('focused')
+	return true;
 }
 
 var advanceCanvas = function(nlayer, nframe){
@@ -155,6 +158,7 @@ var removeCanvasFrame = function(layer, frame){
 		var l = layer != undefined ? layer : parseInt(cc.data('layer')),
 			f = frame != undefined ? frame : parseInt(cc.data('frame'))
 		
+		if($('.canvas-pool canvas[data-layer='+l+']').length <= 1) return false;
 		
 		$('.canvas-pool canvas[data-layer='+l+'][data-frame='+f+']').remove()
 		var tf = $('.canvas-pool canvas[data-layer='+l+']').length

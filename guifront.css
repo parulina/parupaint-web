@@ -132,11 +132,15 @@
 }
 .flayer-info-layer .flayer-info-frame{
 	position:relative;
-	background-color: rgb(216, 234, 216);
+	background-color: rgb(128, 189, 161);
 	margin-left:1px;
 	flex-basis:10px;
 	flex-shrink:0;
 	display:inline;
+}
+
+.flayer-info-frame.focused{
+	background-color:#FFF;
 }
 
 
@@ -369,6 +373,8 @@
 
 .chat-content{
 	-webkit-user-select:all;
+	overflow: auto;
+	max-height: 100%;
 }
 
 .chat-entry.is-admin .chat-message{

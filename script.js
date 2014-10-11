@@ -362,7 +362,7 @@ onRoom = function(room){
 		
 		// real init
 		
-		
+		//todo: move callbacks to <html>???
 		updateCallbacks(function(e, data){
 
 			if(e == 'mousemove'){	
@@ -477,25 +477,33 @@ onRoom = function(room){
 						}
 						case 65: // a
 						{
-							overlayShow(false)
+							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
+								var f = $('canvas.focused').data('frame'),
+									l = $('canvas.focused').data('layer')
 								removeCanvasFrame()
+								if(!focusCanvas(l, f)) focusCanvas(l, f-1)
+								return true
+								
 							}
 							else return advanceCanvas(null, -1)
 						}
 						case 83: // s
 						{
-							overlayShow(false)
+							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
+								var f = $('canvas.focused').data('frame'),
+									l = $('canvas.focused').data('layer')
 								addCanvasFrame()
+								return focusCanvas(l, f+1)
 							}
 							else return advanceCanvas(null, 1)
 						}
 						case 68: // d
 						{
-							overlayShow(false)
+							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
 							}
@@ -503,7 +511,7 @@ onRoom = function(room){
 						}
 						case 70: // f
 						{
-							overlayShow(false)
+							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
 							}
