@@ -121,6 +121,56 @@ var advanceCanvas = function(nlayer, nframe){
 	
 }
 
+var addCanvasFrame = function(layer, frame){
+	var cc = $('canvas.focused')
+	if(cc.length){
+		var w = cc[0].width, 
+			h = cc[0].height
+		
+		var l = layer != undefined ? layer : parseInt(cc.data('layer')),
+			f = frame != undefined ? frame : parseInt(cc.data('frame')),
+			tf = $('.canvas-pool canvas[data-layer='+l+']').length
+		
+		for(var i = tf-1; i > f; i--){
+			console.log('frame ' + i + ' is ahead. advancing it')
+			var af = $('canvas[data-layer='+l+'][data-frame='+i+']')
+			if(af.length){
+				af.data('frame', i+1).attr('data-frame', i+1).attr('id', 'flayer-' + l + '-' + (i+1))
+			}
+		}
+		var nf = f+1,
+			id = ('flayer-' + l + '-' + nf)
+		var nc = $('<canvas width="'+w+'" height="'+h+'" id="'+id+'" data-layer="'+l+'" data-frame="'+nf+'"/>')
+		nc.insertAfter($('.canvas-pool canvas[data-layer='+l+'][data-frame='+f+']'))
+	}
+	
+	updateFrameinfoSlow()
+}
+var removeCanvasFrame = function(layer, frame){
+	var cc = $('canvas.focused')
+	if(cc.length){
+		var w = cc[0].width, 
+			h = cc[0].height
+		
+		var l = layer != undefined ? layer : parseInt(cc.data('layer')),
+			f = frame != undefined ? frame : parseInt(cc.data('frame'))
+		
+		
+		$('.canvas-pool canvas[data-layer='+l+'][data-frame='+f+']').remove()
+		var tf = $('.canvas-pool canvas[data-layer='+l+']').length
+		
+		for(var i = f+1; i <= tf; i++){
+			console.log('frame ' + i + ' is ahead. backwarding it')
+			var af = $('canvas[data-layer='+l+'][data-frame='+i+']')
+			if(af.length){
+				af.data('frame', i-1).attr('data-frame', i-1).attr('id', 'flayer-' + l + '-' + (i-1))
+			}
+		}
+	}
+	
+	updateFrameinfoSlow()
+}
+
 
 // empty layers & frames for resize
 //		       				tnt     int	    0-x		[0-x]
@@ -136,7 +186,7 @@ var initCanvas = function(width, height, layers, frames){
 			for(var f = 0; f < frames[l]; f++){
 				var id = 'flayer-'+l+'-'+f;
 
-				var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"></canvas>')
+				var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"/>')
 				nc[0].getContext('2d').webkitImageSmoothingEnabled = false;
 				$('.canvas-pool').append(nc)
 

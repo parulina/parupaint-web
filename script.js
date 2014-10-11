@@ -53,8 +53,8 @@ var overlayGone = function(now){
 
 var overlayShow = function(full){
 	if(full){
-		if(!$('.overlay .gui').hasClass('visible')){
-			$('.overlay .gui').addClass('visible');
+		if(!$('.gui').hasClass('visible')){
+			$('.gui').addClass('visible');
 
 			$('.overlay .qstatus').removeClass('visible');
 		} else {
@@ -65,43 +65,18 @@ var overlayShow = function(full){
 			ta.focus()
 		}
 	} else {
-		if($('.overlay .gui').hasClass('visible')){
-			$('.overlay .gui').removeClass('visible');
+		if($('.gui').hasClass('visible')){
+			$('.gui').removeClass('visible')
 		}
-		$('.overlay .qstatus').addClass('visible');
+		$('.qstatus').addClass('visible')
 	}
 }
 
+
+
+var ignoreGui = false;
 $(document).keydown(function(e){
 	switch(e.keyCode){
-			case 9:
-			{
-				if(e.shiftKey){
-					if($('.gui.visible').length) {
-						overlayShow(false)
-					}else {
-						overlayGone(true)
-					}
-				}else{
-					var qs = $('.overlay .qstatus');
-					
-					if($('.overlay .gui').hasClass('visible')){
-						
-						overlayShow(true)
-						return false;
-					}else{
-						if(qs.length){
-							if(qs.is(':visible')){
-								overlayShow(true)
-							} else {
-								overlayShow(false)
-							}
-						}
-					}
-					
-				}
-				return false;
-			}
 			case 116:
 			{
 				return chrome.runtime.reload()
@@ -144,6 +119,40 @@ $(document).keydown(function(e){
 				break;
 			}
 	}
+}).keyup(function(e){
+	
+	if(e.keyCode == 9)
+	{
+		if(!ignoreGui){
+
+			if(e.shiftKey){
+				if($('.gui').hasClass('visible')) {
+					overlayShow(false)
+				}else {
+					overlayGone(true)
+				}
+			}else{
+				var qs = $('.qstatus')
+
+				if($('.gui').hasClass('visible')){
+					overlayShow(true)
+					return false;
+				}else{
+					if(qs.length){
+						if(qs.hasClass('visible')){
+							overlayShow(true)
+						} else {
+							overlayShow(false)
+						}
+					}
+				}
+
+			}
+			return false;
+		}
+		ignoreGui = false
+	}
+	
 })
 
 
@@ -187,6 +196,7 @@ var Brush = {
 	
 	beraser:3,
 	bmove:2,
+	tabdown:false,
 	
 	cbrush:0,
 	brushnames:['brush','eraser'],
@@ -460,25 +470,44 @@ onRoom = function(room){
 						{
 							return !(Brush.tmoving = true)
 						}
+						case 9:
+						{
+							Brush.tabdown = true;
+							return false;
+						}
 						case 65: // a
 						{
 							overlayShow(false)
-							return advanceCanvas(null, -1)
+							if(Brush.tabdown){
+								ignoreGui = true
+								removeCanvasFrame()
+							}
+							else return advanceCanvas(null, -1)
 						}
 						case 83: // s
 						{
 							overlayShow(false)
-							return advanceCanvas(null, 1)
+							if(Brush.tabdown){
+								ignoreGui = true
+								addCanvasFrame()
+							}
+							else return advanceCanvas(null, 1)
 						}
 						case 68: // d
 						{
 							overlayShow(false)
-							return advanceCanvas(-1)
+							if(Brush.tabdown){
+								ignoreGui = true
+							}
+							else return advanceCanvas(-1)
 						}
 						case 70: // f
 						{
 							overlayShow(false)
-							return advanceCanvas(1)
+							if(Brush.tabdown){
+								ignoreGui = true
+							}
+							else return advanceCanvas(1)
 						}
 				}
 			} else if(e == 'keyup'){
@@ -489,6 +518,8 @@ onRoom = function(room){
 				if(data.key == 32){
 					Brush.tmoving = false;
 					return false;
+				} else if(data.key == 9){
+					Brush.tabdown = false;
 				}
 			}
 		});
@@ -534,10 +565,13 @@ onRoom = function(room){
 	})
 	
 	$('.flayer-list').bind('mousewheel', function(e){ this.scrollLeft -= (e.originalEvent.wheelDelta) }).click(function(e){
-		var f = parseInt($(e.target).data('frame')),
-			l = parseInt($(e.target).parent().data('layer'))
-		console.log('click on', l, f)
-		focusCanvas(l, f)
+		if($('.flayer-info-layer').has($(e.target)).length){
+			// is a frame from one of the layers?
+			var f = parseInt($(e.target).data('frame')),
+				l = parseInt($(e.target).parent().data('layer'))
+			console.log('click on', l, f)
+			focusCanvas(l, f)
+		}
 	})
 	
 	
