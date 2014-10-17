@@ -118,6 +118,11 @@ $(document).keydown(function(e){
 				}
 				break;
 			}
+			case 84:
+			{
+				$('body').toggleClass('canvas-preview')
+				break;
+			}
 	}
 }).keyup(function(e){
 	
