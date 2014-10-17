@@ -506,6 +506,13 @@ onRoom = function(room){
 							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
+								var l = $('canvas.focused').data('layer'),
+									f1 = $('.canvas-pool canvas[data-layer='+(l)+']').length-1,
+									f2 = $('.canvas-pool canvas[data-layer='+(l-1)+']').length-1
+								removeCanvasLayer()
+								if(!focusCanvas(l, f1)) focusCanvas(l-1, f2)
+
+								return true;
 							}
 							else return advanceCanvas(-1)
 						}
@@ -514,6 +521,10 @@ onRoom = function(room){
 							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
+								var f = $('canvas.focused').data('frame'),
+									l = $('canvas.focused').data('layer')
+								addCanvasLayer()
+								return focusCanvas(l, 0)
 							}
 							else return advanceCanvas(1)
 						}
