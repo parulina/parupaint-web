@@ -24,6 +24,25 @@ var advanceCanvas = function(nlayer, nframe){
 
 }
 
+var clearCanvasFrame = function(color, layer, frame){
+	var cc = $('.canvas-pool canvas[data-layer='+layer+'][data-frame='+frame+']')
+	if(!cc.length) cc = $('canvas.focused')
+	
+	if(cc.length){
+		var w = cc[0].width,
+			h = cc[0].height
+
+		var ctx = cc.get(0).getContext('2d')
+		if(color == "#00000000" || color == "transparent"){
+			ctx.clearRect(0, 0, w, h)
+		} else {
+			ctx.fillStyle = color
+			ctx.fillRect(0, 0, w, h)
+		}
+	}
+
+	updateFrameinfoSlow()
+}
 var addCanvasFrame = function(layer, frame){
 	var cc = $('canvas.focused')
 	if(cc.length){

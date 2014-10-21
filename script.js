@@ -512,6 +512,14 @@ onRoom = function(room){
 							}
 							else return advanceCanvas(1)
 						}
+						case 46: // del
+						{
+							if(data.ctrl){
+								clearCanvasFrame(Brush.brush().color)
+							}else{
+								clearCanvasFrame('transparent')
+							}
+						}
 				}
 			} else if(e == 'keyup'){
 				if(data.key == 82){
