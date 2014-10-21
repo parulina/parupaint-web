@@ -15,8 +15,7 @@
 
 .qstatus.overlay-piece:hover{
 	transition-delay:0;
-	height:46px;
-	box-shadow:0px 0px 64px -20px black
+	box-shadow:0px 0px 64px -20px black;
 }
 
 .panel-open .qstatus-piece{
@@ -252,7 +251,7 @@
 
 .panel-open .qstatus-panel{
 	position:absolute;
-	padding-top:40px;
+	padding-top: 30px;
 	background-color:#EEE;
 	border-top:none !important;
 	z-index: -1;
@@ -271,11 +270,10 @@
 	top:0;
 	left:0;
 	right:0;
-	height:40px;
-	padding:15px 40px 0;
+	height: 15px;
+	padding: 12px 40px 0;
 	font-size:16px;
 	font-family:"Helvetica";
-	text-decoration:underline;
 }
 .panel-open .brush-panel:before{
 	content: "Artists";
