@@ -1,16 +1,23 @@
 
 .qstatus.overlay-piece{
-	height:40px;
+	height: 30px;
 	position:absolute;
 	top:0;
 	right:0;
 	left:0;
-	display:none;
+	display:flex;
 	width: 100%;
 	border-bottom: none;
 	z-index: 1;
+	transition:all 100ms ease-out;
+	transition-delay:500ms;
 }
 
+.qstatus.overlay-piece:hover{
+	transition-delay:0;
+	height:46px;
+	box-shadow:0px 0px 64px -20px black
+}
 
 .panel-open .qstatus-piece{
 	transition:bottom 200ms ease-out;
@@ -81,12 +88,9 @@
 	100% {margin-top:0px; opacity:100;}
 }
 
-.qstatus.visible{
-	display:flex;
-	-webkit-animation:qstatus-show 200ms normal ease-out;
-}
 .qstatus{
 	justify-content:space-between;
+	-webkit-animation:qstatus-show 200ms normal ease-out;
 }
 
 .qstatus > div{
@@ -176,16 +180,15 @@
 
 
 .qstatus-message:before{
-	content: "[" attr(data-label) "]";
+	content: attr(data-label);
 	position:absolute;
-	top: -15px; left:0; bottom:0; right:0;
+	top: 0px; left:0; right:0; 
 	margin:auto;
-	height: 1px;
-	font-size: 13px;
-	background-color: rgba(188, 199, 190, 1);
+	bottom: 0;
+	font-size: 15px;
 	text-align:center;
-	box-shadow: 0 0 16px 1px white;
 	color: rgb(232, 227, 227);
+	background:rgba(0, 0, 0, 0.5);
 }
 
 
@@ -194,15 +197,16 @@
 }
 
 .qstatus-brush:after, .qstatus-settings:before{
-	content:"\2193";
+	content: "\2191";
 	position:absolute;
 	top:0;
 	bottom:0;
 	width:16px;
 	text-align:center;
-	padding-top:15px;
+	line-height: 15px;
 	background-color:#DDD;
 	border-bottom:1px solid #CCC;
+	transform: rotateX(160deg);
 }
 .qstatus-brush, .qstatus-settings{
 
@@ -225,7 +229,7 @@
 }
 .qstatus-brush.panel-open:after, .qstatus-settings.panel-open:before{
 	background-color:transparent;
-	transform:translateY(10px);
+	transform: translateY(-10px);
 	transform-origin:50% 0;
 	opacity:0;
 	transition:all 100ms ease-out;
@@ -244,8 +248,6 @@
 .qstatus-panel{
 	height:0;
 	opacity:0;
-	transition:all 100ms ease-out;
-	transition-property:height,opacity;
 }
 
 .panel-open .qstatus-panel{
@@ -256,6 +258,8 @@
 	z-index: -1;
 	box-shadow:0px 0px 32px -16px #444;
 	opacity:1;
+	transition: all 150ms ease-out;
+	transition-property: height,opacity;
 }
 
 

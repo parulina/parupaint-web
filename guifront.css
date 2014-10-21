@@ -6,7 +6,7 @@
 
 .overlay-piece{
 	background-color:rgba(0, 0, 0, 0.5);
-	box-shadow: 0px 0px 60px -20px black;
+	box-shadow: 0px 0px 40px -20px black;
 	border: 1px solid rgb(195, 195, 195);
 	border-radius: 4px;
 }

@@ -32,7 +32,8 @@ var updateInfo = function(){
 }
 
 var overlayTimeout = null;
-var overlayGone = function(now){
+
+var hideOverlay = function(now){
 	if(now){
 		clearTimeout(overlayTimeout)
 		overlayTimeout = null
@@ -44,31 +45,21 @@ var overlayGone = function(now){
 			return false;
 		}
 	}
-	
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
-	$('.overlay .qstatus').removeClass('visible');
 	$('#mouse-pool').focus()
-};
+}
 
-var overlayShow = function(full){
-	if(full){
-		if(!$('.gui').hasClass('visible')){
-			$('.gui').addClass('visible');
 
-			$('.overlay .qstatus').removeClass('visible');
-		} else {
-			var ta = $('textarea.chat-input')
-			if(ta.is(':focus')){
-				ta.select()
-			}
-			ta.focus()
-		}
+var showOverlay = function(){
+	if(!$('.gui').hasClass('visible')){
+		$('.gui').addClass('visible');
 	} else {
-		if($('.gui').hasClass('visible')){
-			$('.gui').removeClass('visible')
+		var ta = $('textarea.chat-input')
+		if(ta.is(':focus')){
+			ta.select()
 		}
-		$('.qstatus').addClass('visible')
+		ta.focus()
 	}
 }
 
@@ -83,7 +74,7 @@ $(document).keydown(function(e){
 			}
 			case 27:
 			{
-				overlayGone(true)
+				hideOverlay(true)
 				
 				break;
 			}
@@ -141,27 +132,9 @@ $(document).keydown(function(e){
 		if(!ignoreGui){
 
 			if(e.shiftKey){
-				if($('.gui').hasClass('visible')) {
-					overlayShow(false)
-				}else {
-					overlayGone(true)
-				}
+				hideOverlay(true)
 			}else{
-				var qs = $('.qstatus')
-
-				if($('.gui').hasClass('visible')){
-					overlayShow(true)
-					return false;
-				}else{
-					if(qs.length){
-						if(qs.hasClass('visible')){
-							overlayShow(true)
-						} else {
-							overlayShow(false)
-						}
-					}
-				}
-
+				showOverlay()
 			}
 			return false;
 		}
@@ -492,7 +465,6 @@ onRoom = function(room){
 						}
 						case 65: // a
 						{
-							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
 								var f = $('canvas.focused').data('frame'),
@@ -506,7 +478,6 @@ onRoom = function(room){
 						}
 						case 83: // s
 						{
-							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
 								var f = $('canvas.focused').data('frame'),
@@ -518,7 +489,6 @@ onRoom = function(room){
 						}
 						case 68: // d
 						{
-							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
 								var l = $('canvas.focused').data('layer'),
@@ -533,7 +503,6 @@ onRoom = function(room){
 						}
 						case 70: // f
 						{
-							if(!$('.overlay .visible').length) overlayShow(false)
 							if(Brush.tabdown){
 								ignoreGui = true
 								var f = $('canvas.focused').data('frame'),
@@ -564,7 +533,7 @@ onRoom = function(room){
 	
 	$('.gui .color-spinner').mouseout(function(e){
 		clearTimeout(overlayTimeout);
-		overlayTimeout = setTimeout(overlayGone, 3000);
+		overlayTimeout = setTimeout(hideOverlay, 3000);
 	}).mouseover(function(e){
 		clearTimeout(overlayTimeout);
 	});
@@ -572,7 +541,7 @@ onRoom = function(room){
 	$('.qstatus-message').mousedown(function(e){
 		
 		if(!$('.gui.visible').length){
-			overlayShow(true)
+			showOverlay()
 		}
 	})
 	
@@ -621,10 +590,9 @@ onRoom = function(room){
 			}
 		}
 		if(!$('#mouse-pool').has($(e.target)).length && !$('.gui, .qstatus').has($(e.target)).length){
-			if($('.gui.visible').length) overlayShow(false)
-			else if($('.qstatus.visible').length) overlayGone()
+			if($('.gui.visible').length) hideOverlay(true)
 			else{
-				overlayShow(false)
+				showOverlay()
 			}
 		}
 	})
