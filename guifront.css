@@ -371,8 +371,10 @@
 	padding:2px;
 }
 
-.chat-content{
+.chat-box:hover{
 	-webkit-user-select:all;
+}
+.chat-content{
 	overflow: auto;
 	max-height: 100%;
 }
