@@ -158,3 +158,20 @@ var initCanvas = function(width, height, layers, frames){
 
 	}
 }
+
+var downloadCanvas = function(){
+	if($('.canvas-pool canvas').length){
+		var w = $('.canvas-pool').data('ow'),
+			h = $('.canvas-pool').data('oh')
+
+		var canvas = $('<canvas width="'+w+'" height="'+h+'"/>')
+		var iframes = $('.canvas-pool canvas[data-frame=0]'),
+			ifn = iframes.length
+		for(var i = 0; i < ifn; i++){
+			canvas[0].getContext('2d').drawImage(iframes.get(i), 0, 0)
+		}
+		var fname = 'Drawing_at_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/\:/g, '.') + '.png'
+		var link = $('<a/>', {href: iframes.get(0).toDataURL(), download: fname}).text('download canvas ['+fname+']')
+		link.get(0).click()
+	}
+}

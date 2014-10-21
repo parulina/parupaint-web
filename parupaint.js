@@ -276,13 +276,14 @@ var initParupaint = function(room){
 				
 					//todo: oqstatus_internet should have status for current room and internet
 				
-						var exitbtn = $('<div/>', {tabindex:'3',type:'button', class:'setting-quit-btn', 'data-label':'quit'})
+						var exitbtn = $('<div/>', {tabindex:'3',type:'button', class:'setting-quit-btn', 'data-label':'quit'}),
+							dwnbtn = $('<div/>', {type:'button', class:'setting-down-img', 'data-label':'download image'})
 				
 						var toprow = $('<div/>', {class:'setting-top-row'}),
 							middlerow = $('<div/>', {class: 'setting-middle-row'}),
 							bottomrow = $('<div/>', {class: 'setting-bottom-row'})
 						
-						bottomrow.append(exitbtn)
+						bottomrow.append(dwnbtn).append(exitbtn)
 						
 					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow).append(middlerow).append(bottomrow)
 				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'})).append(panel)

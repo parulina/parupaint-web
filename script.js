@@ -87,6 +87,16 @@ $(document).keydown(function(e){
 				
 				break;
 			}
+			case 69:
+			{
+
+				var newbrush = Brush.cbrush == 0 ? 1 : 0;
+				Brush.brush(newbrush)
+				Brush.update()
+				updateInterfaceHex(Brush.brush().color)
+
+				break;
+			}
 			
 			case 123:
 			{
@@ -586,6 +596,9 @@ onRoom = function(room){
 				$(this).removeClass('confirm').unbind('mouseout')
 			})
 		}
+	})
+	$('.setting-down-img').click(function(){
+		downloadCanvas()
 	})
 	
 	$('.flayer-list').bind('mousewheel', function(e){ this.scrollLeft -= (e.originalEvent.wheelDelta) }).click(function(e){

@@ -339,25 +339,29 @@
 }
 .setting-bottom-row{
 	display:flex;
-	justify-content:flex-end;
+	justify-content: space-around;
 }
 
+.setting-panel div[type="button"]:hover{
+	background: rgb(218, 217, 201);
+}
 .setting-panel div[type="button"]{
 	flex-basis:100px;
 	flex-shrink:1;
 	border:none;
 	position:relative;
+	background: rgb(192, 190, 164);
 }
 .setting-panel div[type="button"][data-label]:before{
 	content:attr(data-label);
 	position:absolute;
 	top:0; left:0; right:0; bottom:0;
 	max-width:100px;
-	max-height:28px;
 	margin:auto;
 	text-align:center;
 	font-size:18px;
-	color: rgb(253, 209, 209);
+	color: rgb(150, 86, 86);
+	padding: 8px;
 }
 
 .setting-quit-btn.confirm:before{
@@ -365,8 +369,11 @@
 	max-height:50px !important;
 }
 .setting-quit-btn{
-	background: rgb(232, 109, 109);
+	background: rgb(232, 109, 109) !important;
 }
 .setting-quit-btn:hover{
-	background: rgb(255, 152, 152);
+	background: rgb(255, 152, 152) !important;
+}
+.setting-quit-btn:before{
+	color: rgb(253, 209, 209) !important;
 }
