@@ -158,6 +158,10 @@ var tmouse = {};
 					var ed = e.originalEvent.detail;
 					if(wd || ed) return callback('mousewheel', {scroll: wd || ed, target: e.target})
 
+				}).on('paste', function(e){
+					if(callback){
+						return callback('paste', {clipdata: (e.originalEvent || e).clipboardData})
+					}
 				})
 
 			})
@@ -345,3 +349,20 @@ var initParupaint = function(room){
 var getRoom = function(){
 	return document.location.hash.substr(1)
 }
+var isConnected = function(){
+	//todo socket
+	return (navigator.onLine)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

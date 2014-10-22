@@ -141,6 +141,27 @@ var updateCallbacks = function(){
 			console.log(data.key)
 
 			switch(data.key){
+					
+					
+					case 84:
+					{
+						$('body').toggleClass('canvas-preview')
+						break;
+					}
+					case 69: // e
+					{
+
+						var newbrush = Brush.cbrush == 0 ? 1 : 0;
+						Brush.brush(newbrush)
+						Brush.update()
+						updateInterfaceHex(Brush.brush().color)
+
+						break;
+					}
+					case 27: //esc
+					{
+						return hideOverlay(true)
+					}
 					case 82: // r
 					{
 						if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
@@ -195,9 +216,7 @@ var updateCallbacks = function(){
 					}
 					case 67: // v
 					{
-						if(data.ctrl){ //paste
-							
-						}
+						break;
 					}
 					case 65: // a
 					{
@@ -269,6 +288,47 @@ var updateCallbacks = function(){
 			} else if(data.key == 9){
 				Brush.tabdown = false;
 			}
+			else if(data.key == 9)
+			{
+				if(!ignoreGui){
+
+					if(e.shiftKey){
+						hideOverlay(true)
+					}else{
+						showOverlay()
+					}
+					return false;
+				}
+				ignoreGui = false
+			}
+		}
+		else if(e == 'paste'){
+			var cd = data.clipdata;
+			var file = cd.items[0].getAsFile()
+			console.log(file)
+			
+			/*
+			var reader = new FileReader();
+			reader.onload = function(evt) {
+				return options.callback.call(element, {
+					dataURL: evt.target.result,
+					event: evt,
+					file: file,
+					name: file.name
+				});
+			};
+			reader.readAsDataURL(file);
+			*/
+			return false;
 		}
 	})
 }
+
+
+
+
+
+
+
+
+

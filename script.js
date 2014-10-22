@@ -2,7 +2,7 @@
 var updateInfo = function(){
 	var layer = $('canvas.focused').data('layer'),
 		frame = $('canvas.focused').data('frame'),
-		connected = false ? 'multi' : 'single',// todo socket
+		connected = isConnected() ? 'multi' : 'single', // connected to socket room
 		room = getRoom(),
 		width = parseInt($('canvas.focused')[0].width),
 		height = parseInt($('canvas.focused')[0].height)
@@ -27,7 +27,7 @@ var updateInfo = function(){
 	
 	
 	document.title = 	'[' + players.length + ' artists]' +
-						'['+width+' × '+height+']' + 
+						' ['+width+' × '+height+']' + 
 						' in [' + room + ']'
 }
 
@@ -72,22 +72,6 @@ $(document).keydown(function(e){
 			{
 				return chrome.runtime.reload()
 			}
-			case 27:
-			{
-				hideOverlay(true)
-				
-				break;
-			}
-			case 69:
-			{
-
-				var newbrush = Brush.cbrush == 0 ? 1 : 0;
-				Brush.brush(newbrush)
-				Brush.update()
-				updateInterfaceHex(Brush.brush().color)
-
-				break;
-			}
 			
 			case 123:
 			{
@@ -119,28 +103,7 @@ $(document).keydown(function(e){
 				}
 				break;
 			}
-			case 84:
-			{
-				$('body').toggleClass('canvas-preview')
-				break;
-			}
 	}
-}).keyup(function(e){
-	
-	if(e.keyCode == 9)
-	{
-		if(!ignoreGui){
-
-			if(e.shiftKey){
-				hideOverlay(true)
-			}else{
-				showOverlay()
-			}
-			return false;
-		}
-		ignoreGui = false
-	}
-	
 }).mousemove(function(e){
 	
 	if(Brush.tbrushzoom || Brush.tzoomcanvas){
