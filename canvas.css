@@ -66,9 +66,10 @@
 	height: 100%;
 	transform-origin: 50% 50%;
 	border-radius: 100%;
-	border: 1px solid white;
+	border: 1.5px solid white;
 	visibility: visible;
 	box-shadow: 0 0 1px 1px black inset;
+	margin: -1.5px;
 }
 
 
