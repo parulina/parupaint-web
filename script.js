@@ -65,7 +65,6 @@ var showOverlay = function(){
 
 
 
-var ignoreGui = false;
 $(document).keydown(function(e){
 	switch(e.keyCode){
 			case 116:
@@ -103,42 +102,6 @@ $(document).keydown(function(e){
 				}
 				break;
 			}
-	}
-}).mousemove(function(e){
-	
-	if(Brush.tbrushzoom || Brush.tzoomcanvas){
-		if(Brush.tzoomstart == null) {
-			Brush.tzoomstart = (e.pageY)
-			Brush.ttsize = (Brush.tzoomcanvas ? ($('.canvas-workarea').data('zoom') || 1.0) : Brush.brush().size)
-		}
-		var step = 5 * (Brush.ttsize<5 ? 0.5 : 1);
-		var diff = 1+((Brush.tzoomstart - e.pageY)*2 / $(this).height());
-		var res = 1+(Brush.ttsize * (diff > 0.00000000 ? diff : 1))*diff
-		var rres = Math.floor((res - Brush.ttsize) / step);
-		var rs = (Brush.ttsize + rres * step);
-
-		if(Brush.tbrushzoom){
-			if(rs != Brush.brush().size && rs <= 128 && rs >= 1) {
-				if(rs < 0) rs = 0;
-				else if (rs > 128) rs = 128;
-				Brush.size(rs).update()
-
-			}	
-		}
-		// don't know how to make this work.
-		// the actual canvas-workarea changes when i set the zoom, so the diff
-		// gets all messed up since it uses its' height for calculation.
-
-		else if(Brush.tzoomcanvas){
-			var rrr = (Brush.ttsize * (diff > 0.00000000 ? diff : 1))
-			var ic = (Math.round((rrr) * 100)/100),
-				zz = $('.canvas-workarea').data('zoom') || 1.0
-			console.log('->', res, '=', Brush.ttsize, '*', diff)
-			if(ic != zz){
-				setZoom(ic)
-			}
-		}
-
 	}
 })
 

@@ -123,26 +123,26 @@ var tmouse = {};
 						tmouse.oldsx = e.clientX;
 						tmouse.oldsy = e.clientY;
 
-						return callback('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, target: e.target});
+						return callback('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, xclient:e.clientX, yclient:e.clientY, target: e.target});
 
 					}
 				}).mouseout(function(e){
 					if(callback){
 						tmouse.oldx = undefined;
 						tmouse.oldy = undefined;
-						return callback('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, target: e.target});
+						return callback('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 					}
 				}).mousedown(function(e){
 					if(callback){
 						tmouse.oldx = e.offsetX;
 						tmouse.oldy = e.offsetY;
-						return callback('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, target: e.target});
+						return callback('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 					}
 				}).mouseup(function(e){
 					if(callback){
 						tmouse.oldx = e.offsetX;
 						tmouse.oldy = e.offsetY;
-						return callback('mouseup', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, target: e.target});
+						return callback('mouseup', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 					}
 				}).keydown(function(e){
 					if(callback){

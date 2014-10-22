@@ -1,5 +1,6 @@
 
 var mouseMoveTimer = null
+var ignoreGui = false;
 
 var updateCallbacks = function(){
 	
@@ -87,8 +88,46 @@ var updateCallbacks = function(){
 	$('html').sevent(function(e, data){
 		// global keys
 		// todo: ignore :focus on any global inputs
+		
+		
+		
+		
 		if(e == 'mousemove'){	
 
+			if(Brush.tbrushzoom || Brush.tzoomcanvas){
+				if(Brush.tzoomstart == null) {
+					Brush.tzoomstart = (data.yclient)
+					Brush.ttsize = (Brush.tzoomcanvas ? ($('.canvas-workarea').data('zoom') || 1.0) : Brush.brush().size)
+				}
+				var step = 5 * (Brush.ttsize<5 ? 0.5 : 1);
+				var diff = 1+((Brush.tzoomstart - data.yclient)*2 / $(this).height());
+				var res = 1+(Brush.ttsize * (diff > 0.00000000 ? diff : 1))*diff
+				var rres = Math.floor((res - Brush.ttsize) / step);
+				var rs = (Brush.ttsize + rres * step);
+				
+				if(Brush.tbrushzoom){
+					if(rs != Brush.brush().size && rs <= 128 && rs >= 1) {
+						if(rs < 0) rs = 0;
+						else if (rs > 128) rs = 128;
+						Brush.size(rs).update()
+
+					}	
+				}
+				// don't know how to make this work.
+				// the actual canvas-workarea changes when i set the zoom, so the diff
+				// gets all messed up since it uses its' height for calculation.
+
+				else if(Brush.tzoomcanvas){
+					var rrr = (Brush.ttsize * (diff > 0.00000000 ? diff : 1))
+					var ic = (Math.round((rrr) * 50)/50),
+						zz = $('.canvas-workarea').data('zoom') || 1.0
+					//console.log('->', res, '=', Brush.ttsize, '*', diff)
+					if(ic != zz){
+						setZoom(ic)
+					}
+				}
+
+			}
 		} else if(e == 'mousedown'){
 			
 			if(data.button == Brush.bmove){
@@ -111,6 +150,7 @@ var updateCallbacks = function(){
 			}
 			
 		} else if(e == 'mousewheel'){
+			if($('.overlay').has($(data.target)).length) return false;
 			if(!Brush.tmoving){
 				//while moving canvas
 				var z = $('.canvas-workarea').data('zoom') || 1.0;
@@ -139,6 +179,7 @@ var updateCallbacks = function(){
 			
 		} else if(e == 'keydown'){
 			console.log(data.key)
+			if($('input:focus, textarea:focus').length) return true;
 
 			switch(data.key){
 					
@@ -277,22 +318,12 @@ var updateCallbacks = function(){
 					}
 			}
 		} else if(e == 'keyup'){
-			if(data.key == 82){
-				addPaletteEntryRgb(getColorSliderRgb())
-				$('.canvas-cursor.cursor-self').removeClass('pick-color')
-			}
-			if(data.key == 32){
-				Brush.tzoomcanvas = Brush.tbrushzoom = Brush.tmoving = false
-				Brush.tzoomstart = null
-				return false;
-			} else if(data.key == 9){
-				Brush.tabdown = false;
-			}
-			else if(data.key == 9)
+			if(data.key == 9)
 			{
+				Brush.tabdown = false;
 				if(!ignoreGui){
 
-					if(e.shiftKey){
+					if(data.shift){
 						hideOverlay(true)
 					}else{
 						showOverlay()
@@ -300,6 +331,21 @@ var updateCallbacks = function(){
 					return false;
 				}
 				ignoreGui = false
+			}
+			if(data.key == 32){
+				Brush.tzoomcanvas = Brush.tbrushzoom = Brush.tmoving = false
+				Brush.tzoomstart = null
+				return false;
+			}
+			
+			
+			
+			// below is for normal keycodes for inputs
+			if($('input:focus, textarea:focus').length) return true;
+			
+			if(data.key == 82){
+				addPaletteEntryRgb(getColorSliderRgb())
+				$('.canvas-cursor.cursor-self').removeClass('pick-color')
 			}
 		}
 		else if(e == 'paste'){
