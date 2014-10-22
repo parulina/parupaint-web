@@ -148,7 +148,7 @@ $(function(){
                             connectTablet(devlist[id].vendorId, devlist[id].productId, function(err){
                                 if(err){
                                     var ee = $('<div class="error"></div>').html(err);
-                                    $('#alert-message').effect('shake').prepend(ee);
+                                    $('#alert-message').prepend(ee);
                                     setTimeout(function(){
                                         $('#alert-message div.error').remove();
                                     }, 3000);
@@ -173,7 +173,7 @@ $(function(){
                         } else if(devlist.length == 1){
                             connectTablet(devlist[0].vendorId, devlist[0].productId, function(err){
                                 if(err){
-                                    $('#alert-message').effect('shake').text('Couldn\'t connect to your tablet. Try and see if it works correctly.');
+                                    $('#alert-message').text('Couldn\'t connect to your tablet. Try and see if it works correctly.');
                                     setTimeout(function(){
                                         selectTablet();
                                     }, 3000);
@@ -187,7 +187,7 @@ $(function(){
                         selectTablet();
 
                     } else if(data.last_tablet.vendorId != 0){
-                        $('#alert-message').effect('shake').text('Connecting to tablet...');
+                        $('#alert-message').text('Connecting to tablet...');
                         connectTablet(data.last_tablet.vendorId, data.last_tablet.productId, function(err){
                             if(err){
                                 console.log('something went wrong.');
