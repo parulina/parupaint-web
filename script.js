@@ -141,6 +141,42 @@ $(document).keydown(function(e){
 		ignoreGui = false
 	}
 	
+}).mousemove(function(e){
+	
+	if(Brush.tbrushzoom || Brush.tzoomcanvas){
+		if(Brush.tzoomstart == null) {
+			Brush.tzoomstart = (e.pageY)
+			Brush.ttsize = (Brush.tzoomcanvas ? ($('.canvas-workarea').data('zoom') || 1.0) : Brush.brush().size)
+		}
+		var step = 5 * (Brush.ttsize<5 ? 0.5 : 1);
+		var diff = 1+((Brush.tzoomstart - e.pageY)*2 / $(this).height());
+		var res = 1+(Brush.ttsize * (diff > 0.00000000 ? diff : 1))*diff
+		var rres = Math.floor((res - Brush.ttsize) / step);
+		var rs = (Brush.ttsize + rres * step);
+
+		if(Brush.tbrushzoom){
+			if(rs != Brush.brush().size && rs <= 128 && rs >= 1) {
+				if(rs < 0) rs = 0;
+				else if (rs > 128) rs = 128;
+				Brush.size(rs).update()
+
+			}	
+		}
+		// don't know how to make this work.
+		// the actual canvas-workarea changes when i set the zoom, so the diff
+		// gets all messed up since it uses its' height for calculation.
+
+		else if(Brush.tzoomcanvas){
+			var rrr = (Brush.ttsize * (diff > 0.00000000 ? diff : 1))
+			var ic = (Math.round((rrr) * 100)/100),
+				zz = $('.canvas-workarea').data('zoom') || 1.0
+			console.log('->', res, '=', Brush.ttsize, '*', diff)
+			if(ic != zz){
+				setZoom(ic)
+			}
+		}
+
+	}
 })
 
 
@@ -181,6 +217,10 @@ var drawCanvasLine = function(canvas, x1, y1, x2, y2, color, width){
 
 var Brush = {
 	tmoving:false,
+	tbrushzoom:false,
+	tzoomcanvas:false,
+	tzoomstart:null,
+	ttsize:null,
 	
 	beraser:3,
 	bmove:2,
@@ -293,6 +333,34 @@ var saveCanvasLocal = function(r){
 	});
 }
 
+var setZoom = function(z){
+	if(z == undefined) z = 1.0
+	
+	var w = $('canvas.focused').get(0).width,
+		h = $('canvas.focused').get(0).height,
+		ow = $('.canvas-workarea').width(),
+		oh = $('.canvas-workarea').height(),
+		// change x, y
+		cw = (z*w) - ow,
+		ch = (z*h) - oh,
+		nw = ow + cw,
+		nh = oh + ch
+	
+	
+	var alx = $('html').width()/2,
+		aly = $('html').height()/2
+	
+	var aax = 	($('body').scrollLeft() + alx), 
+		aay = 	($('body').scrollTop() + aly),
+		ccx = 	(ow / (aax)), 
+		ccy = 	(oh / (aay))
+	
+	$('body').scrollTop( $('body').scrollTop()+(ch/ccy) )
+	$('body').scrollLeft( $('body').scrollLeft()+(cw/ccx) )
+	
+	$('.canvas-workarea').width(nw).height(nh).data('zoom', z)
+	$('.canvas-cursor').css('transform', 'scale('+z+')');
+}
 
 
 onRoom = function(room){
@@ -364,7 +432,7 @@ onRoom = function(room){
 				var cursor = $('.canvas-cursor.cursor-self');
 				if(cursor.length){
 					var left = parseInt(cursor.css('left')), top = parseInt(cursor.css('top'));
-					var dx = (data.x - left), dy = (data.y - top);
+					var dx = (Brush.mx - left), dy = (Brush.my - top);
 					var dist = Math.sqrt(dx*dx + dy*dy)
 					if(dist > (drawing ? 2 : 15)){
 						cursor.css({left: data.x, top:data.y});
@@ -375,15 +443,32 @@ onRoom = function(room){
 					b.scrollLeft(b.scrollLeft() - data.sx);
 					b.scrollTop(b.scrollTop() - data.sy);
 				}
-				else if(drawing){
-
-					var nx1 = ((data.x - data.cx));
-					var ny1 = ((data.y - data.cy));
-					var nx2 = ((data.x));
-					var ny2 = ((data.y));
-					var s = parseInt(cursor.data('size')) || Brush.brush().size;
-					var c = Brush.brush().color || cursor.data('color');
-
+				if(drawing){
+					var ow = $('canvas.focused').get(0).width,
+						oh = $('canvas.focused').get(0).height,
+						nw = $('.canvas-workarea').width(),
+						nh = $('.canvas-workarea').height()
+						
+					var nx1 = ((data.x - data.cx)/nw)*ow;
+					var ny1 = ((data.y - data.cy)/nh)*oh;
+					var nx2 = ((data.x)/nw)*ow;
+					var ny2 = ((data.y)/nh)*oh;
+					
+					var s = (Brush.brush().size);
+					var c = (Brush.brush().color);
+					if(tabletConnection){
+						if(tabletConnection.focus){
+							s *= tabletConnection.p
+							
+							var ss = Math.round(tabletConnection.p*10)/10
+							var pp = $('.canvas-cursor.cursor-self .cursor-pressure-size')
+							if(pp.data('ts') != ss){
+								pp.css('transform', 'scale('+tabletConnection.p+')').data('ts', ss);
+							}
+							
+						}
+					}
+					
 					drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
 				}
 			}else if(e == 'mousedown'){
@@ -413,14 +498,25 @@ onRoom = function(room){
 				}
 			} else if(e == 'mousewheel'){
 				console.log(data.target)
-				var a = data.scroll > 0 ? 2 : 0.5;
-				var cursor = $('.canvas-cursor.cursor-self')
-				var s = parseInt(cursor.data('size'))
-				s *= a;
-				if(s < 1) s = 1;
-				if(s > 256) s = 256;
-
-				Brush.size(s).update()
+				
+				if(Brush.tmoving){
+					//while moving canvas
+					var z = $('.canvas-workarea').data('zoom') || 1.0;
+					z *= (data.scroll > 0 ? 1.2 : 0.8)
+					if(z < 0.1) z = 0.1
+					else if(z > 6) z = 6
+					
+					setZoom(z)
+					
+				} else {
+					var a = data.scroll > 0 ? 2 : 0.5;
+					var cursor = $('.canvas-cursor.cursor-self')
+					var s = parseInt(cursor.data('size'))
+					s *= a;
+					if(s < 1) s = 1;
+					if(s > 256) s = 256;
+					Brush.size(s).update()
+				}
 				writeDefaults()
 
 				return false;
@@ -456,7 +552,9 @@ onRoom = function(room){
 						}
 						case 32:
 						{
-							return !(Brush.tmoving = true)
+							if(data.ctrl) 			return !(Brush.tzoomcanvas = true)
+							else if(data.shift) 	return !(Brush.tbrushzoom = true)
+							else					return !(Brush.tmoving = true)
 						}
 						case 9:
 						{
@@ -527,7 +625,8 @@ onRoom = function(room){
 					$('.canvas-cursor.cursor-self').removeClass('pick-color')
 				}
 				if(data.key == 32){
-					Brush.tmoving = false;
+					Brush.tzoomcanvas = Brush.tbrushzoom = Brush.tmoving = false
+					Brush.tzoomstart = null
 					return false;
 				} else if(data.key == 9){
 					Brush.tabdown = false;

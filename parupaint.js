@@ -265,7 +265,7 @@ var initParupaint = function(room){
 		
 		document.title = ''+room+' (offline)';
 		var canvaspool = $('<div class="canvas-pool"></div>');
-		var self = $('<div class="canvas-cursor cursor-self admin"></div>');
+		var self = $('<div/>', {class: "canvas-cursor cursor-self"}).append($('<div />', {class: 'cursor-pressure-size'}));
 		var canvasworkarea = $('<div id="mouse-pool" class="canvas-workarea" tabindex="1"></div>').append(canvaspool).append(self);
 		
 		

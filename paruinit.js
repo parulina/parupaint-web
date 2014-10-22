@@ -4,7 +4,7 @@
 var manifest = chrome.runtime.getManifest();
 $$ = function(callback){ chrome.runtime.getBackgroundPage(function(page){ callback(page); }) };
 
-var tabletConnection = {connection: null, pressure:0, x: 0, y: 0, name:''};
+var tabletConnection = {connection: null, pen:0, p:0, x: 0, y: 0, name:''};
 
 
 var devs = manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices
@@ -38,6 +38,44 @@ var getUsbList = function(){
 	}
 	return rdevs
 }
+
+function _copy(str, mimetype) {
+    document.oncopy = function(event) {
+        event.clipboardData.setData(mimetype, str);
+        event.preventDefault();
+    };
+    document.execCommand("Copy", false, null);
+}
+
+var ddpoll = function(){
+	chrome.hid.receive(tabletConnection.connection, function(r, d){
+		setTimeout(ddpoll, 0)
+		if(d){
+			/*
+			if(d.byteLength == 7){
+				var aa = new Int8Array(d.byteLength + 1)
+				aa.set(new Int8Array(d), 0)
+				d = aa.buffer
+			}*/
+			var b = new Uint8Array(d)
+			
+			
+			// 00010000 = not on tablet
+			// 00010001 = on tablet
+			//        ^ = (& 1)
+			//    ^     = (& 16) >> 4
+			
+			//todo: individual settings of working area for different tablets?
+			tabletConnection.focus = (b[0] & 16) >> 4,
+			tabletConnection.pen = (b[0] & 1),
+			tabletConnection.x = (b[1] + b[2]*255)/20000,
+			tabletConnection.y = (b[3] + b[4]*255)/12452,
+			tabletConnection.p = (b[5] + b[6]*255)/1024
+			
+			//console.log(Array.prototype.join.call(b, ","))
+		}
+	});
+};
 
 
 $(function(){
@@ -81,23 +119,12 @@ $(function(){
                             console.log('Failed connection.');
                             return callback(new Error('Failed connection.'));
                         }
-                        console.log('Connected ('+con.connectionId+').');
+                        console.log('Connected.', con);
                         tabletConnection.connection = con.connectionId;
                         callback(null);
 
-                        var poll = function(){
-                            chrome.hid.receive(con.connectionId, function(rid, data){
-                                console.log('-->' + data);
-                                if(data){
-                                    var a = new Int16Array(data);
-                                    console.log(':' + a);
-                                    document.getElementById('info').innerHTML = 
-                                            ("x: " + a[1] + "  y: " + a[2] + "  p: " + a[3] + "     " + a[0].toString(16));
-                                    setTimeout(poll, 0);
-                                }
-                            });
-                        };
-                        poll();
+                        
+                        ddpoll();
                     });
                 });
             }
