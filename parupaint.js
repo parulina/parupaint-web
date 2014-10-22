@@ -102,71 +102,69 @@ var focusCanvas = function(layer, frame){
 
 var tmouse = {};
 
-var updateCallbacks = function(cb){
-	console.log('setting callbacks for pool');
-	
-	var pool = $('#mouse-pool');
-	pool.unbind();
-	pool.bind('mousemove mousedown', function(e){
-		//console.log(e)
-		if(cb){
-			if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
-			if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
-			if(tmouse.oldsx === undefined) tmouse.oldsx = e.clientX;
-			if(tmouse.oldsy === undefined) tmouse.oldsy = e.clientY;
-			
-			var cx = (e.offsetX - tmouse.oldx);
-			var cy = (e.offsetY - tmouse.oldy);
-			tmouse.oldx = e.offsetX;
-			tmouse.oldy = e.offsetY;
-			
-			var csx = (e.clientX - tmouse.oldsx);
-			var csy = (e.clientY - tmouse.oldsy);
-			tmouse.oldsx = e.clientX;
-			tmouse.oldsy = e.clientY;
-			
-			return cb('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy});
-			
-		}
-	}).mouseout(function(e){
-		if(cb){
-			tmouse.oldx = undefined;
-			tmouse.oldy = undefined;
-			return cb('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
-		}
-	}).mousedown(function(e){
-		if(cb){
-			tmouse.oldx = e.offsetX;
-			tmouse.oldy = e.offsetY;
-			return cb('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
-		}
-	}).mouseup(function(e){
-		if(cb){
-			tmouse.oldx = e.offsetX;
-			tmouse.oldy = e.offsetY;
-			return cb('mouseup', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY});
-		}
-	}).keydown(function(e){
-		if(cb){
-			return cb('keydown', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
-		}
-	}).keyup(function(e){
-		if(cb){
-			return cb('keyup', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
-		}
-	}).bind('contextmenu', function(e) {
-		return false;
-	}).bind('mousewheel DOMMouseScroll', function(e){
-        
-		var wd = e.originalEvent.wheelDelta / 100;
-		var ed = e.originalEvent.detail;
-		if(wd || ed) return cb('mousewheel', {scroll: wd || ed, target: e.target})
-		
-    })
-}
+(function($){
+	$.fn.extend({
+		sevent: function(callback) {
+			return this.each(function(k, e) {
+				$(e).unbind().bind('mousemove mousedown', function(e){
+					if(callback){
+						if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
+						if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
+						if(tmouse.oldsx === undefined) tmouse.oldsx = e.clientX;
+						if(tmouse.oldsy === undefined) tmouse.oldsy = e.clientY;
 
+						var cx = (e.offsetX - tmouse.oldx);
+						var cy = (e.offsetY - tmouse.oldy);
+						tmouse.oldx = e.offsetX;
+						tmouse.oldy = e.offsetY;
 
+						var csx = (e.clientX - tmouse.oldsx);
+						var csy = (e.clientY - tmouse.oldsy);
+						tmouse.oldsx = e.clientX;
+						tmouse.oldsy = e.clientY;
 
+						return callback('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, target: e.target});
+
+					}
+				}).mouseout(function(e){
+					if(callback){
+						tmouse.oldx = undefined;
+						tmouse.oldy = undefined;
+						return callback('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, target: e.target});
+					}
+				}).mousedown(function(e){
+					if(callback){
+						tmouse.oldx = e.offsetX;
+						tmouse.oldy = e.offsetY;
+						return callback('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, target: e.target});
+					}
+				}).mouseup(function(e){
+					if(callback){
+						tmouse.oldx = e.offsetX;
+						tmouse.oldy = e.offsetY;
+						return callback('mouseup', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, target: e.target});
+					}
+				}).keydown(function(e){
+					if(callback){
+						return callback('keydown', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
+					}
+				}).keyup(function(e){
+					if(callback){
+						return callback('keyup', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
+					}
+				}).bind('mousewheel DOMMouseScroll', function(e){
+
+					var wd = e.originalEvent.wheelDelta / 100;
+					var ed = e.originalEvent.detail;
+					if(wd || ed) return callback('mousewheel', {scroll: wd || ed, target: e.target})
+
+				})
+
+			})
+		}
+	})
+
+})(jQuery);
 
 //todo: spectate mode
 
