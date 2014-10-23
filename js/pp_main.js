@@ -189,7 +189,7 @@ var initParupaint = function(room){
 				clear = $('<input/>', {type: 'button',class:'main-setting-panel clear-settings', value:'clear settings', alt:"clears the saved settings and rooms! you won't get them back."}),
 				room2 = $('<div/>', {class: 'main-setting-panel set-room'}).html($('<input/>', {type: 'text', class: 'new-room-input'})),
 				name2 = $('<div/>', {class: 'main-setting-panel set-name'}).html($('<input/>', {type: 'text', class: 'name-input'})),
-				ctablet = $('<div/>', {class: 'chosen-tablet'})
+				ctablet = $('<div/>', {class: 'chosen-tablet'}).text(tabletConnection.connections ? tabletConnection.connections + ' tablets' : 'None')
 			
 			
 		var settings = $('<div/>', {class: 'main-page-settings'}).append(ctablet).append(tablet).append(clear).append(name2).append(room2)
@@ -198,13 +198,6 @@ var initParupaint = function(room){
 		
 		var infoheader = $('<div class="room-info-header"></div>').append(settings).append(title).append(header);
 		
-		
-		
-		chrome.storage.local.get('last_tablet', function(d){
-			if(d && d.last_tablet){
-				 $('.chosen-tablet').text((d.last_tablet.name || 'Mouse/unknown'))
-			}
-		})
 		chrome.permissions.contains(hidperm, function(e){
 			if(e){
 				$('input.set-tablet').addClass('enabled')

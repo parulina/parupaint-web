@@ -4,7 +4,7 @@
 var manifest = chrome.runtime.getManifest();
 $$ = function(callback){ chrome.runtime.getBackgroundPage(function(page){ callback(page); }) };
 
-var tabletConnection = {connection: null, pen:0, e:false, p:0, x: 0, y: 0, mx:0, my:0, mp:0, name:'', autoswitch: true};
+var tabletConnection = {connections: 0, pen:0, e:false, p:0, x: 0, y: 0, mx:0, my:0, mp:0, name:'', autoswitch: true};
 
 
 var devs = manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices
@@ -21,7 +21,6 @@ var selectTablet = function(vendor, product){
 				}
 			}
 		}
-        chrome.storage.local.set({last_tablet: data}, function(){});
     }
     $('#alert-message').remove();
     $('body').removeClass('loading');
@@ -73,7 +72,7 @@ $(function(){
 					if(!con) return console.log('Failed connection to device.', d);
 					// connected successfully
 					console.log('Connected successfully.', d.productId, con.connectionId)
-					
+					tabletConnection.connections++
 					
 					
 					

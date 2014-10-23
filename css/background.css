@@ -177,7 +177,7 @@ input.name-input{
 }
 
 .chosen-tablet:before{
-	content:"Selected tablet";
+	content:"Connected tablets:";
 	position:absolute;
 	left:0;
 	top:0;
