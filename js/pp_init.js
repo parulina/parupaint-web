@@ -165,7 +165,8 @@ $(function(){
 					
 				});
 			}
-			cf()
+			
+			if(dev && dev.length) cf()
 			selectTablet(0)
 		})
     }
