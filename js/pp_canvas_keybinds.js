@@ -75,6 +75,7 @@ var updateCallbacks = function(){
 				Brush.brush(newbrush)
 				Brush.update()
 				updateInterfaceHex(Brush.brush().color)
+				tabletConnection.autoswitch = false
 
 			}
 			else if(data.button == 1){

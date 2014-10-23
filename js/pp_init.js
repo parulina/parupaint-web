@@ -4,7 +4,7 @@
 var manifest = chrome.runtime.getManifest();
 $$ = function(callback){ chrome.runtime.getBackgroundPage(function(page){ callback(page); }) };
 
-var tabletConnection = {connection: null, pen:0, e:false, p:0, x: 0, y: 0, name:'', autoswitch: true};
+var tabletConnection = {connection: null, pen:0, e:false, p:0, x: 0, y: 0, mx:0, my:0, mp:0, name:'', autoswitch: true};
 
 
 var devs = manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices
@@ -95,8 +95,8 @@ $(function(){
 						}
 					}
 					
-					var mw = 20000,
-						mh = 12452,
+					var mw = 10000,
+						mh = 10000,
 						mp = 1024
 
 					if(tablet_info){
@@ -131,19 +131,34 @@ $(function(){
 
 								//todo: individual settings of working area for different tablets?
 								
-								var ae = ((b[0] & 32) >> 5)
+								var ae = ((b[0] & 32) >> 5),
+									ax = (b[1] + b[2]*255),
+									ay = (b[3] + b[4]*255),
+									ap = (b[5] + b[6]*255)
+								
+								if(ax > mw) mw = ax
+								if(ay > mh) mh = ay
+								if(ap > mp){
+									console.log('Warning, either this device is not configured, or it has the wrong pressure max value. ['+ap+' > '+mp+']')
+									mp = ap
+								}
+								
 								if(ae != tabletConnection.e){
 									tabletConnection.autoswitch = true
-									tabletConnection.e = ae
 								}
 								tabletConnection.focus = (b[0] & 16) >> 4,
 								tabletConnection.pen = (b[0] & 1),
-								tabletConnection.x = (b[1] + b[2]*255)/mw,
-								tabletConnection.y = (b[3] + b[4]*255)/mh,
-								tabletConnection.p = (b[5] + b[6]*255)/mp
+								tabletConnection.e = ae,
+								tabletConnection.x = ax/mw,
+								tabletConnection.y = ay/mh,
+								tabletConnection.p = ap/mp
 								
+								//for debug
+								if(ax > tabletConnection.mx) tabletConnection.mx = ax
+								if(ay > tabletConnection.my) tabletConnection.my = ay
+								if(ap > tabletConnection.mp) tabletConnection.mp = ap
 
-								console.log((b[1] + b[2]*255), (b[3] + b[4]*255), Array.prototype.join.call(b, ","))
+								//console.log((b[1] + b[2]*255), (b[3] + b[4]*255), Array.prototype.join.call(b, ","))
 							}
 						});
 					}
@@ -156,3 +171,7 @@ $(function(){
 		})
     }
 })
+
+function tabletDebug(){
+	return [tabletConnection.mx, tabletConnection.my, tabletConnection.mp]
+}
