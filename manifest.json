@@ -1,10 +1,16 @@
 {
 	"manifest_version": 2,
 	"name": "parupaint",
-	"version": "0.2.5",
-	"description":"parupaint chrome webapp.",
+	"version": "0.3.0",
+	"description":"Paint stuff!",
 	"author":"paru",
 	"short_name":"parupaint",
+	"icons": {
+		"16": "icon16.png",
+		"32": "icon32.png",
+		"48": "icon48.png",
+		"128": "icon128.png"
+	},
 	"app": {
 		"background": {
 			"scripts": [ "background.js" ],
