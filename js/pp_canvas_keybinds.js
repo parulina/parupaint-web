@@ -59,6 +59,11 @@ var updateCallbacks = function(){
 						}
 
 					}
+					if(tabletConnection.e != Brush.cbrush && tabletConnection.autoswitch){
+						Brush.brush(parseInt(tabletConnection.e))
+						Brush.update()
+						updateInterfaceHex(Brush.brush().color)
+					}
 				}
 
 				drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
@@ -196,7 +201,7 @@ var updateCallbacks = function(){
 						Brush.brush(newbrush)
 						Brush.update()
 						updateInterfaceHex(Brush.brush().color)
-
+						tabletConnection.autoswitch = false
 						break;
 					}
 					case 27: //esc

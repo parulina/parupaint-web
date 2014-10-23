@@ -4,7 +4,7 @@
 var manifest = chrome.runtime.getManifest();
 $$ = function(callback){ chrome.runtime.getBackgroundPage(function(page){ callback(page); }) };
 
-var tabletConnection = {connection: null, pen:0, p:0, x: 0, y: 0, name:''};
+var tabletConnection = {connection: null, pen:0, e:false, p:0, x: 0, y: 0, name:'', autoswitch: true};
 
 
 var devs = manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices
@@ -47,35 +47,6 @@ function _copy(str, mimetype) {
     document.execCommand("Copy", false, null);
 }
 
-var ddpoll = function(){
-	chrome.hid.receive(tabletConnection.connection, function(r, d){
-		setTimeout(ddpoll, 0)
-		if(d){
-			/*
-			if(d.byteLength == 7){
-				var aa = new Int8Array(d.byteLength + 1)
-				aa.set(new Int8Array(d), 0)
-				d = aa.buffer
-			}*/
-			var b = new Uint8Array(d)
-			
-			
-			// 00010000 = not on tablet
-			// 00010001 = on tablet
-			//        ^ = (& 1)
-			//    ^     = (& 16) >> 4
-			
-			//todo: individual settings of working area for different tablets?
-			tabletConnection.focus = (b[0] & 16) >> 4,
-			tabletConnection.pen = (b[0] & 1),
-			tabletConnection.x = (b[1] + b[2]*255)/20000,
-			tabletConnection.y = (b[3] + b[4]*255)/12452,
-			tabletConnection.p = (b[5] + b[6]*255)/1024
-			
-			//console.log(Array.prototype.join.call(b, ","))
-		}
-	});
-};
 
 
 $(function(){
@@ -84,134 +55,104 @@ $(function(){
 
     } else {
 		
-		var rdevs = getUsbList()
-		var devthing = {filters: rdevs}
-		
-		try{
-			chrome.hid.getDevices(devthing, function(){});
-		} catch(e){
-			/*
-			var ee = $('<div class="error"></div>').append(e).append('<br/>Tablet detection only works in chrome dev channel.<br/>Click to continue.');
-			$('#alert-message').effect('shake').prepend(ee);
-			$('html').click(function(){
-				$('#alert-message div.error').remove();
-				selectTablet(0)
-			});
+		chrome.hid.getDevices({filters: getUsbList()}, function(dev){
+			console.log('Available devices:', dev)
 			
-			return 1;
-			*/
-			console.log('beta getDevices', e)
-			devthing = {vendorId: rdevs[0].vendorId, productId: rdevs[0].productId}
-		}
-		console.log('devices:', devthing)
-        chrome.hid.getDevices(devthing, function(devlist){
-			console.log('available devices:', devlist)
-            var connectTablet = function(vendor, product, callback){
-                chrome.hid.getDevices({ "vendorId": parseInt(vendor), "productId": parseInt(product)}, function(dev) {
-                    if(!dev || !dev.length){
-                        console.log('device not found.');
-                        return callback(new Error('Device not found.'));
-                    }	
+			var i = 0
+			var cf = function(){
+				
+				var d = dev[i]
+				console.log('connecting to', d.deviceId)
+				chrome.hid.connect(d.deviceId, function(con){
+					
+					i++
+					if(i < dev.length){
+						setTimeout(cf, 0)
+					}
+					
+					if(!con) return console.log('Failed connection to device.', d);
+					// connected successfully
+					console.log('Connected successfully.', d.productId, con.connectionId)
+					
+					
+					
+					
+					
+					/*
+					chrome.hid.receiveFeatureReport(con.connectionId, 2, function(data){
+						console.log(d, 'report:', new Uint8Array(data))
+					})
+					*/
+					
+					// get the manifest thingy
+					
+					var tablet_info = null
+					for(var pid in devs){
+						if(devs[pid].productId == d.productId &&
+						  		devs[pid].vendorId == d.vendorId){
+							tablet_info = devs[pid]
+							break
+						}
+					}
+					
+					var mw = 20000,
+						mh = 12452,
+						mp = 1024
 
+					if(tablet_info){
+						if(tablet_info.p) mp = tablet_info.p
+						if(tablet_info.w) mw = tablet_info.w
+						if(tablet_info.h) mh = tablet_info.h
+					}
+					var ddpoll = function(){
+						
+						chrome.hid.receive(con.connectionId, function(r, d){
+							setTimeout(ddpoll, 0)
+							
+							if(d){
+								var b = new Uint8Array(d)
+								
+								// e  eraser
+								// P  in promiximity
+								// h  is hovering (closer than prox??)
+								// d  is pen down
+								// h0eP 000d
+								
+								// 0011 0000 = eraser prox
+								// 1011 0000 = eraser hover (cursor moves)
+								// 1011 0001 = eraser down
+								
+								// 0001 0000 = pen prox
+								// 1001 0000 = pen hover (cursor moves)
+								// 1001 0001 = pen down
+								// 
+								//         ^ = (& 1)
+								//    ^      = (& 16) >> 4
 
-                    chrome.hid.connect(dev[0].deviceId, function(con){
-                        if(!con) {
-                            console.log('Failed connection.');
-                            return callback(new Error('Failed connection.'));
-                        }
-                        console.log('Connected.', con);
-                        tabletConnection.connection = con.connectionId;
-                        callback(null);
+								//todo: individual settings of working area for different tablets?
+								
+								var ae = ((b[0] & 32) >> 5)
+								if(ae != tabletConnection.e){
+									tabletConnection.autoswitch = true
+									tabletConnection.e = ae
+								}
+								tabletConnection.focus = (b[0] & 16) >> 4,
+								tabletConnection.pen = (b[0] & 1),
+								tabletConnection.x = (b[1] + b[2]*255)/mw,
+								tabletConnection.y = (b[3] + b[4]*255)/mh,
+								tabletConnection.p = (b[5] + b[6]*255)/mp
+								
 
-                        
-                        ddpoll();
-                    });
-                });
-            }
-
-
-
-            if(devlist.length){
-                $('#alert-message').text('Connecting...');
-
-
-                var listTablets = function(){
-					$('#alert-message').text('');
-                    $('#alert-message').append('<a href="#" data-id="-1">Don\'t use any tablet.</a>');
-                    for(var i in devlist){
-                        console.log(devlist[i]);
-                        $('#alert-message').append('<a href="#" data-id="'+i+'">Select tablet '+i+' ['+devlist[i].device+']</a>');
-                    }
-                    $('#alert-message > a').click(function(){
-                        var id = $(this).data('id');
-                        if(id < devlist.length && id >= 0){
-                            connectTablet(devlist[id].vendorId, devlist[id].productId, function(err){
-                                if(err){
-                                    var ee = $('<div class="error"></div>').html(err);
-                                    $('#alert-message').prepend(ee);
-                                    setTimeout(function(){
-                                        $('#alert-message div.error').remove();
-                                    }, 3000);
-                                }else{
-                                    selectTablet(devlist[id].vendorId, devlist[id].productId);
-                                }
-                            });
-                        } else {
-                            selectTablet(0);
-                        }
-                    });
-                };
-
-                chrome.storage.local.get('last_tablet', function(data){
-
-					console.log(data.last_tablet)
-                    if(data.last_tablet == undefined) {
-                        console.log('Hmmm, first run...');
-                        if(devlist.length >= 2){
-                            listTablets();
-
-                        } else if(devlist.length == 1){
-                            connectTablet(devlist[0].vendorId, devlist[0].productId, function(err){
-                                if(err){
-                                    $('#alert-message').text('Couldn\'t connect to your tablet. Try and see if it works correctly.');
-                                    setTimeout(function(){
-                                        selectTablet();
-                                    }, 3000);
-                                } else {
-                                    selectTablet(devlist[0].vendorId, devlist[0].productId);
-                                }
-                            });
-                        }
-                    } else if(data.last_tablet.vendorId == 0){
-
-                        selectTablet();
-
-                    } else if(data.last_tablet.vendorId != 0){
-                        $('#alert-message').text('Connecting to tablet...');
-                        connectTablet(data.last_tablet.vendorId, data.last_tablet.productId, function(err){
-                            if(err){
-                                console.log('something went wrong.');
-                                var ee = $('<div class="error"></div>').html('Couldn\'t connect to tablet.');
-                                $('#alert-message').html('');
-                                listTablets();
-                                $('#alert-message').prepend(ee);
-                                setTimeout(function(){ $('#alert-message div.error').remove(); }, 3000);
-
-                            } else {
-                                console.log('Auto-connected to ' + data.last_tablet.vendorId, data.last_tablet.productId);
-                                selectTablet(data.last_tablet.vendorId, data.last_tablet.productId);
-                            }
-                        });
-
-                    }
-
-
-                });
-
-
-            } else if(devlist.length == 0){
-                selectTablet();
-            }
-        });
+								console.log((b[1] + b[2]*255), (b[3] + b[4]*255), Array.prototype.join.call(b, ","))
+							}
+						});
+					}
+					ddpoll()
+					
+				});
+			}
+			cf()
+			selectTablet(0)
+		})
     }
 })
