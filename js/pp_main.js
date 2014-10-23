@@ -9,7 +9,7 @@ var loadSqnyaImage = function(url2, callback){
 	xhr.onload = function(){
 		callback(window.URL.createObjectURL(xhr.response));
 	}
-	xhr.open('GET', url + url2, true); xhr.send();
+	xhr.open('GET', url2, true); xhr.send();
 }
 
 
@@ -69,7 +69,7 @@ var updateRooms = function(){
 			}
 			ee.html(aaa);
 			if(ss != data.lastmod){
-				loadSqnyaImage('/'+(r + '/image?' + Date.now()), function(url){
+				loadSqnyaImage(url + '/'+(r + '/image?' + Date.now()), function(url){
 					ee.css('background-image', 'url('+url +')');
 				})
 				
@@ -343,8 +343,7 @@ var getRoom = function(){
 	return document.location.hash.substr(1)
 }
 var isConnected = function(){
-	//todo socket
-	return (navigator.onLine)
+	return (navigator.onLine && roomConnection && roomConnection.connected())
 }
 
 

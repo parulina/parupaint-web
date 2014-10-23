@@ -18,7 +18,8 @@
 		}
 	},
 	"permissions": [
-		"storage"
+		"storage",
+		"http://localhost:1108/*"
 	],
     "optional_permissions":[
 		"alwaysOnTopWindows",

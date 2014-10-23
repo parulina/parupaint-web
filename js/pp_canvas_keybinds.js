@@ -14,6 +14,12 @@ var updateCallbacks = function(){
 			//todo: store with zoom offset
 			Brush.mx = data.x;
 			Brush.my = data.y;
+			var ow = $('canvas.focused').get(0).width,
+				oh = $('canvas.focused').get(0).height,
+				nw = $('.canvas-workarea').width(),
+				nh = $('.canvas-workarea').height()
+			
+			
 			var cursor = $('.canvas-cursor.cursor-self');
 			if(cursor.length){
 				var left = parseInt(cursor.css('left')), top = parseInt(cursor.css('top'));
@@ -21,6 +27,11 @@ var updateCallbacks = function(){
 				var dist = Math.sqrt(dx*dx + dy*dy)
 				if(dist > (drawing ? 2 : 15)){
 					cursor.css({left: data.x, top:data.y});
+					if(!drawing){
+						if(roomConnection){
+							roomConnection.socket.emit('d', {x: ((data.x/nw)*ow), y: ((data.y)/nh)*oh, d: false})
+						}
+					}
 				}
 				
 				
@@ -41,10 +52,6 @@ var updateCallbacks = function(){
 				b.scrollTop(b.scrollTop() - data.sy);
 			}
 			if(drawing){
-				var ow = $('canvas.focused').get(0).width,
-					oh = $('canvas.focused').get(0).height,
-					nw = $('.canvas-workarea').width(),
-					nh = $('.canvas-workarea').height()
 
 				var nx1 = ((data.x - data.cx)/nw)*ow;
 				var ny1 = ((data.y - data.cy)/nh)*oh;
@@ -65,7 +72,9 @@ var updateCallbacks = function(){
 
 					}
 				}
-
+				if(roomConnection){
+					roomConnection.socket.emit('d', {x: nx2, y: ny2, s: s, c: c, d: true})
+				}
 				drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
 			}
 		}else if(e == 'mousedown'){
@@ -80,6 +89,9 @@ var updateCallbacks = function(){
 			}
 			else if(data.button == 1){
 				$('.canvas-cursor.cursor-self').addClass('drawing')
+				if(roomConnection){
+					roomConnection.socket.emit('d', {d: false, l: $('canvas.focused').data('layer'), f: $('canvas.focused').data('frame')})
+				}
 			}
 		}else if(e == 'mouseup'){
 			if(data.button == 1){

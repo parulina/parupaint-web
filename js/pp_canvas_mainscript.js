@@ -31,6 +31,8 @@ var updateInfo = function(){
 						' in [' + room + ']'
 }
 
+
+
 var overlayTimeout = null;
 
 var hideOverlay = function(now){
@@ -288,6 +290,7 @@ var setZoom = function(z){
 	$('.canvas-cursor').css('transform', 'scale('+z+')');
 }
 
+roomConnection = null;
 
 onRoom = function(room){
 	addMessage('loading parupaint...')
@@ -302,6 +305,8 @@ onRoom = function(room){
 		updateInterfaceHex(Brush.brush().color)
 		
 		$('.canvas-cursor.cursor-self').data('name', data.name || ('unnamed_mofo'+(Date.now().toString().slice(-5))))
+		roomConnection = new connectRoom(room, 'name=' + $('.canvas-cursor.cursor-self').data('name'))
+		
 		
 		
 		

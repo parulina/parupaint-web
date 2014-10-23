@@ -161,6 +161,9 @@ var initCanvas = function(width, height, layers, frames){
 
 				var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"/>')
 				nc[0].getContext('2d').webkitImageSmoothingEnabled = false;
+				nc[0].getContext('2d').webkitimageSmoothingEnabled = false;
+				nc[0].getContext('2d').mozimageSmoothingEnabled = false;
+				nc[0].getContext('2d').imageSmoothingEnabled = false;
 				$('.canvas-pool').append(nc)
 
 			}

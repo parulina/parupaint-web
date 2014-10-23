@@ -412,16 +412,14 @@
 	top:0;
 	margin:2px 4px 0px 0px;
 	background-color: transparent;
-	max-width:60px;
 
 }
 .chat-entry:not([data-name]) .chat-message{
 	text-align:center;
-	font-size:16px;
-	border-bottom:1px solid #FFF;
-	background-color:rgb(220, 190, 190);
+	font-size:15px;
 	padding:5px 0;
 	text-decoration:none;
+	font-style:italic;
 }
 
 .chat-message:hover{
