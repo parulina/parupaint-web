@@ -29,6 +29,11 @@ var updateCallbacks = function(){
 					cursor.css({left: data.x, top:data.y});
 				}, 800)
 			}
+			if(tabletConnection && tabletConnection.e != Brush.cbrush && tabletConnection.autoswitch){
+				Brush.brush(parseInt(tabletConnection.e))
+				Brush.update()
+				updateInterfaceHex(Brush.brush().color)
+			}
 			var moving = (Brush.tmoving || data.button == Brush.bmove);
 			if(moving){
 				var b = $('body');
@@ -58,11 +63,6 @@ var updateCallbacks = function(){
 							pp.css('transform', 'scale('+tabletConnection.p+')').data('ts', ss);
 						}
 
-					}
-					if(tabletConnection.e != Brush.cbrush && tabletConnection.autoswitch){
-						Brush.brush(parseInt(tabletConnection.e))
-						Brush.update()
-						updateInterfaceHex(Brush.brush().color)
 					}
 				}
 
