@@ -159,7 +159,7 @@ body.canvas{
 	background-clip: content-box;
 	overflow:hidden;
 	transition: none;
-	background-size:10% 10%;
+	background-size: 10%;
 	/* z-index: 4; */
 }
 .canvas-workarea:focus{

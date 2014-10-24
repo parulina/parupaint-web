@@ -272,15 +272,24 @@ var initParupaint = function(room){
 					//todo: oqstatus_internet should have status for current room and internet
 				
 						var exitbtn = $('<div/>', {tabindex:'3',type:'button', class:'setting-quit-btn', 'data-label':'quit'}),
-							dwnbtn = $('<div/>', {type:'button', class:'setting-down-img', 'data-label':'download image'})
+							dwnbtn = $('<div/>', {type:'button', class:'setting-down-img', 'data-label':'download image'}),
+							savebtn = $('<div/>', {type:'button', class:'setting-save-img', 'data-label':'save'}),
+							conbtn = $('<div/>', {type:'button', class:'setting-connect', 'data-label':'connect'})
+						
+						var rezf = $('<form/>', {class: 'dimension-input'}),
+							rezw = $('<input/>', {class: 'dimension-w-input', type: 'number', min: '0', max: '4096'}),
+							rezh = $('<input/>', {class: 'dimension-h-input', type: 'number', min: '0', max: '4096'}),
+							rezz = $('<input/>', {class: 'dimension-confirm', type:'submit', value:'set dimensions'})
+						rezf.append(rezw, $('<span/>', {class: 'dim-xx'}).text('x'), rezh, rezz)
 				
 						var toprow = $('<div/>', {class:'setting-top-row'}),
 							middlerow = $('<div/>', {class: 'setting-middle-row'}),
 							bottomrow = $('<div/>', {class: 'setting-bottom-row'})
 						
-						bottomrow.append(dwnbtn).append(exitbtn)
+						bottomrow.append(dwnbtn, savebtn, conbtn, exitbtn)
+						middlerow.append(rezf)
 						
-					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow).append(middlerow).append(bottomrow)
+					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow, middlerow, bottomrow)
 				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'})).append(panel)
 			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
 			

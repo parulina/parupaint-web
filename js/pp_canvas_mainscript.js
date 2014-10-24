@@ -25,6 +25,9 @@ var updateInfo = function(){
 	}
 	$('.brush-panel').html(list)
 	
+	$('form.dimension-input .dimension-w-input').val($('canvas.focused').get(0).width)
+	$('form.dimension-input .dimension-h-input').val($('canvas.focused').get(0).height)
+	
 	
 	document.title = 	'[' + room + ']' + 
 						players.length + ' artists' +
@@ -398,6 +401,12 @@ onRoom = function(room){
 	})
 	$('.setting-down-img').click(function(){
 		downloadCanvas()
+	})
+	$('form.dimension-input .dimension-confirm').click(function(){
+		var w = $(this).parent().children('.dimension-w-input').val(),
+			h = $(this).parent().children('.dimension-h-input').val()
+		initCanvas(w, h)
+		saveCanvasLocal(room)
 	})
 	
 	$('.flayer-list').bind('mousewheel', function(e){
