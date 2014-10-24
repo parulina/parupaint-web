@@ -102,5 +102,7 @@ chatScript = function(room){
 			overlayGone(true)
 		}
 		console.log($('.chat-input-box .ci-size').html($(this).val()).html())
+	}).on('focus', function(e){
+		clearTimeout(overlayTimeout)
 	})
 }

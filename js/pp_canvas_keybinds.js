@@ -151,17 +151,18 @@ var updateCallbacks = function(){
 				$('#mouse-pool').focus()
 				return false;
 			}
-			if($(data.target).is('html')){
+			temp1 = data.target
+			if(!$('.overlay').has(data.target).length && data.button == 1){
 				var qs = $('.qstatus-brush, .qstatus-settings')
 				if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
 					if(qs.hasClass('panel-open')){
 						return qs.removeClass('panel-open')
 					}
 				}
-				if(!$('#mouse-pool').has($(e.target)).length && !$('.gui, .qstatus').has($(e.target)).length){
+				if($(data.target).is('html') && !$('#mouse-pool').has($(e.target)).length && !$('.gui, .qstatus').has($(e.target)).length){
 					if($('.gui.visible').length) hideOverlay(true)
 					else{
-						showOverlay()
+						showOverlay(2000)
 					}
 				}
 			}
@@ -346,7 +347,7 @@ var updateCallbacks = function(){
 					if(data.shift){
 						hideOverlay(true)
 					}else{
-						showOverlay()
+						showOverlay(2000)
 					}
 					return false;
 				}

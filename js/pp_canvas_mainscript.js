@@ -26,9 +26,9 @@ var updateInfo = function(){
 	$('.brush-panel').html(list)
 	
 	
-	document.title = 	'[' + players.length + ' artists]' +
-						' ['+width+' × '+height+']' + 
-						' in [' + room + ']'
+	document.title = 	'[' + room + ']' + 
+						players.length + ' artists' +
+						' ['+width+' × '+height+']'
 }
 
 
@@ -53,7 +53,13 @@ var hideOverlay = function(now){
 }
 
 
-var showOverlay = function(){
+var showOverlay = function(t){
+	if(t != undefined){
+		clearTimeout(overlayTimeout);
+		overlayTimeout = setTimeout(function(){
+			hideOverlay(true)
+		}, 3000);
+	}
 	if(!$('.gui').hasClass('visible')){
 		$('.gui').addClass('visible');
 	} else {
@@ -356,9 +362,8 @@ onRoom = function(room){
 	});
 	
 	
-	$('.gui .color-spinner').mouseout(function(e){
-		clearTimeout(overlayTimeout);
-		overlayTimeout = setTimeout(hideOverlay, 3000);
+	$('.gui .overlay-piece').mouseout(function(e){
+		showOverlay(2000)
 	}).mouseover(function(e){
 		clearTimeout(overlayTimeout);
 	});
@@ -366,7 +371,7 @@ onRoom = function(room){
 	$('.qstatus-message').mousedown(function(e){
 		
 		if(!$('.gui.visible').length){
-			showOverlay()
+			showOverlay(2000)
 		}
 	})
 	
@@ -395,7 +400,13 @@ onRoom = function(room){
 		downloadCanvas()
 	})
 	
-	$('.flayer-list').bind('mousewheel', function(e){ this.scrollLeft -= (e.originalEvent.wheelDelta) }).click(function(e){
+	$('.flayer-list').bind('mousewheel', function(e){
+		if($('.flayer-info-layer').has($(e.target)).length){
+			//is on layer
+		}else {
+			this.scrollLeft -= (e.originalEvent.wheelDelta)
+		}
+	}).click(function(e){
 		if($('.flayer-info-layer').has($(e.target)).length){
 			// is a frame from one of the layers?
 			var f = parseInt($(e.target).data('frame')),

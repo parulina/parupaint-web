@@ -224,10 +224,12 @@ colorScript = function(onchange){
 	var oldcol = null;
 	$('.hsl-select-pick > div').bind('mousedown', function(e){
 		oldcol = getColorSliderHexAlpha()
-	}).bind('mouseup', function(e){
-		if(getColorSliderHexAlpha() != oldcol){
-			onchange(oldcol, getColorSliderRgb())
-		}
+		$(this).bind('mouseup mouseout', function(e){
+			if(getColorSliderHexAlpha() != oldcol){
+				onchange(oldcol, getColorSliderRgb())
+			}
+			$(this).unbind('mouseup mouseout')
+		})
 	})
 	
 	$('.color-spinner .hue-pick').bind('mousemove mousedown', function(e){
