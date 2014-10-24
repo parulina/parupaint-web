@@ -135,7 +135,7 @@
 	height: 50%;
 	overflow: hidden;
 	position:relative;
-	padding-bottom: 20px;
+	padding-bottom: 28px;
 }
 .qstatus-message:hover .chat-message{
 	top:0;
@@ -145,6 +145,10 @@
 }
 .qstatus-message:hover .chat-entry{
 	overflow:auto;
+}
+
+.qstatus-message .chat-message:after{
+	display:none;
 }
 .qstatus-message .chat-message{
 	margin:0;
@@ -188,6 +192,7 @@
 	text-align:center;
 	color: rgb(232, 227, 227);
 	background:rgba(0, 0, 0, 0.5);
+	z-index: -1;
 }
 
 
