@@ -186,6 +186,9 @@ var updateCallbacks = function(){
 				if(s < 1) s = 1;
 				if(s > 256) s = 256;
 				Brush.size(s).update()
+				if(roomConnection){
+					roomConnection.socket.emit('d', {s: s})
+				}
 			}
 			writeDefaults()
 

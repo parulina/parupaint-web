@@ -287,7 +287,12 @@ var setZoom = function(z){
 	$('body').scrollLeft( $('body').scrollLeft()+(cw/ccx) )
 	
 	$('.canvas-workarea').width(nw).height(nh).data('zoom', z)
-	$('.canvas-cursor').css('transform', 'scale('+z+')');
+	$('.canvas-cursor').css('transform', 'scale('+z+')').each(function(k, e){
+		var ee = $(e),
+			nx = (parseFloat(ee.css('left')) / ow) * nw,
+			ny = (parseFloat(ee.css('top')) / oh) * nh
+		ee.css({left: nx, top: ny})
+	});
 }
 
 roomConnection = null;

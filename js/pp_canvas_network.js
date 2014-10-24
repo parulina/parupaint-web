@@ -72,7 +72,8 @@ var connectRoom = function(r, q){
 		
 	}).on('peer', function(d){
 		console.log('peer', d)
-		var e = $('<div/>', {class: 'canvas-cursor', id:d.id, 'data-name': d.name})
+		var e = $('<div/>', {class: 'canvas-cursor', id:d.id, 'data-name': d.name}).css({left: d.x, top: d.y})
+		if(d.s != undefined) Brush.size(d.s, e)
 		$('#mouse-pool').append(e)
 		
 	}).on('canvas', function(d){
@@ -90,13 +91,20 @@ var connectRoom = function(r, q){
 			var e = $('.canvas-cursor#' + d.id)
 			if(e.length){
 				
-				var x = parseFloat(e.css('left')),
-					y = parseFloat(e.css('top')),
+				var ow = $('canvas.focused').get(0).width,
+					oh = $('canvas.focused').get(0).height,
+					nw = $('.canvas-workarea').width(),
+					nh = $('.canvas-workarea').height(),
+					
+					x = (parseFloat(e.css('left')) / nw) * ow,
+					y = (parseFloat(e.css('top')) / nh) * oh,
 					l = e.data('layer'),
 					f = e.data('frame')
+					
+					
 				
-				if(d.x != undefined) e.css('left', d.x)
-				if(d.y != undefined) e.css('top', d.y)
+				if(d.x != undefined) e.css('left', (d.x/oh)*nh)
+				if(d.y != undefined) e.css('top', (d.y/ow)*nw)
 				if(d.l != undefined) {e.data('layer', d.l), l = d.l}
 				if(d.f != undefined) {e.data('frame', d.f), f = d.f}
 				
