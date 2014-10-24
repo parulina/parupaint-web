@@ -19,11 +19,10 @@
 	},
 	"permissions": [
 		"storage",
-		"http://localhost:1108/*"
+		"http://sqnya.se:1108/*"
 	],
     "optional_permissions":[
 		"alwaysOnTopWindows",
-		"http://draw.sqnya.se/*",
          "hid", {"usbDevices":[
 			// [default] list of tablets.
 			// [] vendorId: 	required. 1386 is wacom, 5935 is Waltop/Trust.

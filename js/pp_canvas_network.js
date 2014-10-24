@@ -6,7 +6,7 @@ var connectRoom = function(r, q){
 	if(!r) return false
 	
 	
-	var ur = 'http://localhost:1108/' + r
+	var ur = url + '/' + r
 	
 	var id = null
 	this.reload = function(callback){
@@ -39,7 +39,7 @@ var connectRoom = function(r, q){
 		return this.id
 	}
 	this.connected = function(){
-		return (this.id != null)
+		return this.socket.connected
 	}
 	
 	
@@ -48,7 +48,8 @@ var connectRoom = function(r, q){
 	
 	
 	var pthis = this
-	this.socket = io.connect('ws://localhost:1108/', {query: 'room=' + r + '&' + q});
+	console.log('Connecting to socket', ur)
+	this.socket = io.connect(url, {query: 'room=' + r + '&' + q});
 
 	
 	this.socket.on('connect', function(c){

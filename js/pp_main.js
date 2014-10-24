@@ -1,5 +1,5 @@
 var manifest = chrome.runtime.getManifest();
-var url = 'http://draw.sqnya.se';
+var url = 'http://sqnya.se:1108';
 var hidperm = { permissions: ['hid'] }
 
 
