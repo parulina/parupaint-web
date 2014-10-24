@@ -289,8 +289,8 @@ var setZoom = function(z){
 	$('.canvas-workarea').width(nw).height(nh).data('zoom', z)
 	$('.canvas-cursor').css('transform', 'scale('+z+')').each(function(k, e){
 		var ee = $(e),
-			nx = (parseFloat(ee.css('left')) / ow) * nw,
-			ny = (parseFloat(ee.css('top')) / oh) * nh
+			nx = (ee.data('x') / w) * nw,
+			ny = (ee.data('y') / h) * nh
 		ee.css({left: nx, top: ny})
 	});
 }
