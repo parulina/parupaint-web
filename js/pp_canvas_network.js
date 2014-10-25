@@ -49,13 +49,16 @@ var connectRoom = function(r, q){
 	
 	var pthis = this
 	console.log('Connecting to socket', ur)
-	this.socket = io.connect(url, {query: 'room=' + r + '&' + q});
+	this.socket = io.connect(url, {query: 'room=' + r + '&' + q, reconnection:false});
 
 	
 	this.socket.on('connect', function(c){
 		pthis.sid(pthis.socket.io.engine.id)
 		console.log('Connected as', pthis.id)
 		
+	}).on('connect_error', function(d){
+		addMessage('Connection failed -- ' + d.message)
+		pthis.socket.disconnect()
 	}).on('disconnect', function(c){
 		
 		if(c == pthis.sid()){

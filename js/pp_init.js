@@ -1,57 +1,36 @@
 // this is for actual working
 
-
-var manifest = chrome.runtime.getManifest();
-$$ = function(callback){ chrome.runtime.getBackgroundPage(function(page){ callback(page); }) };
+if(typeof chrome != 'undefined' && typeof chrome.runtime != 'undefined'){
+	var manifest = chrome.runtime.getManifest();
+}
 
 var tabletConnection = {connections: 0, pen:0, e:false, p:0, x: 0, y: 0, mx:0, my:0, mp:0, name:'', autoswitch: true};
 
+if(manifest != undefined){
+	var devs = manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices
+	var getUsbList = function(){
 
-var devs = manifest.optional_permissions[manifest.optional_permissions.length-1].usbDevices
+		var rdevs = []
 
-var selectTablet = function(vendor, product){
-    if(vendor != undefined){
-        console.log('setting local data last tablet to: ' + vendor);
-		
-		var data = {vendorId: vendor, productId: product}
-		if(vendor){
-			for(var i in devs){
-				if(devs[i].vendorId == vendor && devs[i].productId == product){
-					data.name = devs[i].name
-				}
-			}
+		for(var pid in devs){
+			var d = devs[pid]
+			rdevs.push({vendorId: d.vendorId, productId: d.productId})
 		}
-    }
+		return rdevs
+	}
+}
+
+
+var removeInit = function(){
     $('#alert-message').remove();
     $('body').removeClass('loading');
     initParupaint('test');
-};
-
-var getUsbList = function(){
-	
-	var rdevs = []
-
-	for(var pid in devs){
-		var d = devs[pid]
-		rdevs.push({vendorId: d.vendorId, productId: d.productId})
-	}
-	return rdevs
 }
-
-function _copy(str, mimetype) {
-    document.oncopy = function(event) {
-        event.clipboardData.setData(mimetype, str);
-        event.preventDefault();
-    };
-    document.execCommand("Copy", false, null);
-}
-
-
 
 $(function(){
-    if(!chrome.hid){
-        selectTablet(0)
-
+	if(typeof manifest != 'undefined' || (typeof chrome == 'undefined' || typeof chrome.hid == 'undefined')) {
+		// non chrome browser
+		removeInit()
     } else {
 		
 		chrome.hid.getDevices({filters: getUsbList()}, function(dev){
@@ -167,7 +146,7 @@ $(function(){
 			}
 			
 			if(dev && dev.length) cf()
-			selectTablet(0)
+			removeInit(0)
 		})
     }
 })

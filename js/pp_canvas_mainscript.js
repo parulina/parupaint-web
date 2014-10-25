@@ -28,6 +28,7 @@ var updateInfo = function(){
 	$('form.dimension-input .dimension-w-input').val($('canvas.focused').get(0).width)
 	$('form.dimension-input .dimension-h-input').val($('canvas.focused').get(0).height)
 	
+	Brush.update()
 	
 	document.title = 	'[' + room + ']' + 
 						players.length + ' artists' +
@@ -222,14 +223,14 @@ var failSafe = function(){
 }
 
 var writeDefaults = function(){
-	chrome.storage.local.set({brushDefaults: JSON.stringify(Brush.brushes)}, failSafe);
+	setStorageKey({brushDefaults: JSON.stringify(Brush.brushes)}, failSafe);
 }
 
 
 
 var saveCanvasLocal = function(r){
 	if(r == undefined) r = 'default'
-	chrome.storage.local.get('rooms', function(roomdata){
+	getStorageKey('rooms', function(roomdata){
 		
 		var d = roomdata.length ? roomdata.rooms : undefined;
 
@@ -264,7 +265,7 @@ var saveCanvasLocal = function(r){
 				}
 			}
 		}
-		chrome.storage.local.set({rooms: d}, function(){
+		setStorageKey({rooms: d}, function(){
 			console.log('Finish writing')					 
 		});
 	});
@@ -309,7 +310,7 @@ roomConnection = null;
 onRoom = function(room){
 	addMessage('loading parupaint...')
 	
-	chrome.storage.local.get(null, function(data){
+	getStorageKey(null, function(data){
 		
 		if(data.brushDefaults){
 			var def = JSON.parse(data.brushDefaults);

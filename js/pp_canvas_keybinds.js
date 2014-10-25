@@ -8,8 +8,8 @@ var updateCallbacks = function(){
 		// the kind of stuff that happens when the canvas
 		// is focused and _should_ be focused (drawing, etc...)
 		if(e == 'mousemove'){	
-
-			var drawing = (data.button == 1);
+			
+			var drawing = (data.button == 1)
 
 			//todo: store with zoom offset
 			var ow = $('canvas.focused').get(0).width,

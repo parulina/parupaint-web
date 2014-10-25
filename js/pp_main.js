@@ -1,6 +1,4 @@
-var manifest = chrome.runtime.getManifest();
 var url = 'http://sqnya.se:1108';
-var hidperm = { permissions: ['hid'] }
 
 
 var loadSqnyaImage = function(url2, callback){
@@ -99,6 +97,21 @@ var focusCanvas = function(layer, frame){
 	return true;
 }
 
+var getStorageKey = function(key, callback){
+	if(typeof chrome != 'undefined' && typeof chrome.storage != 'undefined'){
+		return chrome.storage.local.get(key, callback)
+	} else {
+		return callback([])
+	}
+}
+var setStorageKey = function(key, callback){
+	if(typeof chrome != 'undefined' && typeof chrome.storage != 'undefined'){
+		return chrome.storage.local.set(key, callback)
+	} else {
+		return callback([])
+	}
+}
+
 
 var tmouse = {};
 
@@ -106,7 +119,11 @@ var tmouse = {};
 	$.fn.extend({
 		sevent: function(callback) {
 			return this.each(function(k, e) {
+				var mb = 0
+				
 				$(e).unbind().bind('mousemove mousedown', function(e){
+					if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+					if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
 					if(callback){
 						if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
 						if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
@@ -122,8 +139,7 @@ var tmouse = {};
 						var csy = (e.clientY - tmouse.oldsy);
 						tmouse.oldsx = e.clientX;
 						tmouse.oldsy = e.clientY;
-
-						return callback('mousemove', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, xclient:e.clientX, yclient:e.clientY, target: e.target});
+						return callback('mousemove', {button: mb, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, xclient:e.clientX, yclient:e.clientY, target: e.target});
 
 					}
 				}).mouseout(function(e){
@@ -136,13 +152,15 @@ var tmouse = {};
 					if(callback){
 						tmouse.oldx = e.offsetX;
 						tmouse.oldy = e.offsetY;
+						mb = e.which
 						return callback('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 					}
 				}).mouseup(function(e){
 					if(callback){
 						tmouse.oldx = e.offsetX;
 						tmouse.oldy = e.offsetY;
-						return callback('mouseup', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
+						mb = 0
+						return callback('mouseup', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 					}
 				}).keydown(function(e){
 					if(callback){

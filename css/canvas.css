@@ -5,6 +5,8 @@
 	position:absolute;
 	pointer-events:none;
 	-webkit-user-select:none;
+	-moz-user-select:none;
+	user-select:none;
 	visibility:hidden;
 	transition:all 100ms ease;
 	transition-property: width, height;
@@ -112,14 +114,16 @@
 
 html{
 	height:100%;
-	/* ??? doesn't work???
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	*/
+	display:flex;
 	-webkit-box-align:center;
 	-webkit-box-pack:center;
+	-moz-box-align: center;
+	-moz-box-pack: center;
+	align-items: center;
+	justify-content: center;
 	display:-webkit-box;
+	display:-moz-box;
+	
 	overflow:hidden;
 }
 /*
