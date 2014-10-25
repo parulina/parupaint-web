@@ -32,13 +32,8 @@
 	margin: -1.5px;
 }
 
-@-webkit-keyframes eraser-frames{
-	0% {transform:rotate(0deg)}
-	100% {transform:rotate(360deg)}
-}
 
 .canvas-cursor.eraser.drawing:after{
-	-webkit-animation:eraser-frames 5s linear infinite;
 	box-shadow:none;
 }
 .canvas-cursor.eraser:after{
