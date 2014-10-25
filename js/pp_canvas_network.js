@@ -77,6 +77,8 @@ var roomSocketConnection = function(r){
 			// i disconnected - remove everyone >:D
 			pthis.id = null
 			$('.canvas-cursor').not('.cursor-self').remove()
+			
+			updateInfo()
 		} else {
 			$('.canvas-cursor#' + c).remove()
 		}

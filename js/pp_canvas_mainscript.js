@@ -35,7 +35,7 @@ var updateInfo = function(){
 	
 	Brush.update()
 	
-	$('.setting-connect').attr('data-label', isConnected() ? 'disconnect' : 'connect')
+	$('form.connection-input').toggleClass('enable', isConnected()).attr('data-label', isConnected() ? 'connected' : 'disconnected')
 	
 	
 	document.title = 	'[' + room + '] ' + 
@@ -409,14 +409,12 @@ var onRoom = function(room){
 			downloadCanvas()
 		} else if(e.is('.setting-save-img')){
 			saveCanvasLocal(room)
-		} else if(e.is('.setting-connect')){
-			var a = r.toggleNetwork()
-			if(a)		addMessage('Connecting...')
-			else		addMessage('Disconnecting.')
-			updateInfo()
 		}
 	})
-	
+	$('input.con-status').change(function(e){
+		var c = $(e.target).is(':checked')
+		r.toggleNetwork(c)
+	})
 	
 	
 	

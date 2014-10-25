@@ -290,25 +290,39 @@ initParupaint = function(room){
 				
 						var exitbtn = $('<div/>', {tabindex:'3',type:'button', class:'setting-quit-btn', 'data-label':'quit'}),
 							dwnbtn = $('<div/>', {type:'button', class:'setting-down-img', 'data-label':'download image'}),
-							savebtn = $('<div/>', {type:'button', class:'setting-save-img', 'data-label':'save'}),
-							conbtn = $('<div/>', {type:'button', class:'setting-connect', 'data-label':'connect'})
+							savebtn = $('<div/>', {type:'button', class:'setting-save-img', 'data-label':'save'})
 						
-						var rezf = $('<form/>', {class: 'dimension-input'}),
-							rezw = $('<input/>', {class: 'dimension-w-input', type: 'number', min: '0', max: '4096'}),
-							rezh = $('<input/>', {class: 'dimension-h-input', type: 'number', min: '0', max: '4096'}),
-							rezz = $('<input/>', {class: 'dimension-confirm', type:'submit', value:'set dimensions'})
-						rezf.append(rezw, $('<span/>', {class: 'dim-xx'}).text('x'), rezh, rezz)
+						var minput = function(f, li){
+							var a = $('<form/>', f)
+							li.forEach(function(e, k){
+								a.append($('<input/>', e))
+							})
+							return a
+						}
+						
+						var rez = minput({class: 'dimension-input'}, [
+							{class: 'dimension-w-input', type: 'number', min: '0', max: '4096'},
+							{class: 'dimension-h-input', type: 'number', min: '0', max: '4096'},
+							{class: 'dimension-confirm', type:'submit', value:'set dimensions'}
+						])
+						var con = minput({class: 'connection-input knob-thing'}, [
+							{class: 'con-status', type: 'checkbox'},
+						])
+						var priv = minput({class: 'private-input knob-thing'}, [
+							{class: 'private-status', type: 'checkbox'},
+						])
+						
 				
 						var toprow = $('<div/>', {class:'setting-top-row'}),
 							middlerow = $('<div/>', {class: 'setting-middle-row'}),
 							bottomrow = $('<div/>', {class: 'setting-bottom-row'})
 						
-						bottomrow.append(dwnbtn, savebtn, conbtn, exitbtn)
-						middlerow.append(rezf)
+						bottomrow.append(dwnbtn, savebtn, exitbtn)
+						middlerow.append(rez, con, priv)
 						
 					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow, middlerow, bottomrow)
-				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'})).append(panel)
-			oqstatus.append(oqstatus_brush).append(oqstatus_message).append(oqstatus_internet);
+				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'}), panel)
+			oqstatus.append(oqstatus_brush, oqstatus_message, oqstatus_internet);
 			
 			var info = $('<div/>', {class: 'gui visible'})
 				var cspinner = $('<div class="color-spinner overlay-piece"></div>');

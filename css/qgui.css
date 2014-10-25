@@ -348,10 +348,13 @@
 	flex-grow:1;
 	flex-direction:column;
 }
-form.dimension-input{
+.setting-middle-row form{
 	flex-basis: 36px;
 	background: linear-gradient(#DADADA, #D3D3D3);
 	padding:4px 0px;
+	margin-bottom:8px;
+	z-index:5;
+	position:relative;
 }
 .setting-middle-row .dimension-input input{
 	font-size:26px;
@@ -364,16 +367,67 @@ form.dimension-input input[type="number"]{
 	margin: 0 10px;
 }
 
-span.dim-xx{
-	font-size:18px;
-	color: rgb(89, 86, 86);
-}
 .setting-middle-row form input[type="submit"]{
 	float:right;
 	font-size:15px;
 	font-weight:100;
 	padding:8px;
 	margin-right:12px;
+}
+
+form.knob-thing:after{
+	content:attr(data-label);
+	position:absolute;
+	top:0;left:0;right:0;bottom:0;
+	text-align:right;
+	padding:10px;
+	font-size:16px;
+	pointer-events: none;
+}
+form.knob-thing input[type=checkbox]:before,
+form.knob-thing input[type=checkbox]:after,
+form.knob-thing input[type=checkbox]:checked:after{
+	content:"";
+	position:absolute;
+	visibility: visible;
+	border-radius:8px;
+}
+form.knob-thing input[type=checkbox]:before{
+	top:0; left:0; bottom:0; right:0;
+	background: rgb(195, 169, 169);
+	box-shadow: 0 0 16px 3px rgba(2, 2, 2, 0.15) inset, 0 0 0px 1px rgb(134, 93, 93);
+}
+form.knob-thing input[type=checkbox]:after{
+	content:"\2A2F";
+	font-size:15px;
+	padding-top:4px;
+	text-align:center;
+	top:0; bottom:0; left:0;
+	width:50%;
+	background: rgb(231, 237, 228);
+	border-top-right-radius:0;
+	border-bottom-right-radius:0;
+	transition:all 100ms steps(15);
+	transition-property:left, transform;
+}
+form.knob-thing input[type=checkbox]:checked:after{
+	background: rgb(208, 240, 193);
+	content:"\2713";
+	border-top-left-radius:0;
+	border-bottom-left-radius:0;
+	left:100%;
+	transform:translateX(-100%);
+}
+form.knob-thing input[type=checkbox]{
+	position:relative;
+	visibility: hidden;
+	margin:0 auto;
+	padding:0;
+	
+	margin-left:12px;
+	width:120px;
+	margin-top:6px;
+	height:24px;
 }
 
 
