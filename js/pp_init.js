@@ -21,13 +21,13 @@ if(manifest != undefined){
 }
 
 
-var removeInit = function(){
-    $('#alert-message').remove();
-    $('body').removeClass('loading');
-    initParupaint('test');
-}
-
 $(function(){
+	console.log('pp_init.js')
+	var removeInit = function(){
+		$('#alert-message').remove();
+		$('body').removeClass('loading');
+		initParupaint('test');
+	}
 	if(typeof manifest != 'undefined' || (typeof chrome == 'undefined' || typeof chrome.hid == 'undefined')) {
 		// non chrome browser
 		removeInit()

@@ -1,9 +1,8 @@
 
-var mouseMoveTimer = null
-var ignoreGui = false;
+var canvasEvents = function(r, rs){
+	var mouseMoveTimer = null, ignoreGui = false;
+	console.log('Creating canvas events')
 
-var updateCallbacks = function(){
-	
 	$('#mouse-pool').sevent(function(e, data){
 		// the kind of stuff that happens when the canvas
 		// is focused and _should_ be focused (drawing, etc...)
@@ -29,8 +28,8 @@ var updateCallbacks = function(){
 				if(dist > (drawing ? 2 : 15)){
 					cursor.css({left: data.x, top:data.y});
 					if(!drawing){
-						if(roomConnection){
-							roomConnection.socket.emit('d', {x: Brush.mx, y: Brush.my, d: false})
+						if(isConnected()){
+							rs.socket.emit('d', {x: Brush.mx, y: Brush.my, d: false})
 						}
 					}
 				}
@@ -71,8 +70,8 @@ var updateCallbacks = function(){
 
 					}
 				}
-				if(roomConnection){
-					roomConnection.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
+				if(isConnected()){
+					rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
 				}
 				drawCanvasLine(null, nx1, ny1, Brush.mx, Brush.my, c, s)
 			}
@@ -88,8 +87,8 @@ var updateCallbacks = function(){
 			}
 			else if(data.button == 1){
 				$('.canvas-cursor.cursor-self').addClass('drawing')
-				if(roomConnection){
-					roomConnection.socket.emit('d', {d: false, l: $('canvas.focused').data('layer'), f: $('canvas.focused').data('frame')})
+				if(isConnected()){
+					rs.socket.emit('d', {d: false, l: $('canvas.focused').data('layer'), f: $('canvas.focused').data('frame')})
 				}
 			}
 		}else if(e == 'mouseup'){
@@ -186,8 +185,8 @@ var updateCallbacks = function(){
 				if(s < 1) s = 1;
 				if(s > 256) s = 256;
 				Brush.size(s).update()
-				if(roomConnection){
-					roomConnection.socket.emit('d', {s: s})
+				if(isConnected()){
+					rs.socket.emit('d', {s: s})
 				}
 			}
 			writeDefaults()
@@ -374,21 +373,22 @@ var updateCallbacks = function(){
 			var file = cd.items[0].getAsFile()
 			console.log(file)
 			
-			/*
-			var reader = new FileReader();
-			reader.onload = function(evt) {
-				return options.callback.call(element, {
-					dataURL: evt.target.result,
-					event: evt,
-					file: file,
-					name: file.name
-				});
-			};
-			reader.readAsDataURL(file);
-			*/
+			
+//				var reader = new FileReader();
+//				reader.onload = function(evt) {
+//					return options.callback.call(element, {
+//						dataURL: evt.target.result,
+//						event: evt,
+//						file: file,
+//						name: file.name
+//					});
+//				};
+//				reader.readAsDataURL(file);
+			
 			return false;
 		}
 	})
+
 }
 
 

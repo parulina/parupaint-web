@@ -1,4 +1,9 @@
 
+var isConnected = function(){
+	return (navigator.onLine && (typeof ROOM != 'undefined' && ROOM.roomSocket.connected() ))
+}
+
+
 var updateInfo = function(){
 	var layer = $('canvas.focused').data('layer'),
 		frame = $('canvas.focused').data('frame'),
@@ -30,7 +35,10 @@ var updateInfo = function(){
 	
 	Brush.update()
 	
-	document.title = 	'[' + room + ']' + 
+	$('.setting-connect').attr('data-label', isConnected() ? 'disconnect' : 'connect')
+	
+	
+	document.title = 	'[' + room + '] ' + 
 						players.length + ' artists' +
 						' ['+width+' × '+height+']'
 }
@@ -88,7 +96,6 @@ $(document).keydown(function(e){
 			{
 				var fperm = {permissions:['alwaysOnTopWindows']}
 				chrome.permissions.contains(fperm, function(e){
-					console.log(e)
 					if(e){
 						if(chrome.app.window.current().isAlwaysOnTop()){
 							console.log('always on top -> false')
@@ -261,7 +268,6 @@ var saveCanvasLocal = function(r){
 				//	d[r].data[l][f].data = ''
 				//	d[r].data[l][f].data = flayer[0].getContext('2d').getImageData(0, 0, flayer[0].width, flayer[0].height).data;
 					d[r].data[l][f].data = flayer[0].toDataURL();
-					console.log()
 				}
 			}
 		}
@@ -305,12 +311,35 @@ var setZoom = function(z){
 	});
 }
 
-roomConnection = null;
 
-onRoom = function(room){
+
+var onRoom = function(room){
 	addMessage('loading parupaint...')
+	console.log('new room:', room)
+	
+	
+	// initialize room socket
+	
+	this.roomSocket = new roomSocketConnection(room)
+	this.canvasCallbacks = new canvasEvents(room, this.roomSocket)
+	var r = this
+		
+	this.toggleNetwork = function(net){
+		if(net == undefined) net = !isConnected()
+		
+		if(!net) 		return this.roomSocket.socket.io.close()
+		else			return this.roomSocket.socket.io.connect()
+	}
 	
 	getStorageKey(null, function(data){
+		
+		var name = data.name || ('unnamed_mofo'+(Date.now().toString().slice(-5)))
+		$('.canvas-cursor.cursor-self').data('name', name)
+		
+		r.roomSocket.query({name: name})
+		
+		
+		
 		
 		if(data.brushDefaults){
 			var def = JSON.parse(data.brushDefaults);
@@ -318,12 +347,6 @@ onRoom = function(room){
 			Brush.update()
 		}
 		updateInterfaceHex(Brush.brush().color)
-		
-		$('.canvas-cursor.cursor-self').data('name', data.name || ('unnamed_mofo'+(Date.now().toString().slice(-5))))
-		roomConnection = new connectRoom(room, 'name=' + $('.canvas-cursor.cursor-self').data('name'))
-		
-		
-		
 		
 		if(data.rooms && data.rooms[room]){
 		   if(data.rooms[room].data){
@@ -360,7 +383,6 @@ onRoom = function(room){
 		
 		
 		// rest init
-		updateCallbacks();
 		updateInfo()
 		updateFrameinfoSlow()
 	});
@@ -372,11 +394,37 @@ onRoom = function(room){
 		clearTimeout(overlayTimeout);
 	});
 	
-	$('.qstatus-message').mousedown(function(e){
-		
-		if(!$('.gui.visible').length){
-			showOverlay(2000)
+	$('.setting-bottom-row > div[type="button"]').click(function(ee){
+		var e = $(ee.target)
+		if(e.is('.setting-quit-btn')){
+			if($(this).hasClass('confirm')){
+				initParupaint()
+			} else {
+				$(this).addClass('confirm')
+				$(this).mouseout(function(){
+					$(this).removeClass('confirm').unbind('mouseout')
+				})
+			}
+		} else if(e.is('.setting-down-img')){
+			downloadCanvas()
+		} else if(e.is('.setting-save-img')){
+			saveCanvasLocal(room)
+		} else if(e.is('.setting-connect')){
+			var a = r.toggleNetwork()
+			if(a)		addMessage('Connecting...')
+			else		addMessage('Disconnecting.')
+			updateInfo()
 		}
+	})
+	
+	
+	
+	
+	
+	
+	
+	$('.qstatus-message').mousedown(function(e){
+		showOverlay(2000)
 	})
 	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
@@ -390,19 +438,6 @@ onRoom = function(room){
 		
 	})
 	
-	$('.setting-quit-btn').click(function(){
-		if($(this).hasClass('confirm')){
-			initParupaint()
-		} else {
-			$(this).addClass('confirm')
-			$(this).mouseout(function(){
-				$(this).removeClass('confirm').unbind('mouseout')
-			})
-		}
-	})
-	$('.setting-down-img').click(function(){
-		downloadCanvas()
-	})
 	$('form.dimension-input .dimension-confirm').click(function(){
 		var w = $(this).parent().children('.dimension-w-input').val(),
 			h = $(this).parent().children('.dimension-h-input').val()
@@ -410,9 +445,11 @@ onRoom = function(room){
 		saveCanvasLocal(room)
 	})
 	
-	$('.flayer-list').bind('mousewheel', function(e){
+	$('.flayer-list').bind('mousewheel', function(e, d){
 		if($('.flayer-info-layer').has($(e.target)).length){
 			//is on layer
+			var n = (d > 0) || -1
+			advanceCanvas(null, n)
 		}else {
 			this.scrollLeft -= (e.originalEvent.wheelDelta)
 		}

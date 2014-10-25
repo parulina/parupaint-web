@@ -2,7 +2,7 @@
 
 
 
-var connectRoom = function(r, q){
+var roomSocketConnection = function(r){
 	if(!r) return false
 	
 	
@@ -41,6 +41,14 @@ var connectRoom = function(r, q){
 	this.connected = function(){
 		return this.socket.connected
 	}
+	this.qq = {room: r}
+	this.query = function(q){
+			console.log(this.qq, q)
+		if(typeof q == "object"){
+			this.socket.io.opts.query = $.param($.extend(this.qq, q))
+		}
+		return this.qq
+	}
 	
 	
 	
@@ -48,8 +56,12 @@ var connectRoom = function(r, q){
 	
 	
 	var pthis = this
-	console.log('Connecting to socket', ur)
-	this.socket = io.connect(url, {query: 'room=' + r + '&' + q, reconnection:false});
+	this.socket = io.connect(url, {
+		query: $.param(this.qq),
+		forceNew: true,
+		autoConnect: false
+	})
+	
 
 	
 	this.socket.on('connect', function(c){
@@ -84,7 +96,6 @@ var connectRoom = function(r, q){
 		
 		pthis.reload(function(){
 			updateFrameinfoSlow()
-			updateCallbacks()
 			updateInfo()
 		})
 		
