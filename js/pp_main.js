@@ -290,6 +290,7 @@ initParupaint = function(room){
 				
 						var exitbtn = $('<div/>', {tabindex:'3',type:'button', class:'setting-quit-btn', 'data-label':'quit'}),
 							dwnbtn = $('<div/>', {type:'button', class:'setting-down-img', 'data-label':'download image'}),
+							rldbtn = $('<div/>', {type:'button', class:'setting-reload-img multi-only', 'data-label':'reload'}),
 							savebtn = $('<div/>', {type:'button', class:'setting-save-img', 'data-label':'save'})
 						
 						var minput = function(f, li){
@@ -319,7 +320,7 @@ initParupaint = function(room){
 							middlerow = $('<div/>', {class: 'setting-middle-row'}),
 							bottomrow = $('<div/>', {class: 'setting-bottom-row'})
 						
-						bottomrow.append(dwnbtn, savebtn, exitbtn)
+						bottomrow.append(dwnbtn, rldbtn, savebtn, exitbtn)
 						middlerow.append(con, priv, rez)
 						
 					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow, middlerow, bottomrow)

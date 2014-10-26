@@ -440,6 +440,10 @@ var onRoom = function(room){
 			downloadCanvas()
 		} else if(e.is('.setting-save-img')){
 			saveCanvasLocal(room)
+		} else if(e.is('.setting-reload-img')){
+			ROOM.roomSocket.reload(function(){
+				updateInfo()
+			})
 		}
 	})
 	
