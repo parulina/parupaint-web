@@ -5,6 +5,13 @@ var isSocket = function(){
 var isConnected = function(){
 	return (navigator.onLine && (isSocket() && ROOM.roomSocket.connected() ))
 }
+var isAdmin = function(){
+	return (navigator.onLine && (isSocket() && ROOM.roomSocket.isAdmin() ))
+}
+
+var isPrivate = function(){
+	return (navigator.onLine && (isSocket() && ROOM.roomSocket.private() ))
+}
 
 
 var updateInfo = function(){
@@ -52,7 +59,14 @@ var updateInfo = function(){
 		
 		$('input.con-status').get(0).checked = ROOM.roomSocket.socket.connected
 		$('body').toggleClass('connected', ROOM.roomSocket.socket.connected)
+		
+		
+		
+		$('body').toggleClass('is-admin', isAdmin()) //if i'm admin, put the body to admin mode. yass
+		$('body').toggleClass('is-private', isPrivate())
+		$('input.private-status').get(0).checked = isPrivate()
 	}
+	
 	
 	
 	document.title = 	'[' + room + '] ' + 
@@ -428,9 +442,17 @@ var onRoom = function(room){
 			saveCanvasLocal(room)
 		}
 	})
+	
+	
 	$('input.con-status').change(function(e){
 		var c = $(e.target).is(':checked')
 		r.toggleNetwork(c)
+	})
+	$('input.private-status').change(function(e){
+		var c = $(e.target).is(':checked')
+		if(isAdmin()){
+			ROOM.roomSocket.socket.emit('rs', {private: c})
+		}
 	})
 	
 	

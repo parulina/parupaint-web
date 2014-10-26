@@ -195,6 +195,13 @@
 	z-index: -1;
 }
 
+body.connected.is-admin .qstatus-message:before{
+	content:"\2726 " attr(data-label);
+}
+body.connected.is-private .qstatus-message:before{
+	content:"\2726 " attr(data-label) " (private)";
+}
+
 
 .qstatus-brush:after{
 	right:0;

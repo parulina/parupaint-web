@@ -8,7 +8,10 @@ var roomSocketConnection = function(r){
 	
 	var ur = url + '/' + r
 	
-	var id = null
+	this.id = null
+	this.ad = null
+	this.pp = false
+	
 	this.reload = function(callback){
 		var cs = $('.canvas-pool canvas'),
 			ii = cs.length
@@ -41,9 +44,25 @@ var roomSocketConnection = function(r){
 	this.connected = function(){
 		return this.socket.connected
 	}
+	this.private = function(q){
+		if(typeof q != "undefined"){
+			this.pp = q
+		}
+		return (this.pp)
+	}
+	this.admin = function(q){
+		if(typeof q != "undefined"){
+			this.ad = q
+		}
+		return (this.ad)
+	}
+	this.isAdmin = function(){
+		return (this.ad == this.id)
+	}
+	
+	
 	this.qq = {room: r}
 	this.query = function(q){
-			console.log(this.qq, q)
 		if(typeof q == "object"){
 			this.socket.io.opts.query = $.param($.extend(this.qq, q))
 		}
@@ -79,7 +98,7 @@ var roomSocketConnection = function(r){
 		addMessage('Reconnection error -- ' + d.message)
 		updateInfo()
 	}).on('disconnect', function(c){
-		
+		console.log('disconnect', c)
 		if(c == pthis.sid() || c == 'forced close'){
 			// i disconnected - remove everyone >:D
 			pthis.id = null
@@ -92,14 +111,19 @@ var roomSocketConnection = function(r){
 		updateInfo()
 		
 		
-	}).on('admin', function(d){
-		console.log(d)
-		$('body').toggleClass('is-admin', (d.id == pthis.id)) //if i'm admin, put the body to admin mode. yass
+	}).on('rs', function(d){
+		if(d.admin != undefined) pthis.admin(d.admin)
+		if(d.private != undefined) pthis.private(d.private)
+		
+		
+		updateInfo()
 		
 	}).on('peer', function(d){
-		var e = $('<div/>', {class: 'canvas-cursor', id:d.id, 'data-name': d.name}).css({left: d.x, top: d.y}).data('x', d.x).data('y', d.y)
-		if(d.s != undefined) Brush.size(d.s, e)
-		$('#mouse-pool').append(e)
+		if(d.id != pthis.id){
+			var e = $('<div/>', {class: 'canvas-cursor', id:d.id, 'data-name': d.name}).css({left: d.x, top: d.y}).data('x', d.x).data('y', d.y)
+			if(d.s != undefined) Brush.size(d.s, e)
+			$('#mouse-pool').append(e)
+		}
 		
 	}).on('canvas', function(d){
 		console.log(d.layers)
