@@ -121,19 +121,11 @@ html{
 	
 	overflow:hidden;
 }
-/*
-body:before{
-	content:" ";
-	position:absolute;
-	background-color:black;
-	top:0; left:0; 
-	height: 100%;
-	width:24px;
-	background:url('ruler-side.png');
-	box-sizing: border-box;
-}*/
+body.canvas.connected{
+	background-color: #DAE2D7;
+}
 body.canvas{
-	background-color:#ddd;
+	background-color: #D7D7D7;
 	transition:none;
 	display:inline-block;
 	padding: 60px;

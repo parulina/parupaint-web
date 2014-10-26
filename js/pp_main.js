@@ -300,16 +300,18 @@ initParupaint = function(room){
 							return a
 						}
 						
-						var rez = minput({class: 'dimension-input'}, [
+						var rez = minput({class: 'dimension-input admin-only'}, [
+							{class: 'dimension-confirm', type:'submit', value:'Set dimensions'},
 							{class: 'dimension-w-input', type: 'number', min: '0', max: '4096'},
-							{class: 'dimension-h-input', type: 'number', min: '0', max: '4096'},
-							{class: 'dimension-confirm', type:'submit', value:'set dimensions'}
+							{class: 'dimension-h-input', type: 'number', min: '0', max: '4096'}
 						])
+						
+						
 						var con = minput({class: 'connection-input knob-thing'}, [
-							{class: 'con-status', type: 'checkbox'},
+							{class: 'con-status', type: 'checkbox'}
 						])
-						var priv = minput({class: 'private-input knob-thing'}, [
-							{class: 'private-status', type: 'checkbox'},
+						var priv = minput({class: 'private-input knob-thing multi-only admin-only', 'data-label': 'Private'}, [
+							{class: 'private-status', type: 'checkbox'}
 						])
 						
 				
@@ -318,7 +320,7 @@ initParupaint = function(room){
 							bottomrow = $('<div/>', {class: 'setting-bottom-row'})
 						
 						bottomrow.append(dwnbtn, savebtn, exitbtn)
-						middlerow.append(rez, con, priv)
+						middlerow.append(con, priv, rez)
 						
 					var panel = $('<div/>', {class: 'qstatus-panel setting-panel'}).append(toprow, middlerow, bottomrow)
 				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'}), panel)

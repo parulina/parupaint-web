@@ -315,6 +315,7 @@
 	display:flex;
 	flex-direction:column;
 	justify-content:space-between;
+	overflow: hidden;
 }
 
 .qstatus-brush.panel-open .player-list{
@@ -347,42 +348,99 @@
 .setting-middle-row{
 	flex-grow:1;
 	flex-direction:column;
+	overflow: hidden;
+}
+
+body form.multi-only{
+	display:none;
+}
+@-webkit-keyframes setting-appear{
+	0% {opacity:0; transform:translateY(-10%);}
+	100% {opacity:1; transform:translateY(0);}
+}
+body.connected form.multi-only{
+	display: flex;
 }
 .setting-middle-row form{
+	
 	flex-basis: 36px;
 	background: linear-gradient(#DADADA, #D3D3D3);
-	padding:4px 0px;
+	padding: 0px 16px;
 	margin-bottom:8px;
 	z-index:5;
 	position:relative;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	box-shadow: 0 0 0px 1px rgb(216, 216, 216);
+	-webkit-animation:setting-appear 500ms normal;
 }
 .setting-middle-row .dimension-input input{
-	font-size:26px;
+	font-size: 17px;
 	margin:0;
-	padding:0;
+	padding: 2px;
 	text-align:center;
+	border: none;
 }
+form.dimension-input .dimension-input-container{
+	height:28px;
+	position: relative;
+	margin: 0 auto;
+	width: 180px;
+}
+
+
+body.connected.is-admin form.admin-only,
+body form.admin-only{
+	display: flex;
+}
+body.connected form.admin-only{
+	display:none;
+}
+
+
+form.dimension-input .dimension-w-input,
+form.dimension-input .dimension-h-input{
+}
+form.dimension-input .dimension-h-input{
+    margin-left: 4px !important;
+}
+
 form.dimension-input input[type="number"]{
-	width:90px;
-	margin: 0 10px;
+	margin: 0;
+	text-align: left;
+	margin-left: auto;
+	border-radius: 4px;
+	padding: 2px 6px;
+}
+.setting-middle-row form input[type="submit"]:active,
+.setting-middle-row form input[type="checkbox"]:active:after{
+	background: rgb(221, 226, 219);
 }
 
 .setting-middle-row form input[type="submit"]{
-	float:right;
-	font-size:15px;
-	font-weight:100;
-	padding:8px;
-	margin-right:12px;
+	padding: 0px 4px;
+	background: rgb(231, 237, 228);
+	font-size: 16px;
+	border: 1px solid rgb(203, 169, 169);
+	border-radius: 2px;
+	outline:none;
+	color: rgb(113, 112, 112);
+	border-top: none;
+	border-bottom: none;
 }
 
 form.knob-thing:after{
 	content:attr(data-label);
 	position:absolute;
 	top:0;left:0;right:0;bottom:0;
-	text-align:right;
-	padding:10px;
+	text-align: left;
+	padding: 8px 16px;
 	font-size:16px;
 	pointer-events: none;
+	color: rgb(165, 157, 157);
+	margin-left: 4px;
 }
 form.knob-thing input[type=checkbox]:before,
 form.knob-thing input[type=checkbox]:after,
@@ -424,10 +482,9 @@ form.knob-thing input[type=checkbox]{
 	margin:0 auto;
 	padding:0;
 	
-	margin-left:12px;
 	width:120px;
-	margin-top:6px;
 	height:24px;
+	margin-right: 0;
 }
 
 
@@ -445,6 +502,7 @@ form.knob-thing input[type=checkbox]{
 	border:none;
 	position:relative;
 	background: rgb(192, 190, 164);
+	border-top: 1px solid rgb(174, 170, 170);
 }
 .setting-panel div[type="button"][data-label]:before{
 	content:attr(data-label);

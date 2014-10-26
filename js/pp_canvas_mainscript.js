@@ -1,6 +1,9 @@
+var isSocket = function(){
+	return (typeof ROOM != 'undefined' && ROOM.roomSocket.socket)
+}
 
 var isConnected = function(){
-	return (navigator.onLine && (typeof ROOM != 'undefined' && ROOM.roomSocket.connected() ))
+	return (navigator.onLine && (isSocket() && ROOM.roomSocket.connected() ))
 }
 
 
@@ -35,7 +38,21 @@ var updateInfo = function(){
 	
 	Brush.update()
 	
-	$('form.connection-input').toggleClass('enable', isConnected()).attr('data-label', isConnected() ? 'connected' : 'disconnected')
+	if(isSocket()){
+		var msg = ROOM.roomSocket.socket.connected ? 'Connected' : 'Disconnected'
+		
+		if(ROOM.roomSocket.socket.io.reconnecting){
+			var a = ROOM.roomSocket.socket.io.attempts,
+				am = ROOM.roomSocket.socket.io.reconnectionAttempts()
+			
+			msg = 'Reconnecting ['+a+'/'+am+']...'
+		}
+		
+		$('form.connection-input').toggleClass('enable', isConnected()).attr('data-label', msg)
+		
+		$('input.con-status').get(0).checked = ROOM.roomSocket.socket.connected
+		$('body').toggleClass('connected', ROOM.roomSocket.socket.connected)
+	}
 	
 	
 	document.title = 	'[' + room + '] ' + 
@@ -327,7 +344,7 @@ var onRoom = function(room){
 	this.toggleNetwork = function(net){
 		if(net == undefined) net = !isConnected()
 		
-		if(!net) 		return this.roomSocket.socket.io.close()
+		if(!net) 		return this.roomSocket.socket.io.disconnect()
 		else			return this.roomSocket.socket.io.connect()
 	}
 	

@@ -59,7 +59,8 @@ var roomSocketConnection = function(r){
 	this.socket = io.connect(url, {
 		query: $.param(this.qq),
 		forceNew: true,
-		autoConnect: false
+		autoConnect: false,
+		reconnectionAttempts:5
 	})
 	
 
@@ -69,23 +70,31 @@ var roomSocketConnection = function(r){
 		console.log('Connected as', pthis.id)
 		
 	}).on('connect_error', function(d){
-		addMessage('Connection failed -- ' + d.message)
-		pthis.socket.disconnect()
+		addMessage('Connection error -- ' + d.message)
+		updateInfo()
+	}).on('reconnect_failed', function(d){
+		addMessage('Reconnection failed.')
+		updateInfo()
+	}).on('reconnect_error', function(d){
+		addMessage('Reconnection error -- ' + d.message)
+		updateInfo()
 	}).on('disconnect', function(c){
 		
-		if(c == pthis.sid()){
+		if(c == pthis.sid() || c == 'forced close'){
 			// i disconnected - remove everyone >:D
 			pthis.id = null
 			$('.canvas-cursor').not('.cursor-self').remove()
+			$('body').removeClass('connected is-admin')
 			
-			updateInfo()
 		} else {
 			$('.canvas-cursor#' + c).remove()
 		}
+		updateInfo()
 		
 		
 	}).on('admin', function(d){
 		console.log(d)
+		$('body').toggleClass('is-admin', (d.id == pthis.id)) //if i'm admin, put the body to admin mode. yass
 		
 	}).on('peer', function(d){
 		var e = $('<div/>', {class: 'canvas-cursor', id:d.id, 'data-name': d.name}).css({left: d.x, top: d.y}).data('x', d.x).data('y', d.y)
