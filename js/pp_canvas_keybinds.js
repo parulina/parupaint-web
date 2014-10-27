@@ -97,6 +97,10 @@ var canvasEvents = function(r, rs){
 				// fixme: should fix this...
 				// saveCanvasLocal(room);
 			}
+		}else if(e == 'mouseout'){
+			if(isConnected()){
+				rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: false})
+			}
 		}
 	}).bind('contextmenu', function(e) {
 			return false;

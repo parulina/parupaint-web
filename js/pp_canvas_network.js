@@ -86,6 +86,7 @@ var roomSocketConnection = function(r){
 	
 	this.socket.on('connect', function(c){
 		pthis.sid(pthis.socket.io.engine.id)
+		$('.canvas-cursor').not('.cursor-self').remove() //clear out just in case
 		console.log('Connected as', pthis.id)
 		
 	}).on('connect_error', function(d){
@@ -157,7 +158,7 @@ var roomSocketConnection = function(r){
 				if(d.f != undefined) {e.data('frame', d.f), f = d.f}
 				
 				if(d.d != undefined && d.d != e.hasClass('drawing')){
-					//if(d.d) { x = d.x, y = d.y } // v0v
+					if(d.d) { x = d.x, y = d.y } // v0v
 					e.toggleClass('drawing', d.d)
 				}
 				

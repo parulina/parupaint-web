@@ -142,6 +142,16 @@ jQuery.fn.extend({
 					return callback('mousemove', {button: mb, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, xclient:e.clientX, yclient:e.clientY, target: e.target});
 
 				}
+			}).mouseenter(function(e){
+				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
+				
+				if(callback){
+					if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
+					if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
+					mb = e.which
+					return callback('mouseenter', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
+				}
 			}).mouseout(function(e){
 				if(callback){
 					tmouse.oldx = undefined;
@@ -149,6 +159,8 @@ jQuery.fn.extend({
 					return callback('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 				}
 			}).mousedown(function(e){
+				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
 				if(callback){
 					tmouse.oldx = e.offsetX;
 					tmouse.oldy = e.offsetY;
@@ -156,6 +168,8 @@ jQuery.fn.extend({
 					return callback('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 				}
 			}).mouseup(function(e){
+				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
 				if(callback){
 					tmouse.oldx = e.offsetX;
 					tmouse.oldy = e.offsetY;
