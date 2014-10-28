@@ -33,7 +33,9 @@ var updateFrameinfoSlow = function(){
 	}
 }
 
+var updateRoomsTimer = null
 var updateRooms = function(){
+	if(typeof updateRoomsTimer == 'null') return false
 	var jj = $.ajax(url + '/info').done(function(data2) {
 		
 		// get all current room children
@@ -81,7 +83,7 @@ var updateRooms = function(){
 		$('.room-counter').html(ll + ' room'+(ll == 1 ? '' : 's')+' active');
 
 		rest.remove();
-		setTimeout(updateRooms, 1000);
+		updateRoomsTimer = setTimeout(updateRooms, 3000);
 	}).fail(function(err){
 		console.log(err);
 		$('.room-counter').html('Error contacting server ('+err+').');
@@ -207,7 +209,10 @@ jQuery.fn.extend({
 initParupaint = function(room){
 	document.title = 'Starting up...';
 	
-	clearTimeout(updateRooms);
+	clearTimeout(updateRoomsTimer), updateRoomsTimer = null
+	if(typeof ROOM != 'undefined') delete ROOM
+	
+	$('body').removeClass('room canvas main').html('')
 	
 	if(!room){
 		document.title = '-- parupaint home --';
@@ -229,25 +234,31 @@ initParupaint = function(room){
 		
 		var infoheader = $('<div class="room-info-header"></div>').append(settings).append(title).append(header);
 		
-		chrome.permissions.contains(hidperm, function(e){
+		getStorageKey('name', function(d){
+			if(d && d.name){
+				$('.main-setting-panel.set-name input').val(d.name)
+			}
+		})
+		
+		chrome.permissions.contains({permissions:['hid']}, function(e){
 			if(e){
 				$('input.set-tablet').addClass('enabled')
 			}
 		})
 		
-		$('body').removeClass('room canvas').addClass('main').html('');
+		$('body').addClass('main')
 		$('body').append(infoheader).append(roomstatus).append(container);
 		
 		$('input.set-tablet').click(function(e){
 			
 			
-			chrome.permissions.contains(hidperm, function(e){
+			chrome.permissions.contains({permissions:['hid']}, function(e){
 				if(e){
-					chrome.permissions.remove(hidperm, function(){
+					chrome.permissions.remove({permissions:['hid']}, function(){
 						$('input.set-tablet').removeClass('enabled')
 					})
 				} else {
-					chrome.permissions.request(hidperm, function(r){
+					chrome.permissions.request({permissions:['hid']}, function(r){
 						if(r){
 							$('input.set-tablet').addClass('enabled')
 						}
@@ -281,7 +292,7 @@ initParupaint = function(room){
 			}
 		});
 		
-		setTimeout(updateRooms, 1000);
+		updateRooms()
 	} else {
 		
 		
