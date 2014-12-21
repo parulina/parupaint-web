@@ -128,7 +128,12 @@ var roomSocketConnection = function(r){
 		
 	}).on('canvas', function(d){
 		console.log(d.layers)
-		initCanvas(d.width, d.height, d.layers.length, d.layers)
+		if(d.layers != undefined){ // create new
+			initCanvas(d.width, d.height, d.layers.length, d.layers)
+		} else {
+			initCanvas(d.width, d.height)
+		}
+		
 		
 		pthis.reload(function(){
 			updateFrameinfoSlow()

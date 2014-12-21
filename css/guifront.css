@@ -31,6 +31,14 @@
 	0% {transform: translateY(100%); opacity:0;}
 	100% {transform: translateY(0); opacity:100;}
 }
+@-moz-keyframes color-show-moz {
+	0% {transform: translateY(-100%); opacity:0;}
+	100% {transform: translateY(0); opacity:100;}
+}
+@-moz-keyframes color-show-bottom-moz {
+	0% {transform: translateY(100%); opacity:0;}
+	100% {transform: translateY(0); opacity:100;}
+}
 
 
 .chat-box.overlay-piece{
@@ -40,6 +48,7 @@
 	top:0;
 	right:0;
 	-webkit-animation:color-show 170ms ease-out;
+	-moz-animation:color-show-moz 170ms ease-out;
 }
 
 .color-spinner.overlay-piece{
@@ -49,6 +58,7 @@
 	left:0;
 	padding:0 2px 2px 0;
 	-webkit-animation:color-show 170ms ease-out;
+	-moz-animation:color-show-moz 170ms ease-out;
 	
 }
 .flayer-list-container.overlay-piece{
@@ -278,7 +288,7 @@
 	margin-top:-1px;
 	background-color:white;
 	border:1px solid black;
-	-webkit-transform-origin: 0 50%;
+	transform-origin: 0 50%;
 	pointer-events: none;
 	z-index: -2;
 	border-radius:2px;

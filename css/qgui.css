@@ -449,20 +449,20 @@ form.knob-thing:after{
 	color: rgb(165, 157, 157);
 	margin-left: 4px;
 }
-form.knob-thing input[type=checkbox]:before,
-form.knob-thing input[type=checkbox]:after,
-form.knob-thing input[type=checkbox]:checked:after{
+form.knob-thing input[type=checkbox]+label:before,
+form.knob-thing input[type=checkbox]+label:after,
+form.knob-thing input[type=checkbox]+label:checked:after{
 	content:"";
 	position:absolute;
 	visibility: visible;
 	border-radius:8px;
 }
-form.knob-thing input[type=checkbox]:before{
+form.knob-thing input[type=checkbox]+label:before{
 	top:0; left:0; bottom:0; right:0;
 	background: rgb(195, 169, 169);
 	box-shadow: 0 0 16px 3px rgba(2, 2, 2, 0.15) inset, 0 0 0px 1px rgb(134, 93, 93);
 }
-form.knob-thing input[type=checkbox]:after{
+form.knob-thing input[type=checkbox]+label:after{
 	content:"\2A2F";
 	font-size:15px;
 	padding-top:4px;
@@ -475,15 +475,16 @@ form.knob-thing input[type=checkbox]:after{
 	transition:all 100ms steps(15);
 	transition-property:left, transform;
 }
-form.knob-thing input[type=checkbox]:checked:after{
+form.knob-thing input[type=checkbox]:checked+label:after{
 	background: rgb(208, 240, 193);
 	content:"\2713";
+	border-radius:8px;
 	border-top-left-radius:0;
 	border-bottom-left-radius:0;
 	left:100%;
 	transform:translateX(-100%);
 }
-form.knob-thing input[type=checkbox]{
+form.knob-thing input[type=checkbox]+label{
 	position:relative;
 	visibility: hidden;
 	margin:0 auto;
@@ -494,7 +495,9 @@ form.knob-thing input[type=checkbox]{
 	margin-right: 0;
 }
 
-
+form.knob-thing input[type=checkbox]{
+	display:none;
+}
 
 .setting-bottom-row{
 	display:flex;

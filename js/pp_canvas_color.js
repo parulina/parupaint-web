@@ -117,7 +117,8 @@ var getColorSliderHsl = function(){
 		lit = $('.hsl-select-pick .light-pick').data('value'),
 		aph = $('.hsl-select-pick .alpha-pick').data('value')
 	
-	return {h: hue == undefined ? 0 : hue, s:sat == undefined ? 0.5 : sat, l:lit == undefined ? 0.5 : lit, a:aph == undefined ? 1 : aph}
+	
+	return {h: isNaN(hue) ? 0 : hue, s: isNaN(sat) ? 0.5 : sat, l: isNaN(lit) ? 0.5 : lit, a: isNaN(aph) ? 1 : aph}
 	
 }
 
@@ -181,13 +182,17 @@ var setColorSliderRgb = function(r, g, b, a){
 
 
 var setColorSliderHsl = function(h, s, l, a){
-	//console.log('setColorSliderHsl', h, s, l, a)
+	console.log('setColorSliderHsl', h, s, l, a)
 	if(h != undefined || h != null){
-		$('.hsl-select-pick .hue-pick').data('value', h).children('.color-selector').css('-webkit-transform', 'rotate('+h*360+'deg)')
+		$('.hsl-select-pick .hue-pick').data('value', h).children('.color-selector').css('transform', 'rotate('+h*360+'deg)')
 		var rgb = hue2rgb(h*360)
 		var rgbstr = 'rgb('+rgb.r+', '+rgb.g+', '+rgb.b+')'
-		$('.hsl-select-pick .light-pick').css({background: '-webkit-linear-gradient(white 0%, '+rgbstr+' 50%, black 100%)'})
-		$('.hsl-select-pick .saturation-pick').css({background: '-webkit-linear-gradient(0deg, hsl('+h*360+', 0%, 50%), hsl('+h*360+', 100%, 50%))'})
+		$('.hsl-select-pick .light-pick').css({
+			background: 'linear-gradient(white 0%, '+rgbstr+' 50%, black 100%)'
+		})
+		$('.hsl-select-pick .saturation-pick').css({
+			background: 'linear-gradient(90deg, hsl('+h*360+', 0%, 50%), hsl('+h*360+', 100%, 50%))'
+		})
 	}
 	if(s != undefined || s != null){
 		$('.hsl-select-pick .saturation-pick').data('value', s).children('.color-selector').css('left', (s*100)+'%')
@@ -233,7 +238,9 @@ colorScript = function(onchange){
 	})
 	
 	$('.color-spinner .hue-pick').bind('mousemove mousedown', function(e){
-		if(e.which == 1 && e.target == this){
+		
+		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
+		if(b == 1 && e.target == this){
 			var dx = (e.offsetX - ($(this).width()/2)),
 				dy = (e.offsetY - ($(this).height()/2))
 			
@@ -250,7 +257,9 @@ colorScript = function(onchange){
 	
 	
 	$('.color-spinner .light-pick').bind('mousemove mousedown', function(e){
-		if(e.which == 1){
+		
+		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
+		if(b == 1){
 			
 			var light = (1.0-(e.offsetY / $(this).height()))
 			setColorSliderHsl(null, null, light)
@@ -261,12 +270,14 @@ colorScript = function(onchange){
 	$('.hsl-select-pick').children().bind('mousewheel DOMMouseScroll', function(e){
         
 		var wd = e.originalEvent.wheelDelta / 100;
-		var ed = e.originalEvent.detail;
+		var ed = e.originalEvent.detail * -1;
+		
+		
 		var w = wd || ed;
 		if(w){
 			var hsl = getColorSliderHsl()
-			
-			var sliderstep = (wd/50)
+			console.log(e.originalEvent.wheelDelta, e.originalEvent.detail)
+			var sliderstep = (w/50)
 			
 			var a = $(e.target)
 			if(a.is('.light-pick')){
@@ -299,7 +310,8 @@ colorScript = function(onchange){
 	
 	
 	$('.color-spinner .alpha-pick').bind('mousemove mousedown', function(e){
-		if(e.which == 1){
+		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
+		if(b == 1){
 			
 			var alpha = (1.0-(e.offsetY / $(this).height()))
 			setColorSliderHsl(null, null, null, alpha)
@@ -309,7 +321,8 @@ colorScript = function(onchange){
 	})
 	
 	$('.color-spinner .saturation-pick').bind('mousemove mousedown', function(e){
-		if(e.which == 1){
+		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
+		if(b == 1){
 			
 			var sat = ((e.offsetX / $(this).width()))
 			setColorSliderHsl(null, sat, null, null)

@@ -4,12 +4,17 @@ console.log('pp_main.js')
 
 
 var loadSqnyaImage = function(url2, callback){
-	var xhr = new XMLHttpRequest();
-	xhr.responseType = 'blob';
-	xhr.onload = function(){
-		callback(window.URL.createObjectURL(xhr.response));
+	if(typeof chrome != "undefined" && typeof chrome.app != "undefined" && typeof chrome.app.runtime != "undefined"){
+		var xhr = new XMLHttpRequest();
+		xhr.responseType = 'blob';
+		xhr.onload = function(){
+			callback(window.URL.createObjectURL(xhr.response));
+		}
+		xhr.open('GET', url2, true); xhr.send();	
+	} else {
+		callback(url2)
 	}
-	xhr.open('GET', url2, true); xhr.send();
+	
 }
 
 
@@ -151,7 +156,7 @@ jQuery.fn.extend({
 				if(callback){
 					if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
 					if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
-					mb = e.which
+					mb = (e.buttons != undefined ? e.buttons : e.which)
 					return callback('mouseenter', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
 				}
 			}).mouseout(function(e){
@@ -189,7 +194,7 @@ jQuery.fn.extend({
 			}).bind('mousewheel DOMMouseScroll', function(e){
 
 				var wd = e.originalEvent.wheelDelta / 100;
-				var ed = e.originalEvent.detail;
+				var ed = e.originalEvent.detail * -1;
 				if(wd || ed) return callback('mousewheel', {scroll: wd || ed, target: e.target})
 
 			}).on('paste', function(e){
@@ -240,11 +245,13 @@ initParupaint = function(room){
 			}
 		})
 		
-		chrome.permissions.contains({permissions:['hid']}, function(e){
-			if(e){
-				$('input.set-tablet').addClass('enabled')
-			}
-		})
+		if(typeof chrome != "undefined" && typeof chrome.permissions != "undefined"){
+			chrome.permissions.contains({permissions:['hid']}, function(e){
+				if(e){
+					$('input.set-tablet').addClass('enabled')
+				}
+			})
+		}
 		
 		$('body').addClass('main')
 		$('body').append(infoheader).append(roomstatus).append(container);
@@ -252,19 +259,21 @@ initParupaint = function(room){
 		$('input.set-tablet').click(function(e){
 			
 			
-			chrome.permissions.contains({permissions:['hid']}, function(e){
-				if(e){
-					chrome.permissions.remove({permissions:['hid']}, function(){
-						$('input.set-tablet').removeClass('enabled')
-					})
-				} else {
-					chrome.permissions.request({permissions:['hid']}, function(r){
-						if(r){
-							$('input.set-tablet').addClass('enabled')
-						}
-					})
-				}
-			})
+			if(typeof chrome != "undefined" && typeof chrome.permissions != "undefined"){
+				chrome.permissions.contains({permissions:['hid']}, function(e){
+					if(e){
+						chrome.permissions.remove({permissions:['hid']}, function(){
+							$('input.set-tablet').removeClass('enabled')
+						})
+					} else {
+						chrome.permissions.request({permissions:['hid']}, function(r){
+							if(r){
+								$('input.set-tablet').addClass('enabled')
+							}
+						})
+					}
+				})
+			}
 		})
 		$('input.clear-settings').click(function(e){
 			
@@ -273,7 +282,8 @@ initParupaint = function(room){
 		
 		$('input.new-room-input').keypress(function(e){
 			if(e.keyCode == 13){
-				chrome.storage.local.get('name', function(d){
+				
+				getStorageKey('name', function(d){
 					if(d && d.name && d.name.length){
 						
 						initParupaint($(e.target).val());
@@ -287,7 +297,7 @@ initParupaint = function(room){
 		});
 		$('input.name-input').keypress(function(e){
 			if(e.keyCode == 13){
-				chrome.storage.local.set({name: $(this).val()})
+				setStorageKey({name: $(this).val()})
 				console.log('set name to: ', $(this).val())
 			}
 		});
@@ -318,10 +328,13 @@ initParupaint = function(room){
 							rldbtn = $('<div/>', {type:'button', class:'setting-reload-img multi-only', 'data-label':'reload'}),
 							savebtn = $('<div/>', {type:'button', class:'setting-save-img', 'data-label':'save'})
 						
+						//note - labels need a working id.
 						var minput = function(f, li){
 							var a = $('<form/>', f)
 							li.forEach(function(e, k){
-								a.append($('<input/>', e))
+								var l = $('<label/>')
+								if(e.id) l.attr('for', e.id)
+								a.append($('<input/>', e)).append(l)
 							})
 							return a
 						}
@@ -334,10 +347,10 @@ initParupaint = function(room){
 						
 						
 						var con = minput({class: 'connection-input knob-thing'}, [
-							{class: 'con-status', type: 'checkbox'}
+							{class: 'con-status', type: 'checkbox', id: 'con-status-id'}
 						])
 						var priv = minput({class: 'private-input knob-thing multi-only admin-only', 'data-label': 'Private'}, [
-							{class: 'private-status', type: 'checkbox'}
+							{class: 'private-status', type: 'checkbox', id: 'private-status-id'}
 						])
 						
 				

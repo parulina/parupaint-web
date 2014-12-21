@@ -416,6 +416,10 @@ var onRoom = function(room){
 		// rest init
 		updateInfo()
 		updateFrameinfoSlow()
+		
+		if(navigator.onLine){
+			//r.toggleNetwork(true)
+		}
 	});
 	
 	
@@ -482,8 +486,15 @@ var onRoom = function(room){
 	$('form.dimension-input .dimension-confirm').click(function(){
 		var w = $(this).parent().children('.dimension-w-input').val(),
 			h = $(this).parent().children('.dimension-h-input').val()
-		initCanvas(w, h)
+		
+		if(isConnected()){
+			ROOM.roomSocket.socket.emit('r', {w: w, h: h})
+		} else {
+			initCanvas(w, h)
+		}
+		
 		saveCanvasLocal(room)
+		
 	})
 	
 	$('.flayer-list').bind('mousewheel', function(e, d){
