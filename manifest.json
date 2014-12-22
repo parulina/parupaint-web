@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 	"name": "parupaint",
-	"version": "0.3.1",
+	"version": "0.3.4",
 	"description":"Paint stuff!",
 	"author":"paru",
 	"short_name":"parupaint",
