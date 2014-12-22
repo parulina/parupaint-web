@@ -202,8 +202,8 @@ var canvasEvents = function(r, rs){
 			
 			
 		} else if(e == 'keydown'){
-			console.log(data.key)
 			if($('input:focus, textarea:focus').length) return true;
+			console.log(data.key)
 
 			switch(data.key){
 					
@@ -344,6 +344,7 @@ var canvasEvents = function(r, rs){
 		} else if(e == 'keyup'){
 			if(data.key == 9)
 			{
+				if($('input:focus').length) return true;
 				Brush.tabdown = false;
 				if(!ignoreGui){
 

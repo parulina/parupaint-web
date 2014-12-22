@@ -147,13 +147,26 @@ input.main-setting-panel:focus{
 input[type=text]{
 	display:block;
 }
+
+
 .new-room-input{
-	box-sizing : border-box;
-	width: 100%;
+	max-width: 250px;
+	font-size:17px;
 }
 input.name-input{
-	width:50%;
+	max-width:200px;
 }
+
+.new-room-input,
+input.name-input{
+    margin: 0 auto;
+    border: 0;
+    padding: 4px;
+    text-align: center;
+}
+
+
+
 .main-setting-panel:before{
 	font-size:12px;
 	display:block;
@@ -200,7 +213,7 @@ input.name-input{
 	clear: both;
 }
 .room-counter{
-	
+	padding:0 15px;
 }
 
 

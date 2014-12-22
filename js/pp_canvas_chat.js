@@ -56,14 +56,14 @@ var addMessage = function(msg, name, time, notify){
 var addChatMessage = function(room, msg, name, time, notify){
 	if(msg){
 		if(!room) room = getRoom()
-		chrome.storage.local.get('rooms', function(d){
+		getStorageKey('rooms', function(d){
 			if(d.length){
 				if(d == undefined) 		d = {};
 				if(d[room] == undefined)	d[room] = {};
 				if(d[room].chatbox == undefined)	d[room].chatbox = [];
 				
 				d[room].chatbox.push({name:name, msg:msg, time:time})
-				chrome.storage.local.set({rooms: d}, failSafe);
+				setStorageKey({rooms: d}, failSafe);
 			}
 			console.log(msg, name, time, notify == undefined ? true : notify)
 			addMessage(msg, name, time, notify == undefined ? true : notify)
@@ -82,7 +82,7 @@ var sendChatMessage = function(msg, room){
 		if(navigator.onLine && isConnected()) //fixme: sockets
 		{
 			//todo
-			roomConnection.socket.emit('chat', {msg: msg, name: name, time: Date.now()})
+			ROOM.roomSocket.socket.emit('chat', {msg: msg, name: name, time: Date.now()})
 			
 		} else {
 			addChatMessage(room, msg, name, new Date().toTimeString().split(' ')[0], false)
@@ -93,7 +93,7 @@ var sendChatMessage = function(msg, room){
 chatScript = function(room){
 	
 	$('textarea.chat-input').keydown(function(e){
-		console.log(e.keyCode)
+		console.log(e.keyCode, e.shiftKey)
 		if(e.keyCode == 13 && !e.shiftKey){
 			sendChatMessage($(this).val())
 			$(this).val('')

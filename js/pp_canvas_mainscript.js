@@ -418,7 +418,7 @@ var onRoom = function(room){
 		updateFrameinfoSlow()
 		
 		if(navigator.onLine){
-			//r.toggleNetwork(true)
+			r.toggleNetwork(true)
 		}
 	});
 	
@@ -433,6 +433,7 @@ var onRoom = function(room){
 		var e = $(ee.target)
 		if(e.is('.setting-quit-btn')){
 			if($(this).hasClass('confirm')){
+				//window.location = '/';
 				initParupaint()
 			} else {
 				$(this).addClass('confirm')
@@ -483,9 +484,9 @@ var onRoom = function(room){
 		
 	})
 	
-	$('form.dimension-input .dimension-confirm').click(function(){
-		var w = $(this).parent().children('.dimension-w-input').val(),
-			h = $(this).parent().children('.dimension-h-input').val()
+	$('form.dimension-input').submit(function(){
+		var w = $(this).children('.dimension-w-input').val(),
+			h = $(this).children('.dimension-h-input').val()
 		
 		if(isConnected()){
 			ROOM.roomSocket.socket.emit('r', {w: w, h: h})
@@ -494,7 +495,7 @@ var onRoom = function(room){
 		}
 		
 		saveCanvasLocal(room)
-		
+		return false;
 	})
 	
 	$('.flayer-list').bind('mousewheel', function(e, d){

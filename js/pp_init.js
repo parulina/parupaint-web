@@ -1,6 +1,6 @@
 // this is for actual working
 
-if(typeof chrome != 'undefined' && typeof chrome.runtime != 'undefined'){
+if(typeof chrome != 'undefined' && typeof chrome.runtime != 'undefined' && typeof chrome.runtime.getManifest != "undefined"){
 	var manifest = chrome.runtime.getManifest();
 }
 
@@ -26,7 +26,7 @@ $(function(){
 	var removeInit = function(){
 		$('#alert-message').remove();
 		$('body').removeClass('loading');
-		initParupaint('test');
+		initParupaint();
 	}
 	if(typeof manifest != 'undefined' || (typeof chrome == 'undefined' || typeof chrome.hid == 'undefined')) {
 		// non chrome browser

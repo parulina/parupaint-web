@@ -53,7 +53,17 @@ var updateRooms = function(){
 			if(!ee.length){
 				// doesn't room exist? add it
 				console.log('added new room ' + r);
-				ee = $('<a id="room-'+r+'" class="room-link" data-save="'+(data.lastmod-1)+'">'+r+'</a>')
+				var m = data.lastmod-1;
+				
+				ee = $('<a/>', 
+					   {
+					id: 'room-' + r,
+					class: 'room-link',
+					'data-room': r,
+					'data-save': m,
+					href:'/#' + r
+					   });
+					
 				$('div.show-area').append(ee);
 			}
 			// get last mod
@@ -72,7 +82,7 @@ var updateRooms = function(){
 				var header = $('<h3></h3>').html(r);
 				var list = $('<ul>'+ccc+'</ul>');
 
-				aaa = $('<div class="room-info"></div>').append(active).append(header).append(list);
+				aaa = $('<div class="room-info"></div>').append(active, header, list);
 			}
 			ee.html(aaa);
 			if(ss != data.lastmod){
@@ -82,6 +92,10 @@ var updateRooms = function(){
 				
 			}
 			ee.data('save', data.lastmod);
+			ee.click(function(){
+				var hash = $(this).attr('data-room');
+				initParupaint(hash);
+			})
 			
 		}
 		var ll = Object.keys(data2).length;
@@ -90,7 +104,6 @@ var updateRooms = function(){
 		rest.remove();
 		updateRoomsTimer = setTimeout(updateRooms, 3000);
 	}).fail(function(err){
-		console.log(err);
 		$('.room-counter').html('Error contacting server ('+err+').');
 	});
 	
@@ -110,17 +123,35 @@ var getStorageKey = function(key, callback){
 	if(typeof chrome != 'undefined' && typeof chrome.storage != 'undefined'){
 		return chrome.storage.local.get(key, callback)
 	} else {
-		return callback([])
+		var a = {};
+		a[key] = localStorage.getItem(key);
+		if(key == null){
+			a = localStorage;
+		}
+		if(typeof callback == 'function'){
+			return callback(a);
+		}
+		return a;
 	}
 }
 var setStorageKey = function(key, callback){
 	if(typeof chrome != 'undefined' && typeof chrome.storage != 'undefined'){
 		return chrome.storage.local.set(key, callback)
 	} else {
-		return callback([])
+		for (var i in key){
+			localStorage.setItem(i, key[i]);
+		}
+		if(typeof callback == 'function') return callback();
+		return true;
 	}
 }
-
+var clearStorage = function(){
+	if(typeof chrome != 'undefined' && typeof chrome.storage != 'undefined'){
+		chrome.storage.local.clear()
+	} else {
+		localStorage.clear();
+	}
+}
 
 
 jQuery.fn.extend({
@@ -215,7 +246,21 @@ initParupaint = function(room){
 	document.title = 'Starting up...';
 	
 	clearTimeout(updateRoomsTimer), updateRoomsTimer = null
-	if(typeof ROOM != 'undefined') delete ROOM
+	if(typeof ROOM != 'undefined') {
+		if(isConnected()){
+			ROOM.roomSocket.socket.io.disconnect();
+		}
+		delete ROOM.roomSocket;
+		delete ROOM.canvasCallbacks;
+		delete ROOM;
+	}
+	
+	
+	window.location.hash = '';
+	if(typeof room == 'string' && room.length){
+		console.log('in room %s now', room);
+		window.location.hash = '#' + room;
+	}
 	
 	$('body').removeClass('room canvas main').html('')
 	
@@ -228,22 +273,21 @@ initParupaint = function(room){
         
 			var tablet = $('<input/>', {type:'button', class: 'main-setting-panel set-tablet', value:'enable tablets', alt:'requests permission from you to turn on tablet support.'}),
 				clear = $('<input/>', {type: 'button',class:'main-setting-panel clear-settings', value:'clear settings', alt:"clears the saved settings and rooms! you won't get them back."}),
-				room2 = $('<div/>', {class: 'main-setting-panel set-room'}).html($('<input/>', {type: 'text', class: 'new-room-input'})),
-				name2 = $('<div/>', {class: 'main-setting-panel set-name'}).html($('<input/>', {type: 'text', class: 'name-input'})),
+				name2 = $('<input/>', {type: 'text', class: 'name-input', placeholder: 'enter nickname'}),
 				ctablet = $('<div/>', {class: 'chosen-tablet'}).text(tabletConnection.connections ? tabletConnection.connections + ' tablets' : 'None')
 			
 			
-		var settings = $('<div/>', {class: 'main-page-settings'}).append(ctablet).append(tablet).append(clear).append(name2).append(room2)
+		var settings = $('<div/>', {class: 'main-page-settings'}).append(ctablet, tablet, clear, name2)
 		
 		var roomstatus = $('<div class="room-status-bar"></div>').append($('<div/>', {class: 'room-counter'}));
 		
-		var infoheader = $('<div class="room-info-header"></div>').append(settings).append(title).append(header);
 		
-		getStorageKey('name', function(d){
-			if(d && d.name){
-				$('.main-setting-panel.set-name input').val(d.name)
-			}
-		})
+		var rinput = $('<input/>', {placeholder: 'or, create a new room', type: 'text', class: 'new-room-input'});
+		var infoheader = $('<div class="room-info-header"></div>').append(settings, title, header, rinput);
+		
+		
+		
+		
 		
 		if(typeof chrome != "undefined" && typeof chrome.permissions != "undefined"){
 			chrome.permissions.contains({permissions:['hid']}, function(e){
@@ -273,11 +317,12 @@ initParupaint = function(room){
 						})
 					}
 				})
+			}else {
+				alert("Sorry, tablet support isn't available on browsers yet.")
 			}
 		})
 		$('input.clear-settings').click(function(e){
-			
-			chrome.storage.local.clear()
+			clearStorage();
 		})
 		
 		$('input.new-room-input').keypress(function(e){
@@ -301,6 +346,18 @@ initParupaint = function(room){
 				console.log('set name to: ', $(this).val())
 			}
 		});
+		
+		
+		
+		getStorageKey('name', function(d){
+			if(d && d.name){
+				$('input.name-input').val(d.name)
+			}
+		})
+		
+		
+		
+		
 		
 		updateRooms()
 	} else {

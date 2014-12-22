@@ -121,6 +121,7 @@ var roomSocketConnection = function(r){
 		
 	}).on('peer', function(d){
 		if(d.id != pthis.id){
+			console.log('Peer connected: ' + d.id)
 			var e = $('<div/>', {class: 'canvas-cursor', id:d.id, 'data-name': d.name}).css({left: d.x, top: d.y}).data('x', d.x).data('y', d.y)
 			if(d.s != undefined) Brush.size(d.s, e)
 			$('#mouse-pool').append(e)
@@ -144,7 +145,7 @@ var roomSocketConnection = function(r){
 		if(d.id != pthis.id){
 			var e = $('.canvas-cursor#' + d.id)
 			if(e.length){
-				
+				console.log('found painter ' + d.id);
 				var ow = $('canvas.focused').get(0).width,
 					oh = $('canvas.focused').get(0).height,
 					nw = $('.canvas-workarea').width(),
