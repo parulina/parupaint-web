@@ -3,14 +3,36 @@
 	width:1px;
 	height:1px;
 	position:absolute;
-	pointer-events:none;
+	/*pointer-events:none;*/
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	user-select:none;
+	
 	visibility:hidden;
 	transition:all 100ms ease;
 	transition-property: width, height;
 	transform-origin: 0% 0%;
+}
+.canvas-cursor.cursor-self{
+	pointer-events:none;
+}
+
+.canvas-cursor:before{
+	opacity:0;
+	transition: opacity 2s ease-out;
+	transition-delay:3s;
+	visibility: visible;
+	content:attr(data-name);
+	color: black;
+	font-size: 10px;
+	text-align: center;
+	transform: translateX(-50%);
+	top: 50%;
+	position:absolute;
+}
+.canvas-cursor:hover:before{
+	transition: opacity 100ms ease-out;
+	opacity: 1;
 }
 
 .canvas-cursor:after {

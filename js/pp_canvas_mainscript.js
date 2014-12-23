@@ -345,8 +345,7 @@ var setZoom = function(z){
 
 
 var onRoom = function(room){
-	addMessage('loading parupaint...')
-	console.log('new room:', room)
+	console.log('onRoom', room)
 	
 	
 	// initialize room socket
