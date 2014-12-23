@@ -94,7 +94,9 @@ var updateRooms = function(){
 			ee.data('save', data.lastmod);
 			ee.click(function(){
 				var hash = $(this).attr('data-room');
+				$(this).unbind().remove()
 				initParupaint(hash);
+				return false;
 			})
 			
 		}

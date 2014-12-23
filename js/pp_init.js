@@ -26,7 +26,8 @@ $(function(){
 	var removeInit = function(){
 		$('#alert-message').remove();
 		$('body').removeClass('loading');
-		initParupaint();
+		
+		initParupaint(window.location.hash.length ? window.location.hash.substr(1) : '');
 	}
 	if(typeof manifest != 'undefined' || (typeof chrome == 'undefined' || typeof chrome.hid == 'undefined')) {
 		// non chrome browser
