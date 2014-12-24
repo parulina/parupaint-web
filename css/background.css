@@ -228,7 +228,8 @@ input.name-input{
     padding:0 5px;
 }
 div.show-area .room-link{
-    margin:2px 8px;
+    margin:10px 0;
+    margin-left:20px;
     width:300px;
     height:300px;
     display:inline-block;
