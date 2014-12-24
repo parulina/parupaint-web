@@ -6,7 +6,6 @@
 
 var messageQueueTimer = null
 var clearMessageQueue = function(delay){
-	console.log('clearmessagequeue', delay)
 	if(delay && !messageQueueTimer){
 		messageQueueTimer = setInterval(clearMessageQueue, delay)
 		console.log('init')
@@ -17,7 +16,6 @@ var clearMessageQueue = function(delay){
 		}else{
 			clearInterval(messageQueueTimer)
 			messageQueueTimer = null
-			console.log('stop')
 		}
 	}
 }
@@ -36,37 +34,38 @@ var addMessage = function(msg, name, time, notify){
 			if(!messageQueueTimer){
 				clearMessageQueue(3000)
 			}
-			overlayShow(false)
 		}
 		
 		if(name){
 			if(box.children('.chat-entry').length){
-				var last = box.children('.chat-entry').last()
+				var last = box.children('.chat-entry').first()
 				if(last.data('name') == name){
-					return last.append(m)
+					return last.prepend(m)
 				}
 			}
 		}
 		
-		var entry = $('<div/>', attrs).append(m)
 		
-		return box.append(entry)
+		
+		var entry = $('<div/>', attrs).append(m)
+		return box.prepend(entry)
+		
 	}
 }
 
 var addChatMessage = function(room, msg, name, time, notify){
 	if(msg){
 		if(!room) room = getRoom()
-		chrome.storage.local.get('rooms', function(d){
+		getStorageKey('rooms', function(d){
 			if(d.length){
 				if(d == undefined) 		d = {};
 				if(d[room] == undefined)	d[room] = {};
 				if(d[room].chatbox == undefined)	d[room].chatbox = [];
 				
 				d[room].chatbox.push({name:name, msg:msg, time:time})
-				chrome.storage.local.set({rooms: d}, failSafe);
+				setStorageKey({rooms: d}, failSafe);
 			}
-			
+			console.log(msg, name, time, notify == undefined ? true : notify)
 			addMessage(msg, name, time, notify == undefined ? true : notify)
 			
 		})
@@ -77,18 +76,16 @@ var addChatMessage = function(room, msg, name, time, notify){
 var sendChatMessage = function(msg, room){
 	if(!room) room = getRoom()
 	var name = $('.canvas-cursor.cursor-self').data('name')
-	var time = new Date().toTimeString().split(' ')[0]
 	
-	var addfunc = function(){
-		addChatMessage(room, msg, name, time, false)
-	}
 	
 	if(room == getRoom()){
-		if(navigator.onLine && false) //fixme: sockets
+		if(navigator.onLine && isConnected()) //fixme: sockets
 		{
 			//todo
+			ROOM.roomSocket.socket.emit('chat', {msg: msg, name: name, time: Date.now()})
+			
 		} else {
-			addfunc()
+			addChatMessage(room, msg, name, new Date().toTimeString().split(' ')[0], false)
 		}
 	}
 }
@@ -96,7 +93,7 @@ var sendChatMessage = function(msg, room){
 chatScript = function(room){
 	
 	$('textarea.chat-input').keydown(function(e){
-		console.log(e.keyCode)
+		console.log(e.keyCode, e.shiftKey)
 		if(e.keyCode == 13 && !e.shiftKey){
 			sendChatMessage($(this).val())
 			$(this).val('')
@@ -105,5 +102,7 @@ chatScript = function(room){
 			overlayGone(true)
 		}
 		console.log($('.chat-input-box .ci-size').html($(this).val()).html())
+	}).on('focus', function(e){
+		clearTimeout(overlayTimeout)
 	})
 }

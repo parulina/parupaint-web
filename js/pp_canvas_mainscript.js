@@ -1,8 +1,23 @@
+var isSocket = function(){
+	return (typeof ROOM != 'undefined' && ROOM.roomSocket.socket)
+}
+
+var isConnected = function(){
+	return (navigator.onLine && (isSocket() && ROOM.roomSocket.connected() ))
+}
+var isAdmin = function(){
+	return (navigator.onLine && (isSocket() && ROOM.roomSocket.isAdmin() ))
+}
+
+var isPrivate = function(){
+	return (navigator.onLine && (isSocket() && ROOM.roomSocket.private() ))
+}
+
 
 var updateInfo = function(){
 	var layer = $('canvas.focused').data('layer'),
 		frame = $('canvas.focused').data('frame'),
-		connected = false ? 'connected' : 'offline',// todo socket
+		connected = isConnected() ? 'multi' : 'single', // connected to socket room
 		room = getRoom(),
 		width = parseInt($('canvas.focused')[0].width),
 		height = parseInt($('canvas.focused')[0].height)
@@ -25,14 +40,45 @@ var updateInfo = function(){
 	}
 	$('.brush-panel').html(list)
 	
+	$('form.dimension-input .dimension-w-input').val($('canvas.focused').get(0).width)
+	$('form.dimension-input .dimension-h-input').val($('canvas.focused').get(0).height)
 	
-	document.title = 	'[' + players.length + ' artists]' +
-						'['+width+' × '+height+']' + 
-						' in room ' + room
+	Brush.update()
+	
+	if(isSocket()){
+		var msg = ROOM.roomSocket.socket.connected ? 'Connected' : 'Disconnected'
+		
+		if(ROOM.roomSocket.socket.io.reconnecting){
+			var a = ROOM.roomSocket.socket.io.attempts,
+				am = ROOM.roomSocket.socket.io.reconnectionAttempts()
+			
+			msg = 'Reconnecting ['+a+'/'+am+']...'
+		}
+		
+		$('form.connection-input').toggleClass('enable', isConnected()).attr('data-label', msg)
+		
+		$('input.con-status').get(0).checked = ROOM.roomSocket.socket.connected
+		$('body').toggleClass('connected', ROOM.roomSocket.socket.connected)
+		
+		
+		
+		$('body').toggleClass('is-admin', isAdmin()) //if i'm admin, put the body to admin mode. yass
+		$('body').toggleClass('is-private', isPrivate())
+		$('input.private-status').get(0).checked = isPrivate()
+	}
+	
+	
+	
+	document.title = 	'[' + room + '] ' + 
+						players.length + ' artists' +
+						' ['+width+' × '+height+']'
 }
 
+
+
 var overlayTimeout = null;
-var overlayGone = function(now){
+
+var hideOverlay = function(now){
 	if(now){
 		clearTimeout(overlayTimeout)
 		overlayTimeout = null
@@ -44,80 +90,43 @@ var overlayGone = function(now){
 			return false;
 		}
 	}
-	
 	clearTimeout(overlayTimeout);
 	$('.overlay .gui').removeClass('visible');
-	$('.overlay .qstatus').removeClass('visible');
 	$('#mouse-pool').focus()
-};
+}
 
-var overlayShow = function(full){
-	if(full){
-		if(!$('.overlay .gui').hasClass('visible')){
-			$('.overlay .gui').addClass('visible');
 
-			$('.overlay .qstatus').removeClass('visible');
-		} else {
-			var ta = $('textarea.chat-input')
-			if(ta.is(':focus')){
-				ta.select()
-			}
-			ta.focus()
-		}
+var showOverlay = function(t){
+	if(t != undefined){
+		clearTimeout(overlayTimeout);
+		overlayTimeout = setTimeout(function(){
+			hideOverlay(true)
+		}, 3000);
+	}
+	if(!$('.gui').hasClass('visible')){
+		$('.gui').addClass('visible');
 	} else {
-		if($('.overlay .gui').hasClass('visible')){
-			$('.overlay .gui').removeClass('visible');
+		var ta = $('textarea.chat-input')
+		if(ta.is(':focus')){
+			ta.select()
 		}
-		$('.overlay .qstatus').addClass('visible');
+		ta.focus()
 	}
 }
 
+
+
 $(document).keydown(function(e){
 	switch(e.keyCode){
-			case 9:
-			{
-				if(e.shiftKey){
-					if($('.gui.visible').length) {
-						overlayShow(false)
-					}else {
-						overlayGone(true)
-					}
-				}else{
-					var qs = $('.overlay .qstatus');
-					
-					if($('.overlay .gui').hasClass('visible')){
-						
-						overlayShow(true)
-						return false;
-					}else{
-						if(qs.length){
-							if(qs.is(':visible')){
-								overlayShow(true)
-							} else {
-								overlayShow(false)
-							}
-						}
-					}
-					
-				}
-				return false;
-			}
 			case 116:
 			{
 				return chrome.runtime.reload()
-			}
-			case 27:
-			{
-				overlayGone(true)
-				
-				break;
 			}
 			
 			case 123:
 			{
 				var fperm = {permissions:['alwaysOnTopWindows']}
 				chrome.permissions.contains(fperm, function(e){
-					console.log(e)
 					if(e){
 						if(chrome.app.window.current().isAlwaysOnTop()){
 							console.log('always on top -> false')
@@ -184,9 +193,14 @@ var drawCanvasLine = function(canvas, x1, y1, x2, y2, color, width){
 
 var Brush = {
 	tmoving:false,
+	tbrushzoom:false,
+	tzoomcanvas:false,
+	tzoomstart:null,
+	ttsize:null,
 	
 	beraser:3,
 	bmove:2,
+	tabdown:false,
 	
 	cbrush:0,
 	brushnames:['brush','eraser'],
@@ -248,14 +262,14 @@ var failSafe = function(){
 }
 
 var writeDefaults = function(){
-	chrome.storage.local.set({brushDefaults: JSON.stringify(Brush.brushes)}, failSafe);
+	setStorageKey({brushDefaults: JSON.stringify(Brush.brushes)}, failSafe);
 }
 
 
 
 var saveCanvasLocal = function(r){
 	if(r == undefined) r = 'default'
-	chrome.storage.local.get('rooms', function(roomdata){
+	getStorageKey('rooms', function(roomdata){
 		
 		var d = roomdata.length ? roomdata.rooms : undefined;
 
@@ -286,22 +300,78 @@ var saveCanvasLocal = function(r){
 				//	d[r].data[l][f].data = ''
 				//	d[r].data[l][f].data = flayer[0].getContext('2d').getImageData(0, 0, flayer[0].width, flayer[0].height).data;
 					d[r].data[l][f].data = flayer[0].toDataURL();
-					console.log()
 				}
 			}
 		}
-		chrome.storage.local.set({rooms: d}, function(){
+		setStorageKey({rooms: d}, function(){
 			console.log('Finish writing')					 
 		});
 	});
 }
 
-
-
-onRoom = function(room){
-	addMessage('loading parupaint...')
+var setZoom = function(z){
+	if(z == undefined) z = 1.0
 	
-	chrome.storage.local.get(null, function(data){
+	var w = $('canvas.focused').get(0).width,
+		h = $('canvas.focused').get(0).height,
+		ow = $('.canvas-workarea').width(),
+		oh = $('.canvas-workarea').height(),
+		// change x, y
+		cw = (z*w) - ow,
+		ch = (z*h) - oh,
+		nw = ow + cw,
+		nh = oh + ch
+	
+	
+	var alx = $('html').width()/2,
+		aly = $('html').height()/2
+	
+	var aax = 	($('body').scrollLeft() + alx), 
+		aay = 	($('body').scrollTop() + aly),
+		ccx = 	(ow / (aax)), 
+		ccy = 	(oh / (aay))
+	
+	$('body').scrollTop( $('body').scrollTop()+(ch/ccy) )
+	$('body').scrollLeft( $('body').scrollLeft()+(cw/ccx) )
+	
+	$('.canvas-workarea').width(nw).height(nh).data('zoom', z)
+	$('.canvas-cursor').css('transform', 'scale('+z+')').each(function(k, e){
+		var ee = $(e),
+			nx = (ee.data('x') / w) * nw,
+			ny = (ee.data('y') / h) * nh
+		ee.css({left: nx, top: ny})
+	});
+}
+
+
+
+var onRoom = function(room){
+	addMessage('loading parupaint...')
+	console.log('new room:', room)
+	
+	
+	// initialize room socket
+	
+	this.roomSocket = new roomSocketConnection(room)
+	this.canvasCallbacks = new canvasEvents(room, this.roomSocket)
+	var r = this
+		
+	this.toggleNetwork = function(net){
+		if(net == undefined) net = !isConnected()
+		
+		if(!net) 		return this.roomSocket.socket.io.disconnect()
+		else			return this.roomSocket.socket.io.connect()
+	}
+	
+	getStorageKey(null, function(data){
+		
+		var name = data.name || ('unnamed_mofo'+(Date.now().toString().slice(-5)))
+		$('.canvas-cursor.cursor-self').data('name', name)
+		
+		r.roomSocket.query({name: name})
+		
+		
+		
 		
 		if(data.brushDefaults){
 			var def = JSON.parse(data.brushDefaults);
@@ -309,10 +379,6 @@ onRoom = function(room){
 			Brush.update()
 		}
 		updateInterfaceHex(Brush.brush().color)
-		
-		$('.canvas-cursor.cursor-self').data('name', data.name || ('unnamed_mofo'+(Date.now().toString().slice(-5))))
-		
-		
 		
 		if(data.rooms && data.rooms[room]){
 		   if(data.rooms[room].data){
@@ -348,179 +414,64 @@ onRoom = function(room){
 		}
 		
 		
-		
-		
-		
-		// real init
-		
-		
-		updateCallbacks(function(e, data){
-
-			if(e == 'mousemove'){	
-
-				var drawing = (data.button == 1);
-				var moving = (Brush.tmoving || data.button == Brush.bmove);
-
-				//todo: store with zoom offset
-				Brush.mx = data.x;
-				Brush.my = data.y;
-				var cursor = $('.canvas-cursor.cursor-self');
-				if(cursor.length){
-					var left = parseInt(cursor.css('left')), top = parseInt(cursor.css('top'));
-					var dx = (data.x - left), dy = (data.y - top);
-					var dist = Math.sqrt(dx*dx + dy*dy)
-					if(dist > (drawing ? 2 : 15)){
-						cursor.css({left: data.x, top:data.y});
-					}
-				}
-				if(moving){
-					var b = $('body');
-					b.scrollLeft(b.scrollLeft() - data.sx);
-					b.scrollTop(b.scrollTop() - data.sy);
-				}
-				else if(drawing){
-
-					var nx1 = ((data.x - data.cx));
-					var ny1 = ((data.y - data.cy));
-					var nx2 = ((data.x));
-					var ny2 = ((data.y));
-					var s = parseInt(cursor.data('size')) || Brush.brush().size;
-					var c = Brush.brush().color || cursor.data('color');
-
-					drawCanvasLine(null, nx1, ny1, nx2, ny2, c, s)
-				}
-			}else if(e == 'mousedown'){
-				console.log('button', data.button)
-				if(data.button == Brush.beraser){
-					var newbrush = Brush.cbrush == 0 ? 1 : 0;
-					Brush.brush(newbrush)
-					Brush.update()
-					updateInterfaceHex(Brush.brush().color)
-					
-				}
-				else if(data.button == 1){
-					$('.canvas-cursor.cursor-self').addClass('drawing')
-				}
-				else if(data.button == Brush.bmove){
-					$('#mouse-pool').focus()
-					return false;
-				}
-			}else if(e == 'mouseup'){
-				if(data.button == 1){
-
-
-					$('.canvas-cursor.cursor-self').removeClass('drawing')
-					saveCanvasLocal(room);
-
-
-				}
-			} else if(e == 'mousewheel'){
-				var a = data.scroll > 0 ? 2 : 0.5;
-				var cursor = $('.canvas-cursor.cursor-self')
-				var s = parseInt(cursor.data('size'))
-				s *= a;
-				if(s < 1) s = 1;
-				if(s > 256) s = 256;
-
-				Brush.size(s).update()
-				writeDefaults()
-
-				return false;
-			} else if(e == 'keydown'){
-				console.log(data.key)
-
-				switch(data.key){
-						case 82:
-						{
-							if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
-								$('.canvas-cursor.cursor-self').addClass('pick-color')
-							}
-							var cc = $('canvas.focused');
-							if(cc.length){
-							//	var x = parseInt($('.canvas-cursor.cursor-self').css('left')),
-							//		y = parseInt($('.canvas-cursor.cursor-self').css('top'))
-								var x = Brush.mx, y = Brush.my;	
-
-								var px = cc[0].getContext('2d').getImageData(x, y, 1, 1).data;
-								var r = ('00' + px[0].toString(16)).slice(-2),
-									g = ('00' + px[1].toString(16)).slice(-2),
-									b = ('00' + px[2].toString(16)).slice(-2),
-									a = ('00' + px[3].toString(16)).slice(-2)
-								var hex = "#" + ("00000000" + (r+g+b+a)).slice(-8);
-								
-								if(hex != Brush.brush().color){
-									Brush.color(hex).update()
-									updateInterfaceHex(hex)
-									writeDefaults();
-								}
-							}
-							break;
-						}
-						case 32:
-						{
-							return !(Brush.tmoving = true)
-						}
-						case 65: // a
-						{
-							overlayShow(false)
-							return advanceCanvas(null, -1)
-						}
-						case 83: // s
-						{
-							overlayShow(false)
-							return advanceCanvas(null, 1)
-						}
-						case 68: // d
-						{
-							overlayShow(false)
-							return advanceCanvas(-1)
-						}
-						case 70: // f
-						{
-							overlayShow(false)
-							return advanceCanvas(1)
-						}
-				}
-			} else if(e == 'keyup'){
-				if(data.key == 82){
-					addPaletteEntryRgb(getColorSliderRgb())
-					$('.canvas-cursor.cursor-self').removeClass('pick-color')
-				}
-				if(data.key == 32){
-					Brush.tmoving = false;
-					return false;
-				}
-			}
-		});
+		// rest init
 		updateInfo()
+		updateFrameinfoSlow()
+		
+		if(navigator.onLine){
+			r.toggleNetwork(true)
+		}
 	});
 	
 	
-	$('.gui .color-spinner').mouseout(function(e){
-		clearTimeout(overlayTimeout);
-		overlayTimeout = setTimeout(overlayGone, 3000);
+	$('.gui .overlay-piece').mouseout(function(e){
+		showOverlay(2000)
 	}).mouseover(function(e){
 		clearTimeout(overlayTimeout);
 	});
 	
-	$('.qstatus-message').mousedown(function(e){
-		
-		var x = e.offsetX, y = e.offsetY
-		$(this).mousemove(function(e){
-			if(e.which == 1){
-
-				var dx = (e.offsetX - x), dy = (e.offsetY - y);
-				console.log(y, e.offsetY)
-				if(dy > 15){
-					overlayShow(true)
-				}
+	$('.setting-bottom-row > div[type="button"]').click(function(ee){
+		var e = $(ee.target)
+		if(e.is('.setting-quit-btn')){
+			if($(this).hasClass('confirm')){
+				//window.location = '/';
+				initParupaint()
+			} else {
+				$(this).addClass('confirm')
+				$(this).mouseout(function(){
+					$(this).removeClass('confirm').unbind('mouseout')
+				})
 			}
-			
-		}).mouseout(function(){
-			$(this).unbind('mouseout mouseup mousemove')
-		}).mouseup(function(){
-			$(this).unbind('mouseout mouseup mousemove')
-		})
+		} else if(e.is('.setting-down-img')){
+			downloadCanvas()
+		} else if(e.is('.setting-save-img')){
+			saveCanvasLocal(room)
+		} else if(e.is('.setting-reload-img')){
+			ROOM.roomSocket.reload(function(){
+				updateInfo()
+			})
+		}
+	})
+	
+	
+	$('input.con-status').change(function(e){
+		var c = $(e.target).is(':checked')
+		r.toggleNetwork(c)
+	})
+	$('input.private-status').change(function(e){
+		var c = $(e.target).is(':checked')
+		if(isAdmin()){
+			ROOM.roomSocket.socket.emit('rs', {private: c})
+		}
+	})
+	
+	
+	
+	
+	
+	
+	$('.qstatus-message').mousedown(function(e){
+		showOverlay(2000)
 	})
 	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
@@ -534,31 +485,38 @@ onRoom = function(room){
 		
 	})
 	
-	$('.setting-quit-btn').click(function(){
-		if($(this).hasClass('confirm')){
-			initParupaint()
-		} else {
-			$(this).addClass('confirm')
-			$(this).mouseout(function(){
-				$(this).removeClass('confirm').unbind('mouseout')
-			})
-		}
-	})
-	
-	
-	$('html').mousedown(function(e){
-		console.log(e.target, $('.gui').has($(e.target)))
+	$('form.dimension-input').submit(function(){
+		var w = $(this).children('.dimension-w-input').val(),
+			h = $(this).children('.dimension-h-input').val()
 		
-		var qs = $('.qstatus-brush, .qstatus-settings')
-		if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
-			if(qs.hasClass('panel-open')){
-				qs.removeClass('panel-open')
-			}
+		if(isConnected()){
+			ROOM.roomSocket.socket.emit('r', {w: w, h: h})
+		} else {
+			initCanvas(w, h)
 		}
-		if(!$('.gui, .qstatus').has($(e.target)).length){
-			if($('.gui.visible').length) overlayShow(false)
+		
+		saveCanvasLocal(room)
+		return false;
+	})
+	
+	$('.flayer-list').bind('mousewheel', function(e, d){
+		if($('.flayer-info-layer').has($(e.target)).length){
+			//is on layer
+			var n = (d > 0) || -1
+			advanceCanvas(null, n)
+		}else {
+			this.scrollLeft -= (e.originalEvent.wheelDelta)
+		}
+	}).click(function(e){
+		if($('.flayer-info-layer').has($(e.target)).length){
+			// is a frame from one of the layers?
+			var f = parseInt($(e.target).data('frame')),
+				l = parseInt($(e.target).parent().data('layer'))
+			console.log('click on', l, f)
+			focusCanvas(l, f)
 		}
 	})
+	
 	
 	
 	$(window).scroll(function(){

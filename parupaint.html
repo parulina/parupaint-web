@@ -2,23 +2,36 @@
 <html>
   <head>
 	  	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	  	<link href="background.css" rel="stylesheet"></link>
-	  	<link href="canvas.css" rel="stylesheet"></link>
-	  	<link href="guifront.css" rel="stylesheet"></link>
-	  	<link href="qgui.css" rel="stylesheet"></link>
+	  	<link rel=icon href="icon16.png">
+	  	
+	  	<link href="css/background.css" rel="stylesheet"></link>
+	  	<link href="css/canvas.css" rel="stylesheet"></link>
+	  	<link href="css/guifront.css" rel="stylesheet"></link>
+	  	<link href="css/qgui.css" rel="stylesheet"></link>
+
 		<script src="jquery-2.1.1.min.js"></script>
 		<script src="moment.min.js"></script>
 		<script src="livestamp.min.js"></script>
-		<script src="jquery-ui/jquery-ui.min.js"></script>
-		<script src="color-interface.js"></script>
-		<script src="script.js"></script>
-		<script src="chat.js"></script>
-		<script src="network.js"></script>
-		<script src="parupaint.js"></script>
-		<script src="paruinit.js"></script>
+		<script src="socket.io.js"></script>
+
+		
+		
+		<!-- todo -->
+		<script src="js/pp_canvas_network.js"></script>
+		<script src="js/pp_canvas_keybinds.js"></script>
+		<script src="js/pp_canvas_color.js"></script>
+		<script src="js/pp_canvas_chat.js"></script>
+
+		<!--  main script - brush definition, update title, etc  -->
+		<script src="js/pp_canvas_mainscript.js"></script>
+
+
+		<script src="js/pp_canvas_functions.js"></script>
+		<script src="js/pp_main.js"></script>
+		<script src="js/pp_init.js"></script>
 		<title>Initializing...</title>
   </head>
-  <body class="disconnected loading">
+  <body class="loading">
 		<div id="alert-message" class="overlay-piece alert">
 		</div>
   </body>

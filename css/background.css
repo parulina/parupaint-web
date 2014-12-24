@@ -1,3 +1,10 @@
+
+@font-face{
+	font-family:"OpenSans";
+	src:url("OpenSans-Regular.ttf") format("truetype");
+}
+
+
 html{
 	margin:0; padding:0;
 	overflow:auto;
@@ -6,6 +13,7 @@ body{
 	margin: 0;
     transition:background-color 2s ease-in-out;
 	background-color:#d1d1d1;
+	font-family:"OpenSans";
 }
 
 
@@ -139,13 +147,26 @@ input.main-setting-panel:focus{
 input[type=text]{
 	display:block;
 }
+
+
 .new-room-input{
-	box-sizing : border-box;
-	width: 100%;
+	max-width: 250px;
+	font-size:17px;
 }
 input.name-input{
-	width:50%;
+	max-width:200px;
 }
+
+.new-room-input,
+input.name-input{
+    margin: 0 auto;
+    border: 0;
+    padding: 4px;
+    text-align: center;
+}
+
+
+
 .main-setting-panel:before{
 	font-size:12px;
 	display:block;
@@ -169,7 +190,7 @@ input.name-input{
 }
 
 .chosen-tablet:before{
-	content:"Selected tablet";
+	content:"Connected tablets:";
 	position:absolute;
 	left:0;
 	top:0;
@@ -192,7 +213,7 @@ input.name-input{
 	clear: both;
 }
 .room-counter{
-	
+	padding:0 15px;
 }
 
 
