@@ -321,17 +321,21 @@ var setZoom = function(z){
 		nw = ow + cw,
 		nh = oh + ch
 	
+    var b = $(window);
+    
 	
-	var alx = $('html').width()/2,
-		aly = $('html').height()/2
+	var alx = b.width()/2,
+		aly = b.height()/2
 	
-	var aax = 	($('body').scrollLeft() + alx), 
-		aay = 	($('body').scrollTop() + aly),
+	var aax = 	(b.scrollLeft() + alx), 
+		aay = 	(b.scrollTop() + aly),
 		ccx = 	(ow / (aax)), 
 		ccy = 	(oh / (aay))
 	
-	$('body').scrollTop( $('body').scrollTop()+(ch/ccy) )
-	$('body').scrollLeft( $('body').scrollLeft()+(cw/ccx) )
+    
+    console.log('left', b.scrollLeft()+(ch/ccy))
+	b.scrollTop( b.scrollTop()+(ch/ccy) )
+	b.scrollLeft( b.scrollLeft()+(cw/ccx) )
 	
 	$('.canvas-workarea').width(nw).height(nh).data('zoom', z)
 	$('.canvas-cursor').css('transform', 'scale('+z+')').each(function(k, e){

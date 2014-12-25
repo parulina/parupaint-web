@@ -145,25 +145,11 @@
 
 html{
 	height:100%;
-	/*display:flex;
-	-webkit-box-align:center;
-	-webkit-box-pack:center;
-	-moz-box-align: center;
-	-moz-box-pack: center;
-	align-items: center;
-	justify-content: center;
-	display:-webkit-box;
-	display:-moz-box;
-	*/
 	
-	
-	display: flex;
-    justify-content: center;
+    display: flex;
+    justify-content: flex-start;
     align-items: center;
 	
-	-webkit-box-align:center;
-	-webkit-box-pack:center;
-	display:-webkit-box !important;
 	
 	overflow:scroll;
 }
@@ -174,7 +160,7 @@ body.canvas{
 	background-color: #D7D7D7;
 	transition:none;
 	display:inline-block;
-	padding: 60px;
+    margin:auto;
 }
 
 
@@ -187,14 +173,18 @@ body.canvas{
 
 .canvas-workarea{
 	position:relative;
-	margin:auto;
-	outline:1px dashed #9d9d9d;
+	margin:0;
+    
 	-webkit-user-select: none;
 	-moz-user-select:none;
 	user-select:none;
 	width:32px; height:32px;
 	cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAR0lEQVQYV5WQSQ4AIAgD6f8fXQGFQKJGOUE7YYM8BDYMVWt6LcwUkgKk7EmDDIhYYIPUn4CZNXep7JRgwDHpe6doer3u+LEBmLoZCntZhJ0AAAAASUVORK5CYII=") 5 5, none;
 	
+	border: 60px solid transparent;
+	outline:1px dashed #9d9d9d;
+    outline-offset: -60px; /*padding*/
+    
 	background-clip: content-box;
 	overflow:hidden;
 	transition: none;
