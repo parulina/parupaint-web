@@ -59,8 +59,6 @@ jQuery.fn.extend({
 					tmouse.oldsx = e.clientX;
 					tmouse.oldsy = e.clientY;
                     
-                    
-                    
 					return callback('mousemove', {
                         button: mb, 
                         x: e.offsetX + document.documentElement.scrollLeft, y: e.offsetY + document.documentElement.scrollTop, 

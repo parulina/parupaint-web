@@ -6,7 +6,7 @@ var canvasEvents = function(r, rs){
 	$('#mouse-pool').sevent(function(e, data){
 		// the kind of stuff that happens when the canvas
 		// is focused and _should_ be focused (drawing, etc...)
-		if(e == 'mousemove'){
+		if(e == 'mousemove' && data.target.tagName == 'CANVAS'){
 			
 			var drawing = (data.button == 1)
 
