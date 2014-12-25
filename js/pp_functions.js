@@ -58,7 +58,7 @@ jQuery.fn.extend({
 					var csy = (e.clientY - tmouse.oldsy);
 					tmouse.oldsx = e.clientX;
 					tmouse.oldsy = e.clientY;
-					return callback('mousemove', {button: mb, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, xclient:e.clientX, yclient:e.clientY, target: e.target});
+					return callback('mousemove', {button: mb, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, cx: cx, cy: cy, sx: csx, sy: csy, xclient:e.clientX, yclient:e.clientY, target: e.target, mozPressure: e.mozPressure});
 
 				}
 			}).mouseenter(function(e){

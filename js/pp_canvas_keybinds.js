@@ -25,9 +25,12 @@ var canvasEvents = function(r, rs){
 				var left = parseInt(cursor.css('left')), top = parseInt(cursor.css('top'));
 				var dx = (data.x - left), dy = (data.y - top);
 				var dist = Math.sqrt(dx*dx + dy*dy)
-				if(dist > (drawing ? 2 : 15)){
+                
+                var color = cursor.hasClass('pick-color');
+                
+				if(color || dist > (drawing ? 2 : 15)){
 					cursor.css({left: data.x, top:data.y});
-					if(!drawing){
+					if(!drawing && !color){
 						if(isConnected()){
 							rs.socket.emit('d', {x: Brush.mx, y: Brush.my, d: false})
 						}
@@ -52,7 +55,9 @@ var canvasEvents = function(r, rs){
 				b.scrollTop(b.scrollTop() - data.sy);
 			}
 			if(drawing){
-
+                if(data.mozPressure){
+                    console.log('mozPressure', data.mozPressure)
+                }
 				var nx1 = ((data.x - data.cx)/nw)*ow;
 				var ny1 = ((data.y - data.cy)/nh)*oh;
 

@@ -103,14 +103,29 @@
 }
 
 
+@-moz-keyframes opac-moz{
+	0% 		{ opacity:0; }
+	100ms	{ opacity:0; }
+	100% 	{ opacity:1; }
+}
+
+@-moz-keyframes size-shrink-moz{
+	0% {transform:scale(1); opacity:1;}
+	100% {transform:scale(0); opacity:0;}
+}
+
+
 .canvas-cursor.pick-color:after{
 	opacity:0;
 	transform:scale(0);
-	-webkit-animation-name:size-shrink;
-	-webkit-animation-duration:100ms;
-	-webkit-animation-timing-function:linear;
+    -webkit-animation:size-shrink 100ms linear;
+    -moz-animation:size-shrink-moz 100ms linear;
 	
 
+}
+
+.canvas-cursor.pick-color .cursor-pressure-size{
+    visibility: hidden;
 }
 
 
@@ -124,9 +139,8 @@
 	margin:-2px;
 	box-shadow: 0px 0px 1px 1px black;
 
-	-webkit-animation-name:opac;
-	-webkit-animation-duration:200ms;
-	-webkit-animation-timing-function:ease-out;
+    -webkit-animation:opac 200ms ease-out;
+    -moz-animation:opac-moz 200ms ease-out;
 }
 
 html{
