@@ -99,6 +99,7 @@ var roomSocketConnection = function(r){
 		addMessage('Reconnection error -- ' + d.message)
 		updateInfo()
 	}).on('disconnect', function(c){
+        
 		console.log('disconnect', c)
 		if(c == pthis.sid() || c == 'forced close'){
 			// i disconnected - remove everyone >:D
@@ -145,7 +146,6 @@ var roomSocketConnection = function(r){
 		if(d.id != pthis.id){
 			var e = $('.canvas-cursor#' + d.id)
 			if(e.length){
-				console.log('found painter ' + d.id);
 				var ow = $('canvas.focused').get(0).width,
 					oh = $('canvas.focused').get(0).height,
 					nw = $('.canvas-workarea').width(),

@@ -165,7 +165,7 @@ html{
 	-webkit-box-pack:center;
 	display:-webkit-box !important;
 	
-	overflow:hidden;
+	overflow:scroll;
 }
 body.canvas.connected{
 	background-color: #DAE2D7;

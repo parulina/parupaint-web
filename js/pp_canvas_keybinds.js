@@ -50,7 +50,7 @@ var canvasEvents = function(r, rs){
 			}
 			var moving = (Brush.tmoving || data.button == Brush.bmove);
 			if(moving){
-				var b = $('body');
+				var b = $(window);
 				b.scrollLeft(b.scrollLeft() - data.sx);
 				b.scrollTop(b.scrollTop() - data.sy);
 			}
