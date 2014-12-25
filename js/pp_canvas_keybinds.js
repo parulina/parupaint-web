@@ -262,24 +262,36 @@ var canvasEvents = function(r, rs){
 					}
 					case 82: // r
 					{
-						if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
-							$('.canvas-cursor.cursor-self').addClass('pick-color')
+						if(data.shift && data.ctrl){
+							
 						}
-						var cc = $('canvas.focused');
-						if(cc.length){
-							var x = Brush.mx, y = Brush.my;	
+						else if(data.shift){
+							if(isConnected()){
+								ROOM.roomSocket.reload(function(){
+									updateInfo()
+								})
+							}
+						}else{
 
-							var px = cc.get(0).getContext('2d').getImageData(x, y, 1, 1).data;
-							var r = ('00' + px[0].toString(16)).slice(-2),
-								g = ('00' + px[1].toString(16)).slice(-2),
-								b = ('00' + px[2].toString(16)).slice(-2),
-								a = ('00' + px[3].toString(16)).slice(-2)
-							var hex = "#" + ("00000000" + (r+g+b+a)).slice(-8);
+							if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
+								$('.canvas-cursor.cursor-self').addClass('pick-color')
+							}
+							var cc = $('canvas.focused');
+							if(cc.length){
+								var x = Brush.mx, y = Brush.my;	
 
-							if(hex != Brush.brush().color){
-								Brush.color(hex).update()
-								updateInterfaceHex(hex)
-								writeDefaults();
+								var px = cc.get(0).getContext('2d').getImageData(x, y, 1, 1).data;
+								var r = ('00' + px[0].toString(16)).slice(-2),
+									g = ('00' + px[1].toString(16)).slice(-2),
+									b = ('00' + px[2].toString(16)).slice(-2),
+									a = ('00' + px[3].toString(16)).slice(-2)
+								var hex = "#" + ("00000000" + (r+g+b+a)).slice(-8);
+
+								if(hex != Brush.brush().color){
+									Brush.color(hex).update()
+									updateInterfaceHex(hex)
+									writeDefaults();
+								}
 							}
 						}
 						break;
