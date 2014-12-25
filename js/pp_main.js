@@ -343,22 +343,22 @@ initParupaint = function(room){
 				var oqstatus_internet = $('<div/>', {class: 'qstatus-settings', title:'[layer] - [frame] - [connected]'}).append($('<div/>', {class: 'qstatus-piece qinfo'}), panel)
 			oqstatus.append(oqstatus_brush, oqstatus_message, oqstatus_internet);
 			
-			var info = $('<div/>', {class: 'gui visible'})
+			var info = $('<div/>', {class: 'gui'})
 				var cspinner = $('<div class="color-spinner overlay-piece"></div>');
 					
 					var selectorcode = '<div class="color-selector"></div>';
 					var preview = $('<div class="preview-col"></div>')
 						
-					var hue = $('<div class="hue-pick"></div>').html(preview).append(selectorcode)
+					var hue = $('<div class="hue-pick"></div>').append(preview, selectorcode)
 					
 					var lp = $('<div class="light-pick"></div>').html(selectorcode),
 						sp = $('<div class="saturation-pick"></div>').html(selectorcode),
 						ap = $('<div class="alpha-pick"></div>').html(selectorcode)
 							
-					var pick = $('<div class="hsl-select-pick"></div>').append(ap).append(lp).append(sp).append(hue)
+					var pick = $('<div class="hsl-select-pick"></div>').append(ap, lp. sp, hue)
 					
 					var palette = $('<div class="palette-storage"></div>')
-				cspinner.append(pick).append(palette)
+				cspinner.append(pick, palette)
 				
 				var chatbox = $('<div class="chat-box overlay-piece"></div>');
 					var chatcontent = $('<div class="chat-content"></div>')
@@ -366,28 +366,28 @@ initParupaint = function(room){
 					
 						var chati = $('<textarea/>', {tabindex: '-1', class: 'chat-input'})
 						var ssize = $('<div/>', {class: 'ci-size'})
-					var chatinput = $('<div/>', {class: 'chat-input-box'}).append(chati).append(ssize)
+					var chatinput = $('<div/>', {class: 'chat-input-box'}).append(chati, ssize)
 					
-				chatbox.append(chatcontent).append(chatinput)
+				chatbox.append(chatcontent, chatinput)
 				
 		
 			var flalist = $('<div/>', {class: 'flayer-list-container overlay-piece'}),
 				flacontainer = $('<div/>', {class: 'flayer-list'}),
 				flainfo = $('<div/>', {class: 'flayer-info'})
-			flalist.append(flainfo).append(flacontainer)
+			flalist.append(flainfo, flacontainer)
 		
 		
-			info.append(cspinner).append(chatbox).append(flalist);
+			info.append(cspinner, chatbox, flalist);
 		
 		
 		
-		overlay.append(info).append(oqstatus);
+		overlay.append(info, oqstatus);
 		
 		
-		var drawarea = $('<div class="draw-main-area"></div>').append(canvasworkarea).append(overlay)
+		var drawarea = $('<div class="draw-main-area"></div>').append(canvasworkarea, overlay)
 		
 		$('body').removeClass('room main').addClass('canvas').html('');
-		$('body').append(canvasworkarea).append(overlay);
+		$('body').append(canvasworkarea, overlay);
 		
 		document.location.hash = room
 		

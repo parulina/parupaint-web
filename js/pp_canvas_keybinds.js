@@ -62,28 +62,44 @@ var canvasEvents = function(r, rs){
 
 				var s = (Brush.brush().size);
 				var c = (Brush.brush().color);
-				if(tabletConnection){
+				var ns = null;
+				
+				
+				// size
+				if(tabletConnection && tabletConnection.connections){
 					if(tabletConnection.focus){
-						s *= tabletConnection.p
-
-						var ss = Math.round(tabletConnection.p*10)/10
-						var pp = $('.canvas-cursor.cursor-self .cursor-pressure-size')
-						if(pp.data('ts') != ss){
-							pp.css('transform', 'scale('+tabletConnection.p+')').data('ts', ss);
-						}
-
+						ns = tabletConnection.p;
+						console.log('tabletConnection', ns)
 					}
 				}
-                if(data.mozPressure){
-                    console.log('mozPressure', data.mozPressure)
-                    
-                }
-                if(plugin && plugin.penAPI){
+                else if(plugin && plugin.penAPI){
                     if(plugin.penAPI.pointerType != 0){
-                        console.log(plugin.penAPI.pressure)
-                        s = plugin.penAPI.pressure * s;
+                        ns = plugin.penAPI.pressure;
+                    	//console.log('plugin.penAPI.pressure', ns)
                     }
                 }
+                else if(data.mozPressure){
+                    console.log('mozPressure', ns)
+                    ns = data.mozPressure;
+                }
+				
+				
+				
+				
+				var pp = cursor.children('.cursor-pressure-size');
+				if(ns != null){
+					s *= ns;
+
+					var ss = Math.round(ns * 10)/10;
+					if(pp.data('ts') != ss){
+						pp.css('transform', 'scale('+ ns +')').data('ts', ss);
+					}
+				} else {
+					//mouse
+					if(pp.attr('style')){
+						pp.removeAttr('style');
+					}
+				}
                 
                 
                 
