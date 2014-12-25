@@ -55,9 +55,8 @@ var canvasEvents = function(r, rs){
 				b.scrollTop(b.scrollTop() - data.sy);
 			}
 			if(drawing){
-                if(data.mozPressure){
-                    console.log('mozPressure', data.mozPressure)
-                }
+                var plugin = document.getElementById('wacomPlugin');
+                
 				var nx1 = ((data.x - data.cx)/nw)*ow;
 				var ny1 = ((data.y - data.cy)/nh)*oh;
 
@@ -75,6 +74,19 @@ var canvasEvents = function(r, rs){
 
 					}
 				}
+                if(data.mozPressure){
+                    console.log('mozPressure', data.mozPressure)
+                    
+                }
+                if(plugin && plugin.penAPI){
+                    if(plugin.penAPI.pointerType != 0){
+                        console.log(plugin.penAPI.pressure)
+                        s = plugin.penAPI.pressure * s;
+                    }
+                }
+                
+                
+                
 				if(isConnected()){
 					rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
 				}

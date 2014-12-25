@@ -415,6 +415,12 @@ var onRoom = function(room){
 			initCanvas(500, 500, 2, [2, 2])
 		}
 		
+        
+        if(data.plugin){
+            $('body').prepend(
+                $('<object/>', {id: 'wacomPlugin', type: 'application/x-wacomtabletplugin'})
+            )
+        }
 		
 		// rest init
 		updateInfo()

@@ -238,7 +238,10 @@ initParupaint = function(room){
 					}
 				})
 			}else {
-				alert("Sorry, tablet support isn't available on browsers yet.")
+				var a = confirm("Sorry, full tablet support isn't available on browsers yet.\nHowever, i can try to use Wacom's tablet plugin, but it is slightly outdated and might crash this site.\n\nDo you want to use it?")
+                if(a){
+                    setStorageKey({plugin: 'true'});
+                }
 			}
 		})
 		$('input.clear-settings').click(function(e){

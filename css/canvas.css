@@ -1,3 +1,9 @@
+#wacomPlugin{
+    visiblity:none;
+    width:0;
+    height:0;
+}
+
 .canvas-cursor{
 	left:0;top:0;
 	width:1px;
