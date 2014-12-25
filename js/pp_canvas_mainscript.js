@@ -35,7 +35,7 @@ var updateInfo = function(){
 	if(players.length){
 		list.html('')
 		players.each(function(k, e){
-			list.append($('<li/>', {class: 'player-list-entry'}).text('painter'))
+			list.append($('<li/>', {class: 'player-list-entry'}).text($(e).data('name')))
 		})
 	}
 	$('.brush-panel').html(list)

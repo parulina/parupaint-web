@@ -335,11 +335,17 @@ body.connected.is-private .qstatus-message:before{
     border-top: 1px solid #777;
     display: none;
     -webkit-user-select: all;
+    font-size: 13px;
+    padding-left: 6px;
+    list-style-type: none;
 }
 
 .player-list li.player-list-entry{
-    padding-left: 16px;
     padding-top: 4px;
+}
+.player-list li.player-list-entry:before{
+    content:"-";
+    padding-right:5px;
 }
 
 
