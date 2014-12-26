@@ -102,11 +102,12 @@ var canvasEvents = function(r, rs){
 				}
                 
                 
-                
-				if(isConnected()){
-					rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
+                if(s != 0.0){
+					if(isConnected()){
+						rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
+					}
+					drawCanvasLine(null, nx1, ny1, Brush.mx, Brush.my, c, s)	
 				}
-				drawCanvasLine(null, nx1, ny1, Brush.mx, Brush.my, c, s)
 			}
 		}else if(e == 'mousedown'){
 			
@@ -240,6 +241,19 @@ var canvasEvents = function(r, rs){
 
 			switch(data.key){
 					
+					case 49: // 1
+					case 50:
+					case 51:
+					case 52:
+					case 53: // 5
+					{
+						var s = (data.key - 48) * 2;
+						Brush.size(s).update()
+						if(isConnected()){
+							rs.socket.emit('d', {s: s})
+						}
+						break;
+					}
 					
 					case 84:
 					{
