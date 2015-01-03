@@ -7,10 +7,10 @@
 	"short_name":"parupaint",
     "minimum_chrome_version": "40.0.0",
 	"icons": {
-		"16": "icon16.png",
-		"32": "icon32.png",
-		"48": "icon48.png",
-		"128": "icon128.png"
+		"16": "css/icon16.png",
+		"32": "css/icon32.png",
+		"48": "css/icon48.png",
+		"128": "css/icon128.png"
 	},
 	"app": {
 		"background": {
