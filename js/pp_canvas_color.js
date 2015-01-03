@@ -241,8 +241,12 @@ colorScript = function(onchange){
 		
 		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
 		if(b == 1 && e.target == this){
-			var dx = (e.offsetX - ($(this).width()/2)),
-				dy = (e.offsetY - ($(this).height()/2))
+
+			var y  = (e.offsetY || e.pageY - $(e.target).offset().top);
+			var x  = (e.offsetX || e.pageX - $(e.target).offset().left);
+			
+			var dx = (x - ($(this).width()/2)),
+				dy = (y - ($(this).height()/2))
 			
 			var dist = Math.sqrt(dx*dx + dy*dy)
 			var ang = Math.atan2(dy, dx)
@@ -261,7 +265,8 @@ colorScript = function(onchange){
 		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
 		if(b == 1){
 			
-			var light = (1.0-(e.offsetY / $(this).height()))
+			var y  = (e.offsetY || e.pageY - $(e.target).offset().top);
+			var light = (1.0-(y / $(this).height()))
 			setColorSliderHsl(null, null, light)
 			var rgb = setPreviewColor()
 		}
@@ -313,7 +318,8 @@ colorScript = function(onchange){
 		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
 		if(b == 1){
 			
-			var alpha = (1.0-(e.offsetY / $(this).height()))
+			var y  = (e.offsetY || e.pageY - $(e.target).offset().top);
+			var alpha = (1.0-(y / $(this).height()))
 			setColorSliderHsl(null, null, null, alpha)
 			var rgb = setPreviewColor()
 			console.log(rgb.a, rgb2hex(rgb))
@@ -323,8 +329,8 @@ colorScript = function(onchange){
 	$('.color-spinner .saturation-pick').bind('mousemove mousedown', function(e){
 		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
 		if(b == 1){
-			
-			var sat = ((e.offsetX / $(this).width()))
+			var x  = (e.offsetX || e.pageX - $(e.target).offset().left);
+			var sat = ((x / $(this).width()))
 			setColorSliderHsl(null, sat, null, null)
 			var rgb = setPreviewColor()
 		}

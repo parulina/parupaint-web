@@ -351,11 +351,11 @@ initParupaint = function(room){
 						
 					var hue = $('<div class="hue-pick"></div>').append(preview, selectorcode)
 					
-					var lp = $('<div class="light-pick"></div>').html(selectorcode),
-						sp = $('<div class="saturation-pick"></div>').html(selectorcode),
-						ap = $('<div class="alpha-pick"></div>').html(selectorcode)
+					var lp = $('<div/>', {class: 'light-pick'}).append(selectorcode),
+						sp = $('<div/>', {class: 'saturation-pick'}).append(selectorcode),
+						ap = $('<div/>', {class: 'alpha-pick'}).append(selectorcode)
 							
-					var pick = $('<div class="hsl-select-pick"></div>').append(ap, lp. sp, hue)
+					var pick = $('<div class="hsl-select-pick"></div>').append(ap, lp, sp, hue)
 					
 					var palette = $('<div class="palette-storage"></div>')
 				cspinner.append(pick, palette)
