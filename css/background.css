@@ -24,15 +24,14 @@ body.disconnected, body.loading{
 }
 body.main{
 	overflow:hidden;
-	background-color:rgb(108, 153, 124);
+	background-color: rgb(133, 153, 140);
     transition:background-color 0.5s linear;
-	box-shadow: 0px 0px 433px 50px rgb(171, 189, 183) inset;
 	width:100%;
 	height:100%;
 }
 body.main h1.title{
 	display: block;
-	margin: 5px;
+	margin: 0 5px;
 	position: relative;
 	overflow: hidden;
 }
@@ -55,7 +54,7 @@ body.main h2{
 	font-size: 10px;
 	font-family: Helvetica, sans-serif;
 	font-weight: 100;
-	margin: -5px 0px 0px 15px;
+	margin: 0 0px 0px 15px;
 }
 body.main div.show-area{
 	background-color: rgba(255, 255, 255, 0.07);
@@ -119,12 +118,10 @@ body a{
 
 .main-page-settings{
 	
-	float:right;
-	background-color:rgb(193, 211, 193);
-	padding:5px;
-	padding-bottom:0;
-	border-top-left-radius:2px;
-	border-top-right-radius:2px;
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	overflow: hidden;
+	margin: 0 auto;
 }
 
 input.main-setting-panel{
@@ -134,7 +131,6 @@ input.main-setting-panel{
 	border:none;
 	background-color:#DBDBDB;
 	font-size:10px;
-	margin-right:2px;
 	max-width:50px;
 }
 input.main-setting-panel:hover, 
@@ -146,16 +142,10 @@ input.main-setting-panel:focus{
 }
 input[type=text]{
 	display:block;
+	clear: both;
 }
 
 
-.new-room-input{
-	max-width: 250px;
-	font-size:17px;
-}
-input.name-input{
-	max-width:200px;
-}
 
 .new-room-input,
 input.name-input{
@@ -166,6 +156,21 @@ input.name-input{
 }
 
 
+.new-room-input{
+	max-width: 250px;
+	font-size:17px;
+	margin-top: 55px;
+	outline: none;
+}
+input.name-input{
+	display: inline-block;
+	padding: 0;
+	outline: none;
+	background: transparent;
+	color: rgb(96, 92, 157);
+	text-decoration: underline;
+	margin-right: 0;
+}
 
 .main-setting-panel:before{
 	font-size:12px;
@@ -189,31 +194,31 @@ input.name-input{
 	box-shadow: 0px 0px 4px 2px rgba(193, 252, 218, 0.71);
 }
 
-.chosen-tablet:before{
-	content:"Connected tablets:";
-	position:absolute;
-	left:0;
-	top:0;
-	margin-top:-5px;
-	font-size:11px;
-}
-
 .chosen-tablet{
 	position:relative;
-	float:right;
-	width:100px;
-	padding-top:7px;
+	margin-top: 10px;
+	text-align: center;
+	padding: 0 15px;
 }
 
 .room-status-bar{
-	display: block;
-	padding: 1px 6px 0px 4px;
-	background-color: rgb(193, 211, 193);
-	margin-top: 2px;
+	display: flex;
+	padding: 3px 6px 1px 4px;
+	background-color: rgb(232, 232, 232);
+	margin-top: 0;
 	clear: both;
+	font-family: monospace;
+	font-size: 12px;
+	justify-content: space-between;
 }
 .room-counter{
 	padding:0 15px;
+	display: inline-block;
+	/* flex: 1 1; */
+	color: rgb(74, 74, 74);
+}
+.room-counter.error{
+	color: rgb(210, 117, 117);
 }
 
 
@@ -223,7 +228,8 @@ input.name-input{
     padding:0 5px;
 }
 div.show-area .room-link{
-    margin:2px 8px;
+    margin:10px 0;
+    margin-left:20px;
     width:300px;
     height:300px;
     display:inline-block;
@@ -273,39 +279,21 @@ div.show-area .room-link{
 }
 
 .room-info-header{
-	padding:10px;
+	padding: 0;
 	padding-bottom:0;
 	position:relative;
-	box-shadow:0px 17px 64px -16px #898 inset;
+	margin-top: 0;
+	display: flex;
+	justify-content: space-around;
+	background: rgb(143, 216, 183);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.header-column{
+    flex: 1 1;
+	
+}
+.middle-header-column{
+	text-align:center;
+}
 
 

@@ -1,16 +1,45 @@
+#wacomPlugin{
+    visiblity:none;
+    width:0;
+    height:0;
+}
+
 .canvas-cursor{
 	left:0;top:0;
 	width:1px;
 	height:1px;
 	position:absolute;
-	pointer-events:none;
+	/*pointer-events:none;*/
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	user-select:none;
+	
 	visibility:hidden;
 	transition:all 100ms ease;
 	transition-property: width, height;
 	transform-origin: 0% 0%;
+}
+.canvas-cursor.cursor-self{
+	pointer-events:none;
+}
+
+.canvas-cursor:before{
+	opacity:0;
+	transition: opacity 2s ease-out;
+	transition-delay:3s;
+	visibility: visible;
+	content:attr(data-name);
+	color: black;
+	font-size: 10px;
+	text-align: center;
+	transform: translateX(-50%);
+	top: 50%;
+	position:absolute;
+	pointer-events:none;
+}
+.canvas-cursor:hover:before{
+	transition: opacity 100ms ease-out;
+	opacity: 1;
 }
 
 .canvas-cursor:after {
@@ -81,14 +110,29 @@
 }
 
 
+@-moz-keyframes opac-moz{
+	0% 		{ opacity:0; }
+	100ms	{ opacity:0; }
+	100% 	{ opacity:1; }
+}
+
+@-moz-keyframes size-shrink-moz{
+	0% {transform:scale(1); opacity:1;}
+	100% {transform:scale(0); opacity:0;}
+}
+
+
 .canvas-cursor.pick-color:after{
 	opacity:0;
 	transform:scale(0);
-	-webkit-animation-name:size-shrink;
-	-webkit-animation-duration:100ms;
-	-webkit-animation-timing-function:linear;
+    -webkit-animation:size-shrink 100ms linear;
+    -moz-animation:size-shrink-moz 100ms linear;
 	
 
+}
+
+.canvas-cursor.pick-color .cursor-pressure-size{
+    visibility: hidden;
 }
 
 
@@ -102,34 +146,19 @@
 	margin:-2px;
 	box-shadow: 0px 0px 1px 1px black;
 
-	-webkit-animation-name:opac;
-	-webkit-animation-duration:200ms;
-	-webkit-animation-timing-function:ease-out;
+    -webkit-animation:opac 200ms ease-out;
+    -moz-animation:opac-moz 200ms ease-out;
 }
 
 html{
 	height:100%;
-	/*display:flex;
-	-webkit-box-align:center;
-	-webkit-box-pack:center;
-	-moz-box-align: center;
-	-moz-box-pack: center;
-	align-items: center;
-	justify-content: center;
-	display:-webkit-box;
-	display:-moz-box;
-	*/
 	
-	
-	display: flex;
-    justify-content: center;
+    display: flex;
+    justify-content: flex-start;
     align-items: center;
 	
-	-webkit-box-align:center;
-	-webkit-box-pack:center;
-	display:-webkit-box !important;
 	
-	overflow:hidden;
+	overflow:scroll;
 }
 body.canvas.connected{
 	background-color: #DAE2D7;
@@ -138,7 +167,7 @@ body.canvas{
 	background-color: #D7D7D7;
 	transition:none;
 	display:inline-block;
-	padding: 60px;
+    margin:auto;
 }
 
 
@@ -151,14 +180,18 @@ body.canvas{
 
 .canvas-workarea{
 	position:relative;
-	margin:auto;
-	outline:1px dashed #9d9d9d;
+	margin:0;
+    
 	-webkit-user-select: none;
 	-moz-user-select:none;
 	user-select:none;
 	width:32px; height:32px;
 	cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAR0lEQVQYV5WQSQ4AIAgD6f8fXQGFQKJGOUE7YYM8BDYMVWt6LcwUkgKk7EmDDIhYYIPUn4CZNXep7JRgwDHpe6doer3u+LEBmLoZCntZhJ0AAAAASUVORK5CYII=") 5 5, none;
 	
+	border: 60px solid transparent;
+	outline:1px dashed #9d9d9d;
+    outline-offset: -60px; /*padding*/
+    
 	background-clip: content-box;
 	overflow:hidden;
 	transition: none;
@@ -187,6 +220,13 @@ body.canvas{
 canvas{
 	display:none;
 	pointer-events: none;
+    
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: -o-crisp-edges;
+    image-rendering: pixelated;
+    -ms-interpolation-mode: nearest-neighbor;
 }
 canvas.partial-focused{
 	opacity:0.3;

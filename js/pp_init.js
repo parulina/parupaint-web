@@ -26,13 +26,16 @@ $(function(){
 	var removeInit = function(){
 		$('#alert-message').remove();
 		$('body').removeClass('loading');
-		initParupaint();
+		
+		initParupaint(window.location.hash.length ? window.location.hash.substr(1) : '');
 	}
-	if(typeof manifest != 'undefined' || (typeof chrome == 'undefined' || typeof chrome.hid == 'undefined')) {
+	if(typeof manifest == 'undefined' || (typeof chrome == 'undefined' || typeof chrome.hid == 'undefined')) {
 		// non chrome browser
 		removeInit()
+        console.log('Non chrome-app.')
     } else {
 		
+        console.log('Chrome hid...');
 		chrome.hid.getDevices({filters: getUsbList()}, function(dev){
 			console.log('Available devices:', dev)
 			

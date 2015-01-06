@@ -193,7 +193,13 @@ var downloadCanvas = function(){
 			canvas[0].getContext('2d').drawImage(iframes.get(i), 0, 0)
 		}
 		var fname = 'Drawing_at_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/\:/g, '.') + '.png'
-		var link = $('<a/>', {href: iframes.get(0).toDataURL(), download: fname}).text('download canvas ['+fname+']')
-		link.get(0).click()
+		//link = $('<a/>', {href: iframes.get(0).toDataURL(), download: fname}).text('download canvas ['+fname+']')
+		//console.log(link)
+		//link.get(0).click()
+		a = document.createElement('a');
+		document.body.appendChild(a);
+		a.download = fname;
+		a.href = iframes.get(0).toDataURL();
+		a.click();
 	}
 }

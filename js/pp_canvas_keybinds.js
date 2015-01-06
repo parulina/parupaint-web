@@ -6,7 +6,7 @@ var canvasEvents = function(r, rs){
 	$('#mouse-pool').sevent(function(e, data){
 		// the kind of stuff that happens when the canvas
 		// is focused and _should_ be focused (drawing, etc...)
-		if(e == 'mousemove'){	
+		if(e == 'mousemove' && data.target.tagName == 'CANVAS'){
 			
 			var drawing = (data.button == 1)
 
@@ -25,9 +25,12 @@ var canvasEvents = function(r, rs){
 				var left = parseInt(cursor.css('left')), top = parseInt(cursor.css('top'));
 				var dx = (data.x - left), dy = (data.y - top);
 				var dist = Math.sqrt(dx*dx + dy*dy)
-				if(dist > (drawing ? 2 : 15)){
+                
+                var color = cursor.hasClass('pick-color');
+                
+				if(color || dist > (drawing ? 2 : 15)){
 					cursor.css({left: data.x, top:data.y});
-					if(!drawing){
+					if(!drawing && !color){
 						if(isConnected()){
 							rs.socket.emit('d', {x: Brush.mx, y: Brush.my, d: false})
 						}
@@ -47,33 +50,64 @@ var canvasEvents = function(r, rs){
 			}
 			var moving = (Brush.tmoving || data.button == Brush.bmove);
 			if(moving){
-				var b = $('body');
+				var b = $(window);
 				b.scrollLeft(b.scrollLeft() - data.sx);
 				b.scrollTop(b.scrollTop() - data.sy);
 			}
 			if(drawing){
-
+                var plugin = document.getElementById('wacomPlugin');
+                
 				var nx1 = ((data.x - data.cx)/nw)*ow;
 				var ny1 = ((data.y - data.cy)/nh)*oh;
 
 				var s = (Brush.brush().size);
 				var c = (Brush.brush().color);
-				if(tabletConnection){
+				var ns = null;
+				
+				
+				// size
+				if(tabletConnection && tabletConnection.connections){
 					if(tabletConnection.focus){
-						s *= tabletConnection.p
-
-						var ss = Math.round(tabletConnection.p*10)/10
-						var pp = $('.canvas-cursor.cursor-self .cursor-pressure-size')
-						if(pp.data('ts') != ss){
-							pp.css('transform', 'scale('+tabletConnection.p+')').data('ts', ss);
-						}
-
+						ns = tabletConnection.p;
+						console.log('tabletConnection', ns)
 					}
 				}
-				if(isConnected()){
-					rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
+                else if(plugin && plugin.penAPI){
+                    if(plugin.penAPI.pointerType != 0){
+                        ns = plugin.penAPI.pressure;
+                    	//console.log('plugin.penAPI.pressure', ns)
+                    }
+                }
+                else if(data.mozPressure){
+                    console.log('mozPressure', ns)
+                    ns = data.mozPressure;
+                }
+				
+				
+				
+				
+				var pp = cursor.children('.cursor-pressure-size');
+				if(ns != null){
+					s *= ns;
+
+					var ss = Math.round(ns * 10)/10;
+					if(pp.data('ts') != ss){
+						pp.css('transform', 'scale('+ ns +')').data('ts', ss);
+					}
+				} else {
+					//mouse
+					if(pp.attr('style')){
+						pp.removeAttr('style');
+					}
 				}
-				drawCanvasLine(null, nx1, ny1, Brush.mx, Brush.my, c, s)
+                
+                
+                if(s != 0.0){
+					if(isConnected()){
+						rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
+					}
+					drawCanvasLine(null, nx1, ny1, Brush.mx, Brush.my, c, s)	
+				}
 			}
 		}else if(e == 'mousedown'){
 			
@@ -207,6 +241,19 @@ var canvasEvents = function(r, rs){
 
 			switch(data.key){
 					
+					case 49: // 1
+					case 50:
+					case 51:
+					case 52:
+					case 53: // 5
+					{
+						var s = (data.key - 48) * 2;
+						Brush.size(s).update()
+						if(isConnected()){
+							rs.socket.emit('d', {s: s})
+						}
+						break;
+					}
 					
 					case 84:
 					{
@@ -229,24 +276,36 @@ var canvasEvents = function(r, rs){
 					}
 					case 82: // r
 					{
-						if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
-							$('.canvas-cursor.cursor-self').addClass('pick-color')
+						if(data.shift && data.ctrl){
+							
 						}
-						var cc = $('canvas.focused');
-						if(cc.length){
-							var x = Brush.mx, y = Brush.my;	
+						else if(data.shift){
+							if(isConnected()){
+								ROOM.roomSocket.reload(function(){
+									updateInfo()
+								})
+							}
+						}else{
 
-							var px = cc.get(0).getContext('2d').getImageData(x, y, 1, 1).data;
-							var r = ('00' + px[0].toString(16)).slice(-2),
-								g = ('00' + px[1].toString(16)).slice(-2),
-								b = ('00' + px[2].toString(16)).slice(-2),
-								a = ('00' + px[3].toString(16)).slice(-2)
-							var hex = "#" + ("00000000" + (r+g+b+a)).slice(-8);
+							if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
+								$('.canvas-cursor.cursor-self').addClass('pick-color')
+							}
+							var cc = $('canvas.focused');
+							if(cc.length){
+								var x = Brush.mx, y = Brush.my;	
 
-							if(hex != Brush.brush().color){
-								Brush.color(hex).update()
-								updateInterfaceHex(hex)
-								writeDefaults();
+								var px = cc.get(0).getContext('2d').getImageData(x, y, 1, 1).data;
+								var r = ('00' + px[0].toString(16)).slice(-2),
+									g = ('00' + px[1].toString(16)).slice(-2),
+									b = ('00' + px[2].toString(16)).slice(-2),
+									a = ('00' + px[3].toString(16)).slice(-2)
+								var hex = "#" + ("00000000" + (r+g+b+a)).slice(-8);
+
+								if(hex != Brush.brush().color){
+									Brush.color(hex).update()
+									updateInterfaceHex(hex)
+									writeDefaults();
+								}
 							}
 						}
 						break;
