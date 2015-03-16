@@ -349,20 +349,6 @@ body.connected.is-private .qstatus-message:before{
 }
 
 
-.setting-top-row, .setting-bottom-row{
-	flex:0 0;
-	flex-basis:40px;
-	background-color:#CCC;
-}
-.setting-top-row{
-	background-color:transparent;
-}
-
-.setting-middle-row{
-	flex-grow:1;
-	flex-direction:column;
-	overflow: hidden;
-}
 
 body .multi-only{
 	display:none;
@@ -510,17 +496,17 @@ form.knob-thing input[type=checkbox]{
 	justify-content: space-around;
 }
 
-.setting-panel div[type="button"]:hover{
+.setting-bottom-row > div:hover{
 	background: rgb(218, 217, 201);
 }
-.setting-panel div[type="button"]{
+.setting-bottom-row > div{
 	flex:1 1;
 	border:none;
 	position:relative;
 	background: rgb(192, 190, 164);
 	border-top: 1px solid rgb(174, 170, 170);
 }
-.setting-panel div[type="button"][data-label]:before{
+.setting-bottom-row > div[data-label]:before{
 	content:attr(data-label);
 	position:absolute;
 	top:0; left:0; right:0; bottom:0;
@@ -543,4 +529,21 @@ form.knob-thing input[type=checkbox]{
 }
 .setting-quit-btn:before{
 	color: rgb(253, 209, 209) !important;
+}
+
+
+
+.setting-top-row, .setting-bottom-row{
+	flex:0 0;
+	flex-basis:40px;
+	background-color:#CCC;
+}
+.setting-top-row{
+	background-color:transparent;
+}
+
+.setting-middle-row{
+	flex-grow:1;
+	flex-direction:column;
+	overflow: hidden;
 }

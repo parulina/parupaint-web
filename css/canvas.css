@@ -1,5 +1,6 @@
 #wacomPlugin{
     visiblity:none;
+	display:block;
     width:0;
     height:0;
 }
@@ -24,19 +25,29 @@
 }
 
 .canvas-cursor:before{
-	opacity:0;
-	transition: opacity 2s ease-out;
-	transition-delay:3s;
+/* // until i can have click through but still hover events,
+ * // this stays off.
+ *
+    opacity:0;
+    transition: opacity 2s ease-out;
+    transition-delay:3s;
+	*/
 	visibility: visible;
 	content:attr(data-name);
-	color: black;
+	color: white;
 	font-size: 10px;
 	text-align: center;
 	transform: translateX(-50%);
 	top: 50%;
 	position:absolute;
 	pointer-events:none;
-}
+
+	text-shadow:
+	-1px -1px 0 #000,  
+	1px -1px 0 #000,
+	-1px 1px 0 #000,
+	1px 1px 0 #000;
+    }
 .canvas-cursor:hover:before{
 	transition: opacity 100ms ease-out;
 	opacity: 1;
@@ -46,20 +57,14 @@
 	position: absolute;
 	visibility:visible;
 	content: " ";
-	/*
-	width:attr(data-size px);
-	height:attr(data-size px);
-	this will work... someday.
-	*/
-	width:100%;
-	height:100%;
+	top:0; left:0; right:0; bottom:0;
+	transform: translate(-50%, -50%);
+
 	border-radius:100%;
-	left: -50%;
-	top: -50%;
-	border:1.5px solid black;
-	box-shadow: 0px 0px 1px 1px white inset;
-	margin: -1.5px;
-}
+	border:1px solid black;
+	box-shadow: 0px 0px 0px 1px white inset;
+	pointer-events: none;
+   }
 
 
 .canvas-cursor.eraser.drawing:after{
@@ -83,16 +88,12 @@
 }
 .canvas-cursor.cursor-self .cursor-pressure-size{
 	position:absolute;
-	top: -50%; 
-	left: -50%; 
-	width: 100%; 
-	height: 100%;
-	transform-origin: 50% 50%;
+	top: 0; left: 0; bottom: 0; right: 0;
+	transform-origin: 0 0;
+	transform: translate(-50%, -50%);
 	border-radius: 100%;
-	border: 1.5px solid white;
 	visibility: visible;
-	box-shadow: 0 0 1px 1px black inset;
-	margin: -1.5px;
+	box-shadow: 0 0 0px 1px black inset;
 }
 
 

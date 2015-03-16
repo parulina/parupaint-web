@@ -110,7 +110,7 @@
 	margin-top:1px;
 	background-color:rgba(255,255,255,0.4);
 }
-.flayer-info-layer .flayer-info-frame:hover:before{
+.flayer-info-layer .flayer-info-frame:hover:after{
 	content:"frame " attr(data-frame);
 	box-shadow:0 0 8px -3px black inset;
 	position:absolute;
@@ -124,16 +124,16 @@
 	top:100%;
 	pointer-events:none;
 }
-.flayer-info-layer:last-child .flayer-info-frame:hover:before{
+.flayer-info-layer:last-child(+1+2) .flayer-info-frame:hover:after{
 	top:auto; bottom:100%;
 	border-top-left-radius:16px;
 	border-bottom-left-radius:0;
 }
-.flayer-info-layer:last-child .flayer-info-frame:nth-last-child(-50+8):hover:before{
+.flayer-info-layer:last-child(+1+2) .flayer-info-frame:nth-last-child(-50+8):hover:after{
 	border-radius:0;
 	border-top-right-radius:16px;
 }
-.flayer-info-layer .flayer-info-frame:nth-last-child(-50+8):hover:before{
+.flayer-info-layer .flayer-info-frame:nth-last-child(-50+8):hover:after{
 	right:0;
 	border-radius:0;
 	border-bottom-right-radius:16px;

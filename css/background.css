@@ -124,6 +124,15 @@ body a{
 	margin: 0 auto;
 }
 
+.opt-notify {
+	color: green;
+	position: absolute;
+	left: 0;
+	right: 0;
+	text-align: center;
+	pointer-events: none;
+}
+
 input.main-setting-panel{
 	white-space: normal;
 	text-align:center;
@@ -166,7 +175,7 @@ input.name-input{
 	display: inline-block;
 	padding: 0;
 	outline: none;
-	background: transparent;
+	background: white;
 	color: rgb(96, 92, 157);
 	text-decoration: underline;
 	margin-right: 0;
@@ -297,3 +306,13 @@ div.show-area .room-link{
 }
 
 
+body > *{
+	display:none;
+}
+body.canvas > #main-canvas,
+body.canvas > #mouse-pool {
+	display:block;
+}
+body.main > #main-page {
+	display:block;
+}
