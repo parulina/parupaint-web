@@ -22,7 +22,57 @@ if(manifest != undefined){
 
 
 $(function(){
-	console.log('pp_init.js')
+	console.log('pp_init.js');
+	
+	$('input.set-tablet').click(function(e){
+
+		if(typeof chrome != "undefined" && typeof chrome.permissions != "undefined"){
+			chrome.permissions.contains({permissions:['hid']}, function(e){
+				if(e){
+					chrome.permissions.remove({permissions:['hid']}, function(){
+						$('input.set-tablet').removeClass('enabled')
+					})
+				} else {
+					chrome.permissions.request({permissions:['hid']}, function(r){
+						if(r){
+							$('input.set-tablet').addClass('enabled')
+						}
+					})
+				}
+			})
+		}else {
+			var a = confirm("Sorry, full tablet support isn't available on browsers yet.\nHowever, i can try to use Wacom's tablet plugin, but it is slightly outdated and might crash this site.\n\nDo you want to use it?")
+			if(a){
+				setStorageKey({plugin: 'true'});
+			}
+		}
+	})
+	$('input.new-room-input').keypress(function(e){
+		if(e.keyCode == 13){
+
+			getStorageKey('name', function(d){
+				if(d && d.name && d.name.length){
+
+					initParupaint($(e.target).val());
+					$(e.target).val('');
+				} else {
+					console.log("name isn't valid!",d)
+					return $('input.name-input').focus().select()
+				}
+			})
+		}
+	});
+	$('input.name-input').keypress(function(e){
+		if(e.keyCode == 13){
+			setStorageKey({name: $(this).val()})
+			console.log('set name to: ', $(this).val())
+			$('input.new-room-input').focus().select();
+		}
+	});
+	
+	
+	
+	
 	var removeInit = function(){
 		$('#alert-message').remove();
 		$('body').removeClass('loading');

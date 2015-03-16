@@ -27,7 +27,8 @@ var addMessage = function(msg, name, time, notify){
 		if(name) attrs['data-name'] = name
 		
 		var m = $('<div />',{class:'chat-message', html: msg.replace(new RegExp('\r?\n','g'), '<br />')})
-		if(time) m.attr('data-time', time)
+		var t = new Date(time);
+		if(time) m.attr('data-time', (t.getHours() + ":" + t.getMinutes() + ":" + t.getSeconds()))
 			
 		if(notify){
 			$('.qstatus-message').append($('<div/>', attrs).html(m.clone()))
@@ -73,35 +74,31 @@ var addChatMessage = function(room, msg, name, time, notify){
 }
 
 
-var sendChatMessage = function(msg, room){
-	if(!room) room = getRoom()
+var sendChatMessage = function(network, msg){
 	var name = $('.canvas-cursor.cursor-self').data('name')
 	
-	
-	if(room == getRoom()){
-		if(navigator.onLine && isConnected()) //fixme: sockets
-		{
-			//todo
-			ROOM.roomSocket.socket.emit('chat', {msg: msg, name: name, time: Date.now()})
-			
-		} else {
-			addChatMessage(room, msg, name, new Date().toTimeString().split(' ')[0], false)
-		}
+	if(isConnected()){
+		network.emit('chat', {msg: msg, time: new Date().toISOString()})
+
+	} else {
+		addChatMessage(room, msg, name, new Date().toTimeString().split(' ')[0], false)
 	}
 }
 
-chatScript = function(room){
+chatScript = function(network){
 	
 	$('textarea.chat-input').keydown(function(e){
-		console.log(e.keyCode, e.shiftKey)
+		//console.log(e.keyCode, e.shiftKey)
 		if(e.keyCode == 13 && !e.shiftKey){
-			sendChatMessage($(this).val())
+			
+			sendChatMessage(network, $(this).val())
 			$(this).val('')
 			return false;
 		} else if(e.keyCode == 27){
+			
 			overlayGone(true)
 		}
-		console.log($('.chat-input-box .ci-size').html($(this).val()).html())
+		$('.chat-input-box .ci-size').html($(this).val()).html();
 	}).on('focus', function(e){
 		clearTimeout(overlayTimeout)
 	})

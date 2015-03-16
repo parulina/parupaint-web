@@ -2,193 +2,216 @@
 
 
 
-var roomSocketConnection = function(r){
-	if(!r) return false
+var roomConnection = function(roomObj){
+	if(!RoomListSocket) return false;
 	
 	
-	var ur = url + '/' + r
 	
-	this.id = null
-	this.ad = null
-	this.pp = false
 	
-	this.reload = function(callback){
-		var cs = $('.canvas-pool canvas'),
-			ii = cs.length
+	//disconnect - $('.canvas-cursor').not('.cursor-self').remove()
+	
+	this.emit = function(str, d) {
+		if(RoomListSocket){
+			RoomListSocket.emit(str, d);
+		}	
+	};
+	var cleanup = function(){
+		$('.canvas-cursor').not('.cursor-self').remove()
+		$('.cursor-self').removeClass('admin');
+		$('body').removeClass('is-private');
 		
-		if(ii){
-			cs.each(function(k, e){
-				var c = $(e),
-					s = ur + '/image/' + c.data('layer') + '/' + c.data('frame') + '?t=' + new Date().getTime()
-				
-				loadSqnyaImage(s, function(i){
-					var img = new Image;
-					
-					img.onload = function() {
-						c.get(0).getContext('2d').drawImage(img, 0, 0)
-						if((--ii) == 0){
-							callback()
-						}
-					}
-					img.src = i;
-					
-					
-				})
-			})
+	}
+	RoomListSocket.on('leave', cleanup);
+	RoomListSocket.on('join', function(data){
+		if(!data.success) {
+			initParupaint('', 'Wrong password.')
+			
 		}
-	}
-	this.sid = function(i){
-		if(i != undefined) this.id = i
-		return this.id
-	}
-	this.connected = function(){
-		return this.socket.connected
-	}
-	this.private = function(q){
-		if(typeof q != "undefined"){
-			this.pp = q
-		}
-		return (this.pp)
-	}
-	this.admin = function(q){
-		if(typeof q != "undefined"){
-			this.ad = q
-		}
-		return (this.ad)
-	}
-	this.isAdmin = function(){
-		return (this.ad == this.id)
-	}
-	
-	
-	this.qq = {room: r}
-	this.query = function(q){
-		if(typeof q == "object"){
-			this.socket.io.opts.query = $.param($.extend(this.qq, q))
-		}
-		return this.qq
-	}
-	
-	
-	
-	
-	
-	
-	var pthis = this
-	this.socket = io.connect(url, {
-		query: $.param(this.qq),
-		forceNew: true,
-		autoConnect: false,
-		reconnectionAttempts:5
 	})
 	
-
-	
-	this.socket.on('connect', function(c){
-		pthis.sid(pthis.socket.io.engine.id)
-		$('.canvas-cursor').not('.cursor-self').remove() //clear out just in case
-		console.log('Connected as', pthis.id)
-		
-	}).on('connect_error', function(d){
-		addMessage('Connection error -- ' + d.message)
-		updateInfo()
-	}).on('reconnect_failed', function(d){
-		addMessage('Reconnection failed.')
-		updateInfo()
-	}).on('reconnect_error', function(d){
-		addMessage('Reconnection error -- ' + d.message)
-		updateInfo()
-	}).on('disconnect', function(c){
-        
-		console.log('disconnect', c)
-		if(c == pthis.sid() || c == 'forced close'){
-			// i disconnected - remove everyone >:D
-			pthis.id = null
-			$('.canvas-cursor').not('.cursor-self').remove()
-			$('body').removeClass('connected is-admin')
-			
-		} else {
-			$('.canvas-cursor#' + c).remove()
-		}
-		updateInfo()
-		
-		
-	}).on('rs', function(d){
-		if(d.admin != undefined) pthis.admin(d.admin)
-		if(d.private != undefined) pthis.private(d.private)
-		
-		
-		updateInfo()
-		
-	}).on('peer', function(d){
-		if(d.id != pthis.id){
-			console.log('Peer connected: ' + d.id)
-			var e = $('<div/>', {class: 'canvas-cursor', id:d.id, 'data-name': d.name}).css({left: d.x, top: d.y}).data('x', d.x).data('y', d.y)
-			if(d.s != undefined) Brush.size(d.s, e)
-			$('#mouse-pool').append(e)
-		}
-		
-	}).on('canvas', function(d){
-		console.log(d.layers)
+	RoomListSocket.on('canvas', function(d){
+		console.log('canvas', d)
 		if(d.layers != undefined){ // create new
-			initCanvas(d.width, d.height, d.layers.length, d.layers)
+			initCanvas(d.width, d.height, d.layers)
 		} else {
 			initCanvas(d.width, d.height)
 		}
 		
 		
-		pthis.reload(function(){
+		roomObj.socketReload(function(){
 			updateFrameinfoSlow()
 			updateInfo()
 		})
+	});
+	
+	RoomListSocket.on('img', function(d){
+		var l = parseInt(d.l),
+			f = parseInt(d.f),
+			decodedData = window.atob(d.data),
+			binData = new Uint8Array(decodedData.split('').map(function(x){ return x.charCodeAt(0); })),
+			data = pako.inflate(binData),
+			iw = parseInt(d.w),
+			ih = parseInt(d.h),
+			bpp = 4;
 		
-	}).on('d', function(d){
-		if(d.id != pthis.id){
-			var e = $('.canvas-cursor#' + d.id)
-			if(e.length){
-				var ow = $('canvas.focused').get(0).width,
-					oh = $('canvas.focused').get(0).height,
-					nw = $('.canvas-workarea').width(),
-					nh = $('.canvas-workarea').height(),
-					
-					x = e.data('x'),
-					y = e.data('y'),
-					l = e.data('layer'),
-					f = e.data('frame')
-					
-					
-				
-				if(d.x != undefined) e.css('left', (d.x/oh)*nh).data('x', d.x)
-				if(d.y != undefined) e.css('top', (d.y/ow)*nw).data('y', d.y)
-				if(d.l != undefined) {e.data('layer', d.l), l = d.l}
-				if(d.f != undefined) {e.data('frame', d.f), f = d.f}
-				
-				if(d.d != undefined && d.d != e.hasClass('drawing')){
-					if(d.d) { x = d.x, y = d.y } // v0v
-					e.toggleClass('drawing', d.d)
-				}
-				
-				
-				if(d.s != undefined) Brush.size(d.s, e)
-				if(d.c != undefined) Brush.color(d.c, e)
-				
-				
-				if(d.d && 
-				   l != undefined && 
-				   f != undefined && 
-				   d.x != undefined && 
-				   d.y != undefined){
-					
-					var cc = $('.canvas-pool canvas[data-layer='+l+'][data-frame='+f+']')
-					if(cc.length){
-						drawCanvasLine(cc, x, y, d.x, d.y, d.c, d.s)
-					}
-					
-				}
+		var e = $('#flayer-' + l + '-' + f);
+		
+		if(e.length) {
+			var ctx = e.get(0).getContext('2d');
+			
+
+
+			var cc = ctx.createImageData(iw, ih);
+			for (var i = 0, len = cc.data.length; i < len; i += 4) {
+				cc.data[i] = data[i+2];
+				cc.data[i+1] = data[i+1];
+				cc.data[i+2] = data[i];
+				cc.data[i+3] = data[i+3];
+			}
+			ctx.putImageData(cc, 0, 0)
+		}
+	});
+	
+	// on peer disconnect/connect
+	RoomListSocket.on('peer', function(d){
+		console.log('Peer connected: ' + d.id, d)
+		
+		var f = $('#' + d.id)
+		if(d.disconnect && f.length) {
+			f.remove()
+		} else if(!d.disconnect) {
+			var e = $('<div/>', {
+				class: 'canvas-cursor',
+				id:d.id,
+				'data-name': d.name 
+			}).css({
+				left: d.brushdata.X,	
+				top: d.brushdata.Y
+			}).data({
+				'x': d.brushdata.X,	
+				'y': d.brushdata.Y,
+				'layer': d.brushdata.Layer,
+				'frame': d.brushdata.Frame
+			})
+			Brush.size(d.brushdata.Size, e)
+			//TODO set drawing/etc
+			$('#mouse-pool').append(e)		
+		}
+	});
+	
+	RoomListSocket.on('id', function(id){
+		if(typeof id == "string"){
+			console.log("You're ID " + id);
+			$('.cursor-self').attr('id', id);
+		}
+	})
+	RoomListSocket.on('lf', function(d){
+		var e = $('.canvas-cursor#' + d.id)
+		if(!e.length) return;
+		
+		var l = parseInt(d.l),
+			f = parseInt(d.f);
+		e.data({
+			'layer': l,
+			'frame': f
+		})
+	})
+	RoomListSocket.on('rs', function(d){
+		
+		$('.cursor-self').removeClass('admin');
+		$('body').removeClass('is-private');
+		
+		if(typeof d.admin != "undefined") {
+			if(d.admin == $('.cursor-self').attr('id')) {
+				// is admin
+				console.log("You're admin.");
+				$('.cursor-self').addClass('admin');
 			}
 		}
-	}).on('chat', function(d){
-		addChatMessage(r, d.msg, d.name, d.time, true)
+		if(typeof d.private != "undefined"){
+			$('body').toggleClass('is-private', d.private);
+			console.log('Switching private to ' + d.private);
+		}
+		
+		
+		updateInfo()
+		
+	})
+	
+	RoomListSocket.on('draw', function(d){
+		
+		var x = d.xo,
+			y = d.yo,
+			l = d.l,
+			f = d.f,
+			xx = d.x, // net x
+			yy = d.y, // net y
+			ss = d.s, // net size
+			cc = d.c, // net color
+			dd = d.d; // net drawing
+		
+		
+		if(typeof d.id != "undefined") {
+			
+			var e = $('.canvas-cursor#' + d.id)
+			if(!e.length) return;
+			var me = e.hasClass('cursor-self');
+
+			var ow = $('canvas.focused').get(0).width,
+				oh = $('canvas.focused').get(0).height,
+				nw = $('.canvas-workarea').width(),
+				nh = $('.canvas-workarea').height();
+			
+			var x = e.data('x'),
+				y = e.data('y'),
+				l = e.data('layer'),
+				f = e.data('frame');
+
+
+
+			if(!me) {
+				if(xx != undefined) e.css('left', (xx/oh)*nh).data('x', xx);
+				if(yy != undefined) e.css('top', (yy/ow)*nw).data('y', yy);
+				if(ss != undefined) Brush.size(ss, e)
+				if(cc != undefined) Brush.color(cc, e)
+
+			} else {
+				if(xx != undefined) e.data('x', xx);
+				if(yy != undefined) e.data('y', yy);
+			}
+
+			if(dd != undefined && dd != e.hasClass('drawing')){
+				if(dd) { 
+					x = xx, y = yy
+					console.log('Drawing, resetting')
+				} // v0v
+				e.toggleClass('drawing', dd)
+			}
+			if((!me && dd) && 
+			   l != undefined && 
+			   f != undefined && 
+			   xx != undefined && 
+			   yy != undefined ){
+
+				var cce = $('.canvas-pool canvas[data-layer='+l+'][data-frame='+f+']');
+				if(cce.length){
+					drawCanvasLine(cce, x, y, xx, yy, cc, ss);
+				}
+			} else if(me && dd) {
+				//console.log(y, yy);
+				//drawCanvasLine(null, x, y, xx, yy, cc, ss)
+			}
+		} else {
+			//anon draw op
+			var cce = $('.canvas-pool canvas[data-layer='+l+'][data-frame='+f+']');
+			if(cce.length){
+				drawCanvasLine(cce, x, y, xx, yy, cc, ss);
+			}
+		}
+
+	});
+	RoomListSocket.on('chat', function(d){
+		addChatMessage(null, d.msg, d.name, d.time, true)
 	})
 }
 

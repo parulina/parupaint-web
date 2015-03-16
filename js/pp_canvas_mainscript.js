@@ -1,29 +1,28 @@
-var isSocket = function(){
-	return (typeof ROOM != 'undefined' && ROOM.roomSocket.socket)
-}
 
 var isConnected = function(){
-	return (navigator.onLine && (isSocket() && ROOM.roomSocket.connected() ))
+	return (navigator.onLine && (RoomListSocket && RoomListSocket.connected))
 }
+
+
 var isAdmin = function(){
-	return (navigator.onLine && (isSocket() && ROOM.roomSocket.isAdmin() ))
+	return (isConnected() && $('.cursor-self').hasClass('admin'));
 }
 
 var isPrivate = function(){
-	return (navigator.onLine && (isSocket() && ROOM.roomSocket.private() ))
+	return (isConnected() && $('body').hasClass('is-private'));
 }
 
 
 var updateInfo = function(){
 	var layer = $('canvas.focused').data('layer'),
 		frame = $('canvas.focused').data('frame'),
-		connected = isConnected() ? 'multi' : 'single', // connected to socket room
+		connected_label = isConnected() ? 'multi' : 'single', // connected to socket room
 		room = getRoom(),
 		width = parseInt($('canvas.focused')[0].width),
 		height = parseInt($('canvas.focused')[0].height)
 	
 	
-	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame).attr('data-label-3', connected)
+	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame).attr('data-label-3', connected_label)
 	$('.qstatus-message').attr('data-label', room)
 	$('.qstatus-piece.qinfo').toggleClass('online', navigator.onLine)
 	
@@ -45,25 +44,18 @@ var updateInfo = function(){
 	
 	Brush.update()
 	
-	if(isSocket()){
-		var msg = ROOM.roomSocket.socket.connected ? 'Connected' : 'Disconnected'
+	if(true){
+		var connected = isConnected();
 		
-		if(ROOM.roomSocket.socket.io.reconnecting){
-			var a = ROOM.roomSocket.socket.io.attempts,
-				am = ROOM.roomSocket.socket.io.reconnectionAttempts()
-			
-			msg = 'Reconnecting ['+a+'/'+am+']...'
-		}
 		
-		$('form.connection-input').toggleClass('enable', isConnected()).attr('data-label', msg)
-		
-		$('input.con-status').get(0).checked = ROOM.roomSocket.socket.connected
-		$('body').toggleClass('connected', ROOM.roomSocket.socket.connected)
+		var msg = connected ? 'Connected' : 'Disconnected';
+		$('form.connection-input').toggleClass('enable', connected).attr('data-label', msg)
+		$('input.con-status').get(0).checked = connected
+		$('body').toggleClass('connected', connected)
 		
 		
 		
 		$('body').toggleClass('is-admin', isAdmin()) //if i'm admin, put the body to admin mode. yass
-		$('body').toggleClass('is-private', isPrivate())
 		$('input.private-status').get(0).checked = isPrivate()
 	}
 	
@@ -235,7 +227,7 @@ var Brush = {
 		if(cursor.length){
 			var cssrgba = rgba2css((color[0] == '#') ? hex2rgb(color) : color)
 			cursor.data('color', color);
-			cursor.css({'borderColor': cssrgba, 'background-color': cssrgba})
+			//cursor.css({'borderColor': cssrgba, 'background-color': cssrgba})
 			if(cursor.hasClass('cursor-self')) this.brush().color = color;
 		}
 		return this;
@@ -334,7 +326,6 @@ var setZoom = function(z){
 		ccy = 	(oh / (aay))
 	
     
-    console.log('left', b.scrollLeft()+(ch/ccy))
 	b.scrollTop( b.scrollTop()+(ch/ccy) )
 	b.scrollLeft( b.scrollLeft()+(cw/ccx) )
 	
@@ -352,29 +343,56 @@ var setZoom = function(z){
 var onRoom = function(room){
 	console.log('onRoom', room)
 	
+	$('#main-canvas *').unbind();
 	
-	// initialize room socket
-	
-	this.roomSocket = new roomSocketConnection(room)
-	this.canvasCallbacks = new canvasEvents(room, this.roomSocket)
+	this.roomConnected = false;
+	this.wantToConnect = false;
+	this.canvasNetwork = new roomConnection(this)
+	this.canvasCallbacks = new canvasEvents(room, this.canvasNetwork)
+	this.canvasChat = new chatScript(this.canvasNetwork)
 	var r = this
+	
+	if(RoomListSocket) {
+		RoomListSocket.on('open', function(data){
+			RoomListSocket.emit('name', {
+				name: $('.canvas-cursor.cursor-self').data('name')
+			});
+			console.log('Connected to socket. (connect? %s)', r.wantToConnect)
+			if(r.wantToConnect) {
+				r.toggleNetwork(true)
+			}
+		})
+		RoomListSocket.on('close', function(data){
+			$('.canvas-cursor').not('.cursor-self').remove()
+		})
 		
-	this.toggleNetwork = function(net){
-		if(net == undefined) net = !isConnected()
-		
-		if(!net) 		return this.roomSocket.socket.io.disconnect()
-		else			return this.roomSocket.socket.io.connect()
 	}
 	
+	this.toggleNetwork = function(net){
+		if(!r.canvasNetwork) return false;
+		if(net == undefined) net = !isConnected();
+		
+		
+		if(!net) {
+			r.canvasNetwork.emit('leave', {room: room});
+		}
+		else {
+			r.canvasNetwork.emit('join', {room: room});
+		}
+	}
+	
+	this.socketReload = function(callback){
+		if(r.canvasNetwork) {
+			r.canvasNetwork.emit('img');
+			callback();
+		}
+	}
+	
+	console.log("Loading canvas storage data.")
 	getStorageKey(null, function(data){
 		
 		var name = data.name || ('unnamed_mofo'+(Date.now().toString().slice(-5)))
 		$('.canvas-cursor.cursor-self').data('name', name)
-		
-		r.roomSocket.query({name: name})
-		
-		
-		
 		
 		if(data.brushDefaults){
 			var def = JSON.parse(data.brushDefaults);
@@ -393,7 +411,7 @@ var onRoom = function(room){
 				var w = data.rooms[room].width || 500,
 					h = data.rooms[room].height || 500
 
-				initCanvas(w, h, layers.length, layers)
+				initCanvas(w, h, layers)
 				for(var l in data.rooms[room].data){
 					for(var f in data.rooms[room].data[l]){
 						var cc = data.rooms[room].data[l][f];
@@ -413,31 +431,35 @@ var onRoom = function(room){
 			}
 		} else {
 			console.log('New canvas')
-			initCanvas(500, 500, 2, [2, 2])
+			initCanvas(500, 500, [[{}, {}], [{}, {}]])
 		}
 		
         
         if(data.plugin){
+			console.log('Adding wacom plugin.');
             $('body').prepend(
                 $('<object/>', {id: 'wacomPlugin', type: 'application/x-wacomtabletplugin'})
-            )
+            );
         }
 		
 		// rest init
 		updateInfo()
 		updateFrameinfoSlow()
 		
-		if(navigator.onLine){
+		if(navigator.onLine && RoomListSocket.ws.readyState == 1){
 			r.toggleNetwork(true)
+		} else if(RoomListSocket.ws.readyState == 0){
+			r.wantToConnect = true;
 		}
 	});
 	
 	
-	$('.gui .overlay-piece').mouseout(function(e){
+	$('.gui .overlay-piece').mouseover(function(e){
 		showOverlay(2000)
 	}).mouseover(function(e){
 		clearTimeout(overlayTimeout);
 	});
+	
 	
 	$('.setting-bottom-row > div[type="button"]').click(function(ee){
 		var e = $(ee.target)
@@ -454,23 +476,22 @@ var onRoom = function(room){
 		} else if(e.is('.setting-down-img')){
 			downloadCanvas()
 		} else if(e.is('.setting-save-img')){
-			saveCanvasLocal(room)
+			saveCanvasLocal(room);
 		} else if(e.is('.setting-reload-img')){
-			ROOM.roomSocket.reload(function(){
-				updateInfo()
-			})
+			r.socketReload();
 		}
 	})
 	
 	
 	$('input.con-status').change(function(e){
 		var c = $(e.target).is(':checked')
+		
 		r.toggleNetwork(c)
 	})
 	$('input.private-status').change(function(e){
 		var c = $(e.target).is(':checked')
 		if(isAdmin()){
-			ROOM.roomSocket.socket.emit('rs', {private: c})
+			r.canvasNetwork.emit('rs', {private: c})
 		}
 	})
 	
@@ -495,11 +516,11 @@ var onRoom = function(room){
 	})
 	
 	$('form.dimension-input').submit(function(){
-		var w = $(this).children('.dimension-w-input').val(),
-			h = $(this).children('.dimension-h-input').val()
+		var w = parseInt($(this).children('.dimension-w-input').val()),
+			h = parseInt($(this).children('.dimension-h-input').val());
 		
 		if(isConnected()){
-			ROOM.roomSocket.socket.emit('r', {w: w, h: h})
+			r.canvasNetwork.emit('r', {width: w, height: h})
 		} else {
 			initCanvas(w, h)
 		}
@@ -532,10 +553,9 @@ var onRoom = function(room){
 		if($('.qstatus-brush, .qstatus-settings').hasClass('panel-open')) return false;
 	})
 	
-	chatScript(room)
+	
 	
 	colorScript(function(oldc, newc){
-		console.log(oldc, '->', newc)
 		addPaletteEntryRgb(newc)
 		Brush.color(rgb2hex(newc)).update()
 		writeDefaults();

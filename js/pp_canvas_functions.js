@@ -147,16 +147,17 @@ var removeCanvasLayer = function(layer){
 
 // empty layers & frames for resize
 //		       				tnt     int	    0-x		[0-x]
-var initCanvas = function(width, height, layers, frames){
-
-	var nn = (layers != undefined && frames != undefined)
+var initCanvas = function(width, height, cdata){
+	var nn = (cdata != undefined)
 
 	$('.canvas-workarea').width(width).height(height)
 	$('.canvas-pool').data('ow', width).data('oh', height);
 	if(nn){
 		$('.canvas-pool').html('')
-		for(var l = 0; l < layers; l++){
-			for(var f = 0; f < frames[l]; f++){
+		for(var l = 0; l < cdata.length; l++){
+			
+			for(var f = 0; f < cdata[l].length; f++){
+				console.log('Creating layer ' + l + " frame " + f)
 				var id = 'flayer-'+l+'-'+f;
 
 				var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"/>')

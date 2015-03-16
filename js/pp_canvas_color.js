@@ -75,6 +75,7 @@ function hex2rgb(hex) {
 	
 	if(!result) {
 		console.log('invalid color.', hex)
+		return {r: 255, g: 255, b: 255, a: 255};
 	}
 	
     return result ? {

@@ -1,5 +1,5 @@
 
-var canvasEvents = function(r, rs){
+var canvasEvents = function(r, net){
 	var mouseMoveTimer = null, ignoreGui = false;
 	console.log('Creating canvas events')
 
@@ -9,7 +9,8 @@ var canvasEvents = function(r, rs){
 		if(e == 'mousemove' && data.target.tagName == 'CANVAS'){
 			
 			var drawing = (data.button == 1)
-
+			var plugin = document.getElementById('wacomPlugin');
+			
 			//todo: store with zoom offset
 			var ow = $('canvas.focused').get(0).width,
 				oh = $('canvas.focused').get(0).height,
@@ -18,6 +19,8 @@ var canvasEvents = function(r, rs){
 			
 			Brush.mx = (data.x/nw)*ow;
 			Brush.my = (data.y/nh)*oh;
+			var s = (Brush.brush().size);
+			var c = (Brush.brush().color);
 			
 			
 			var cursor = $('.canvas-cursor.cursor-self');
@@ -29,10 +32,13 @@ var canvasEvents = function(r, rs){
                 var color = cursor.hasClass('pick-color');
                 
 				if(color || dist > (drawing ? 2 : 15)){
-					cursor.css({left: data.x, top:data.y});
+					cursor.css({
+						left: data.x, 
+						top:data.y
+					});
 					if(!drawing && !color){
 						if(isConnected()){
-							rs.socket.emit('d', {x: Brush.mx, y: Brush.my, d: false})
+							net.emit('draw', {x: Brush.mx, y: Brush.my, s: s, c: c, d: false})
 						}
 					}
 				}
@@ -43,11 +49,35 @@ var canvasEvents = function(r, rs){
 					cursor.css({left: data.x, top:data.y});
 				}, 800)
 			}
-			if(tabletConnection && tabletConnection.e != Brush.cbrush && tabletConnection.autoswitch){
+			if(tabletConnection && tabletConnection.connections &&
+				tabletConnection.e != Brush.cbrush && 
+				tabletConnection.autoswitch){
+
 				Brush.brush(parseInt(tabletConnection.e))
 				Brush.update()
 				updateInterfaceHex(Brush.brush().color)
 			}
+			if(plugin && plugin.penAPI){
+			    var er = plugin.penAPI.isEraser ? 1 : 0;
+			    if(tabletConnection.autoswitch &&
+				Brush.cbrush != er) {
+
+				Brush.brush(er);
+				Brush.update();
+				updateInterfaceHex(Brush.brush().color);
+				if(isConnected()){
+				    net.emit('draw', 
+				    {
+					x: Brush.mx, 
+					y: Brush.my,
+					s: Brush.brush().size,
+					c: Brush.brush().color, 
+					d: false
+				    });
+				}
+			    }
+			}
+
 			var moving = (Brush.tmoving || data.button == Brush.bmove);
 			if(moving){
 				var b = $(window);
@@ -55,13 +85,10 @@ var canvasEvents = function(r, rs){
 				b.scrollTop(b.scrollTop() - data.sy);
 			}
 			if(drawing){
-                var plugin = document.getElementById('wacomPlugin');
                 
 				var nx1 = ((data.x - data.cx)/nw)*ow;
 				var ny1 = ((data.y - data.cy)/nh)*oh;
 
-				var s = (Brush.brush().size);
-				var c = (Brush.brush().color);
 				var ns = null;
 				
 				
@@ -76,6 +103,7 @@ var canvasEvents = function(r, rs){
                     if(plugin.penAPI.pointerType != 0){
                         ns = plugin.penAPI.pressure;
                     	//console.log('plugin.penAPI.pressure', ns)
+
                     }
                 }
                 else if(data.mozPressure){
@@ -92,7 +120,7 @@ var canvasEvents = function(r, rs){
 
 					var ss = Math.round(ns * 10)/10;
 					if(pp.data('ts') != ss){
-						pp.css('transform', 'scale('+ ns +')').data('ts', ss);
+						pp.css('transform', 'scale('+ ns +') translate(-50%, -50%)').data('ts', ss);
 					}
 				} else {
 					//mouse
@@ -104,36 +132,45 @@ var canvasEvents = function(r, rs){
                 
                 if(s != 0.0){
 					if(isConnected()){
-						rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
-					}
-					drawCanvasLine(null, nx1, ny1, Brush.mx, Brush.my, c, s)	
+						net.emit('draw', {x: Brush.mx, y: Brush.my, s: s, c: c, d: true})
+						
+					} 
+					//else {
+						drawCanvasLine(null, nx1, ny1, Brush.mx, Brush.my, c, s)	
+					//}
 				}
 			}
 		}else if(e == 'mousedown'){
 			
+                var plugin = document.getElementById('wacomPlugin');
+			if(plugin && plugin.penAPI){
+				
+			}
 			if(data.button == Brush.beraser){
 				var newbrush = Brush.cbrush == 0 ? 1 : 0;
 				Brush.brush(newbrush)
 				Brush.update()
 				updateInterfaceHex(Brush.brush().color)
-				tabletConnection.autoswitch = false
-
+				tabletConnection.autoswitch = false;
+				if(isConnected()){
+					net.emit('draw', {x: Brush.mx, y: Brush.my, s: Brush.brush().size, c: Brush.brush().color, d: false})
+				}
 			}
 			else if(data.button == 1){
-				$('.canvas-cursor.cursor-self').addClass('drawing')
+				//$('.canvas-cursor.cursor-self').addClass('drawing')
 				if(isConnected()){
-					rs.socket.emit('d', {d: false, l: $('canvas.focused').data('layer'), f: $('canvas.focused').data('frame')})
+					net.emit('lf', {l: $('canvas.focused').data('layer'), f: $('canvas.focused').data('frame')})
 				}
 			}
 		}else if(e == 'mouseup'){
 			if(data.button == 1){
-				$('.canvas-cursor.cursor-self').removeClass('drawing')
+				//$('.canvas-cursor.cursor-self').removeClass('drawing')
 				// fixme: should fix this...
 				// saveCanvasLocal(room);
 			}
 		}else if(e == 'mouseout'){
 			if(isConnected()){
-				rs.socket.emit('d', {x: Brush.mx, y: Brush.my, s: s, c: c, d: false})
+				net.emit('draw', {x: Brush.mx, y: Brush.my, s: Brush.brush().size, c: Brush.brush().color, d: false})
 			}
 		}
 	}).bind('contextmenu', function(e) {
@@ -146,7 +183,7 @@ var canvasEvents = function(r, rs){
 		
 		
 		
-		if(e == 'mousemove'){	
+		if(e == 'mousemove'){
 
 			if(Brush.tbrushzoom || Brush.tzoomcanvas){
 				if(Brush.tzoomstart == null) {
@@ -157,13 +194,13 @@ var canvasEvents = function(r, rs){
 				var diff = 1+((Brush.tzoomstart - data.yclient)*2 / $(this).height());
 				var res = 1+(Brush.ttsize * (diff > 0.00000000 ? diff : 1))*diff
 				var rres = Math.floor((res - Brush.ttsize) / step);
-				var rs = (Brush.ttsize + rres * step);
+				var ras = (Brush.ttsize + rres * step);
 				
 				if(Brush.tbrushzoom){
-					if(rs != Brush.brush().size && rs <= 128 && rs >= 1) {
-						if(rs < 0) rs = 0;
-						else if (rs > 128) rs = 128;
-						Brush.size(rs).update()
+					if(ras != Brush.brush().size && ras <= 128 && ras >= 1) {
+						if(ras < 0) ras = 0;
+						else if (ras > 128) ras = 128;
+						Brush.size(ras).update()
 
 					}	
 				}
@@ -188,6 +225,9 @@ var canvasEvents = function(r, rs){
 				$('#mouse-pool').focus()
 				return false;
 			}
+			else if(data.button == 3) {
+				return false;
+			}
 			temp1 = data.target
 			if(!$('.overlay').has(data.target).length && data.button == 1){
 				var qs = $('.qstatus-brush, .qstatus-settings')
@@ -203,7 +243,7 @@ var canvasEvents = function(r, rs){
 					}
 				}
 			}
-			
+			writeDefaults();
 		} else if(e == 'mousewheel'){
 			if($('.overlay').has($(data.target)).length) return false;
 			if(!Brush.tmoving){
@@ -224,7 +264,7 @@ var canvasEvents = function(r, rs){
 				if(s > 256) s = 256;
 				Brush.size(s).update()
 				if(isConnected()){
-					rs.socket.emit('d', {s: s})
+					net.emit('draw', {x: Brush.mx, y: Brush.my, s: s, c: Brush.brush().color, d: false})
 				}
 			}
 			writeDefaults()
@@ -247,10 +287,16 @@ var canvasEvents = function(r, rs){
 					case 52:
 					case 53: // 5
 					{
-						var s = (data.key - 48) * 2;
+						var k = (data.key - 48),
+							s = (((k * 4) * k));
+//							s = (k * 2) * ((k-1)*0.5);
+						// K1 R0.5	2 * 1 = 1
+						// K2 R2	4 * 2 = 8
+						// K3 R8	6 * 3 = 18
+						// K4 R32	8 * 4 = 32
 						Brush.size(s).update()
 						if(isConnected()){
-							rs.socket.emit('d', {s: s})
+							net.emit('draw', {x: Brush.mx, y: Brush.my, s: s, c: Brush.brush().color, d: false})
 						}
 						break;
 					}
