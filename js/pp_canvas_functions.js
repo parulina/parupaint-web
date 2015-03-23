@@ -204,3 +204,34 @@ var downloadCanvas = function(){
 		a.click();
 	}
 }
+
+
+var focusCanvas = function(layer, frame){
+	if(!$('.canvas-pool canvas[data-layer='+layer+'][data-frame='+frame+']').length) return false;
+	$('.canvas-pool canvas').removeClass('focused partial-focused').filter('[data-frame='+frame+']').addClass('partial-focused').filter('[data-layer='+layer+']').addClass('focused');
+	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame)
+	$('.flayer-list .flayer-info-frame').removeClass('focused')
+	$('.flayer-list .flayer-info-layer[data-layer='+layer+'] .flayer-info-frame[data-frame='+frame+']').addClass('focused')
+	return true;
+}
+
+//clear and re-add all frames and layers in the flayer-list
+var updateFrameinfoSlow = function(){
+	var list = []
+	$('.flayer-list').html('')
+	
+	$('.canvas-pool canvas[data-frame=0]').each(function(k, e){
+		var l = $(e).data('layer')
+		
+		var fls = $('.flayer-list')
+		if(fls.length){
+			if(list[l] == undefined) list[l] = $('<div/>', {class: 'flayer-info-layer', 'data-layer':l, id:('list-flayer-' + l)})
+			for(var f = 0; f < $('.canvas-pool canvas[data-layer='+l+']').length; f++){
+				list[l].append($('<div/>', {class:'flayer-info-frame', id:('list-flayer-' + l + '-' + f), 'data-frame':f}))
+			}
+		}
+	})
+	for(var i = 0; i < list.length; i++){ //standard loop is important so that layers get in order
+		$('.flayer-list').append(list[i])
+	}
+}

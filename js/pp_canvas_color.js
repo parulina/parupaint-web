@@ -183,7 +183,7 @@ var setColorSliderRgb = function(r, g, b, a){
 
 
 var setColorSliderHsl = function(h, s, l, a){
-	console.log('setColorSliderHsl', h, s, l, a)
+	//console.log('setColorSliderHsl', h, s, l, a)
 	if(h != undefined || h != null){
 		$('.hsl-select-pick .hue-pick').data('value', h).children('.color-selector').css('transform', 'rotate('+h*360+'deg)')
 		var rgb = hue2rgb(h*360)
@@ -196,6 +196,15 @@ var setColorSliderHsl = function(h, s, l, a){
 		})
 	}
 	if(s != undefined || s != null){
+	    	var hue = $('.hsl-select-pick .hue-pick').data('value'),
+		    light = 0.5; //$('.hsl-select-pick .light-pick').data('value');
+
+		var rgb = hsl2rgb(hue, s, light),
+		    rgbstr = 'rgb('+rgb.r+', '+rgb.g+', '+rgb.b+')';
+
+		$('.hsl-select-pick .light-pick').css({
+			background: 'linear-gradient(white 0%, '+rgbstr+' 50%, black 100%)'
+		})
 		$('.hsl-select-pick .saturation-pick').data('value', s).children('.color-selector').css('left', (s*100)+'%')
 	}
 	if(l != undefined || l != null){
@@ -219,7 +228,12 @@ var addPaletteEntryRgb = function(r, g, b, a){
 		while(storage.children().length >= 16) {
 			storage.children().last().remove()
 		}
-		storage.prepend($('<div class="palette-entry"></div>').css('background-color', 'rgba('+r+', '+g+', '+b+', '+a/255+')'))
+		var pal = $('<div/>', {class: "palette-entry"}).
+			data('value', rgb2hex(r, g, b, a)).
+			css('background-color', 'rgba('+r+', '+g+', '+b+', '+a/255+')');
+		console.log(pal);
+
+		storage.prepend(pal);
 	}
 }
 
@@ -227,116 +241,118 @@ var addPaletteEntryRgb = function(r, g, b, a){
 
 
 colorScript = function(onchange){
-	var oldcol = null;
-	$('.hsl-select-pick > div').bind('mousedown', function(e){
-		oldcol = getColorSliderHexAlpha()
-		$(this).bind('mouseup mouseout', function(e){
-			if(getColorSliderHexAlpha() != oldcol){
-				onchange(oldcol, getColorSliderRgb())
-			}
-			$(this).unbind('mouseup mouseout')
-		})
-	})
-	
-	$('.color-spinner .hue-pick').bind('mousemove mousedown', function(e){
-		
-		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
-		if(b == 1 && e.target == this){
+	var oldcol = null,
+    	    sel = null;
 
-			var y  = (e.offsetY || e.pageY - $(e.target).offset().top);
-			var x  = (e.offsetX || e.pageX - $(e.target).offset().left);
+	var gui = $('.color-spinner.overlay-piece'),
+	    pick = $('.hsl-select-pick'),
+	    hsel = pick.children('.hue-pick'),
+	    ssel = pick.children('.saturation-pick'),
+	    lsel = pick.children('.light-pick'),
+	    asel = pick.children('.alpha-pick');
+
+	gui.unbind().on('mousedown', function(e){
+	    var t = e.target || e.srcElement || e.originalTarget,
+	   	tt = $(t);
+	    if(!sel) {
+		if(tt.is(hsel) || tt.is(ssel) || tt.is(lsel) || tt.is(asel)) {
+			oldcol = getColorSliderHexAlpha();
+			sel = $(t);
+			$(this).on('mousemove');
+		} else if(tt.is('.palette-entry')){
+		    var hex = tt.data('value'),
+			rgb = hex2rgb(hex),
+		    	hsl = rgb2hsl(rgb.r/255, rgb.g/255, rgb.b/255, rgb.a/255);
+		    console.log("Set saved palette color: " + hex);
+		    setColorSliderHsl(hsl.h, hsl.s, hsl.l, hsl.a);
+		    setPreviewColor();
+
+		}
+
+	    }
+	}).on('mousemove', function(e){
+		if(sel) {
+		    var b = e.buttons == undefined ? e.which : e.buttons; // firefox
+		    if(sel.is(hsel)) {
+			//
+			var y  = (e.pageY - sel.offset().top);
+			var x  = (e.pageX - sel.offset().left);
 			
-			var dx = (x - ($(this).width()/2)),
-				dy = (y - ($(this).height()/2))
+			var dx = (x - (sel.width()/2)),
+				dy = (y - (sel.height()/2))
 			
 			var dist = Math.sqrt(dx*dx + dy*dy)
 			var ang = Math.atan2(dy, dx)
 			var deg = ((ang > 0 ? ang : (2*Math.PI + ang)) * 360 / (2*Math.PI))
 			setColorSliderHsl(deg/360)
 			var rgb = setPreviewColor()
-			
-			
-		}
-	})
-	
-	
-	
-	$('.color-spinner .light-pick').bind('mousemove mousedown', function(e){
-		
-		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
-		if(b == 1){
-			
-			var y  = (e.offsetY || e.pageY - $(e.target).offset().top);
-			var light = (1.0-(y / $(this).height()))
-			setColorSliderHsl(null, null, light)
-			var rgb = setPreviewColor()
-		}
-	})
-	
-	$('.hsl-select-pick').children().bind('mousewheel DOMMouseScroll', function(e){
-        
-		var wd = e.originalEvent.wheelDelta / 100;
-		var ed = e.originalEvent.detail * -1;
-		
-		
-		var w = wd || ed;
-		if(w){
-			var hsl = getColorSliderHsl()
-			console.log(e.originalEvent.wheelDelta, e.originalEvent.detail)
-			var sliderstep = (w/50)
-			
-			var a = $(e.target)
-			if(a.is('.light-pick')){
-				hsl.l += sliderstep;
-				if(hsl.l < 0) hsl.l = 0;
-				if(hsl.l > 1) hsl.l = 1;
-			} else if(a.is('.alpha-pick')){
-				hsl.a += sliderstep;
-				if(hsl.a < 0) hsl.a = 0;
-				if(hsl.a > 1) hsl.a = 1;
-			} else if(a.is('.hue-pick')){
-				hsl.h += sliderstep;
-				if(hsl.h < 0) hsl.h += 1;
-				if(hsl.h > 1) hsl.h -= 1;
-			} else if(a.is('.saturation-pick')){
-				hsl.s -= sliderstep;
-				if(hsl.s < 0) hsl.s = 0;
-				if(hsl.s > 1) hsl.s = 1;
+
+		    } else if(sel.is(asel) || sel.is(ssel) || sel.is(lsel)) {
+			var sa = null, li = null, al = null;
+			if(sel.is(asel) || sel.is(lsel)){
+			    var y  = (e.offsetY || e.pageY - sel.offset().top);
+			    var val = (1.0-(y / sel.height()));
+			    if(val < 0.0) val = 0.0;
+			    if(val > 1.0) val = 1.0;
+
+
+			    if(sel.is(asel)){
+				al = val;
+			    } else if(sel.is(lsel)) {
+				li = val;
+			    }
+			} else if(sel.is(ssel)) {
+			    var x  = (e.offsetX || e.pageX - sel.offset().left);
+			    var val = (x / sel.width());
+			    if(val < 0.0) val = 0.0;
+			    if(val > 1.0) val = 1.0;
+
+			    sa = val;
 			}
-			updateInterfaceHsl(hsl)
-			
-			$(e.target).unbind('mouseout').bind('mouseout', function(e){
-				onchange(oldcol, getColorSliderRgb())
-				$(this).unbind('mouseout')
-			})
-			
-		}
-		
-    })
-	
-	
-	$('.color-spinner .alpha-pick').bind('mousemove mousedown', function(e){
-		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
-		if(b == 1){
-			
-			var y  = (e.offsetY || e.pageY - $(e.target).offset().top);
-			var alpha = (1.0-(y / $(this).height()))
-			setColorSliderHsl(null, null, null, alpha)
-			var rgb = setPreviewColor()
-			console.log(rgb.a, rgb2hex(rgb))
-		}
-	})
-	
-	$('.color-spinner .saturation-pick').bind('mousemove mousedown', function(e){
-		var b = e.buttons == undefined ? e.which : e.buttons; // firefox
-		if(b == 1){
-			var x  = (e.offsetX || e.pageX - $(e.target).offset().left);
-			var sat = ((x / $(this).width()))
-			setColorSliderHsl(null, sat, null, null)
-			var rgb = setPreviewColor()
-		}
-	})
-}
 
+			setColorSliderHsl(null, sa, li, al)
+			var rgb = setPreviewColor();
+		    }
+		}
+	}).bind('mousewheel DOMMouseScroll', function(e){
+	    var wd = e.originalEvent.wheelDelta/100,
+	    	ed = e.originalEvent.detail * -1;
+	    var w = wd || ed,
+	    	s = $(e.target);
+	    if(w && s.length) {
 
+		var hsl = getColorSliderHsl(),
+		    sliderstep = (w/50);
+		    if(s.is(lsel)){
+			    hsl.l += sliderstep;
+			    if(hsl.l < 0) hsl.l = 0;
+			    if(hsl.l > 1) hsl.l = 1;
+		    } else if(s.is(asel)){
+			    hsl.a += sliderstep;
+			    if(hsl.a < 0) hsl.a = 0;
+			    if(hsl.a > 1) hsl.a = 1;
+		    } else if(s.is(hsel)){
+			    hsl.h += sliderstep;
+			    if(hsl.h < 0) hsl.h += 1;
+			    if(hsl.h > 1) hsl.h -= 1;
+		    } else if(s.is(ssel)){
+			    hsl.s -= sliderstep;
+			    if(hsl.s < 0) hsl.s = 0;
+			    if(hsl.s > 1) hsl.s = 1;
+		    }
+		    updateInterfaceHsl(hsl);
+		    var rgb = setPreviewColor();
+	
+		    s.unbind('mouseout').bind('mouseout', function(e){
+			    onchange(oldcol, getColorSliderRgb())
+			    $(this).unbind('mouseout')
+		    })
+	    }
+	}).on('mouseup', function(e){
+	    if(sel){
+		    sel = null;
+		    onchange(oldcol, getColorSliderRgb())
 
+	    }
+	});
+};

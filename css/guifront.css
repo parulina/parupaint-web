@@ -20,6 +20,9 @@
 .overlay .gui.visible{
 	display:block;
 	pointer-events: all;
+	user-select:none;
+	-moz-user-select:none;
+	-webkit-user-select:none;
 }
 
 
@@ -388,6 +391,8 @@
 }
 
 .chat-box:hover{
+    	-user-select:all;
+	-moz-user-select:all;
 	-webkit-user-select:all;
 }
 .chat-content{

@@ -78,7 +78,7 @@ var hideOverlay = function(now){
 	if(overlayTimeout){
 		var reset = ( $('.gui').is(':hover') || $('textarea.chat-input').is(':focus') )
 		if(reset){
-			overlayTimeout = setTimeout(overlayGone, 2000)
+			overlayTimeout = setTimeout(hideOverlay, 2000)
 			return false;
 		}
 	}
@@ -92,7 +92,7 @@ var showOverlay = function(t){
 	if(t != undefined){
 		clearTimeout(overlayTimeout);
 		overlayTimeout = setTimeout(function(){
-			hideOverlay(true)
+			hideOverlay();
 		}, 3000);
 	}
 	if(!$('.gui').hasClass('visible')){

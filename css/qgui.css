@@ -177,6 +177,8 @@
 		#BBC1BB);
 
 	z-index:4;
+	user-select:all;
+	-moz-user-select:all;
 	-webkit-user-select:all;
 	pointer-events:all;
 }
@@ -334,6 +336,8 @@ body.connected.is-private .qstatus-message:before{
     margin: 0;
     border-top: 1px solid #777;
     display: none;
+    user-select: all;
+    -moz-user-select: all;
     -webkit-user-select: all;
     font-size: 13px;
     padding-left: 6px;
