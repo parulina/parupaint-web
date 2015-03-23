@@ -332,9 +332,9 @@ var canvasEvents = function(r, net){
 								})
 							}
 						}else{
-
-							if(!$('.canvas-cursor.cursor-self').hasClass('pick-color')){
-								$('.canvas-cursor.cursor-self').addClass('pick-color')
+							var me = $('.canvas-cursor.cursor-self');
+							if(!me.hasClass('pick-color')){
+								me.addClass('pick-color');
 							}
 							var cc = $('canvas.focused');
 							if(cc.length){
@@ -350,6 +350,12 @@ var canvasEvents = function(r, net){
 								if(hex != Brush.brush().color){
 									Brush.color(hex).update()
 									updateInterfaceHex(hex)
+									me.css('background-color', 
+										'rgba('+
+										    px[0]+','+
+										    px[1]+','+
+										    px[2]+','+
+										    px[3]/255 + ')');
 									writeDefaults();
 								}
 							}
