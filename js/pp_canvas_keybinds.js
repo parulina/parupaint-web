@@ -395,53 +395,63 @@ var canvasEvents = function(r, net){
 						break;
 					}
 					case 65: // a
-					{
-						if(Brush.tabdown){
-							ignoreGui = true
-							var f = $('canvas.focused').data('frame'),
-								l = $('canvas.focused').data('layer')
-							removeCanvasFrame()
-							if(!focusCanvas(l, f)) focusCanvas(l, f-1)
-							return true
-
-						}
-						else return advanceCanvas(null, -1)
-					}
 					case 83: // s
 					{
+					    	var sd = (data.key == 83);
 						if(Brush.tabdown){
-							ignoreGui = true
-							var f = $('canvas.focused').data('frame'),
-								l = $('canvas.focused').data('layer')
-							addCanvasFrame()
-							return focusCanvas(l, f+1)
+							ignoreGui = true;
+							var    	l = $('canvas.focused').data('layer'),
+							    	f = $('canvas.focused').data('frame');
+							if(!isConnected()){
+							    if(sd) {
+								addCanvasFrame();
+								return focusCanvas(l, f+1);
+							    } else {
+								removeCanvasFrame();
+								if(!focusCanvas(l, f)) focusCanvas(l, f-1);
+							    }
+							} else {
+							    var fc = (sd ? 1 : -1);
+							    RoomListSocket.emit('lf', {l: l, f: f, fc: fc});
+							}
+							return true;
+
 						}
-						else return advanceCanvas(null, 1)
+						else return advanceCanvas(null, sd ? 1 : -1)
+						break;
 					}
 					case 68: // d
+					case 70: // f
 					{
+					    	var fd = (data.key == 70);
 						if(Brush.tabdown){
-							ignoreGui = true
-							var l = $('canvas.focused').data('layer'),
+							ignoreGui = true;
+							var 	l = $('canvas.focused').data('layer'),
+								f = $('canvas.focused').data('frame'),
+
 								f1 = $('.canvas-pool canvas[data-layer='+(l)+']').length-1,
-								f2 = $('.canvas-pool canvas[data-layer='+(l-1)+']').length-1
-							removeCanvasLayer()
-							if(!focusCanvas(l, f1)) focusCanvas(l-1, f2)
+								f2 = $('.canvas-pool canvas[data-layer='+(l-1)+']').length-1;
+
+							if(!isConnected()) {
+							    if(fd) {
+								addCanvasLayer();
+								return focusCanvas(l, 0)
+							    } else {
+								removeCanvasLayer();
+								if(!focusCanvas(l, f1)) focusCanvas(l-1, f2);
+							    }
+							} else {
+							    var lc = (fd ? 1 : -1);
+							    RoomListSocket.emit('lf', {l: l, f: f, lc: lc});
+							}
 
 							return true;
 						}
-						else return advanceCanvas(-1)
-					}
-					case 70: // f
-					{
-						if(Brush.tabdown){
-							ignoreGui = true
-							var f = $('canvas.focused').data('frame'),
-								l = $('canvas.focused').data('layer')
-							addCanvasLayer()
-							return focusCanvas(l, 0)
+						else {
+
+						   return advanceCanvas(fd ? 1 : -1)
 						}
-						else return advanceCanvas(1)
+						break;
 					}
 					case 46: // del
 					{
