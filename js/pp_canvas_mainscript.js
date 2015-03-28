@@ -354,9 +354,9 @@ var onRoom = function(room){
 	
 	if(RoomListSocket) {
 		RoomListSocket.on('open', function(data){
-			RoomListSocket.emit('name', {
+			/*RoomListSocket.emit('name', {
 				name: $('.canvas-cursor.cursor-self').data('name')
-			});
+			});*/
 			console.log('Connected to socket. (connect? %s)', r.wantToConnect)
 			if(r.wantToConnect) {
 				r.toggleNetwork(true)
@@ -377,7 +377,10 @@ var onRoom = function(room){
 			r.canvasNetwork.emit('leave', {room: room});
 		}
 		else {
-			r.canvasNetwork.emit('join', {room: room});
+			r.canvasNetwork.emit('join', {
+			    room: room,
+			    name: $('.canvas-cursor.cursor-self').data('name')
+			});
 		}
 	}
 	
