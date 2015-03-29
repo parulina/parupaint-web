@@ -304,10 +304,12 @@ var onRoom = function(room){
 	
 	$('#main-canvas *').unbind();
 	
+	this.room = room;
+	
 	this.roomConnected = false;
 	this.wantToConnect = false;
 	this.canvasNetwork = new roomConnection(this)
-	this.canvasCallbacks = new canvasEvents(room, this.canvasNetwork)
+	this.canvasCallbacks = new canvasEvents(this, this.canvasNetwork)
 	this.canvasChat = new chatScript(this.canvasNetwork)
 	var r = this
 	

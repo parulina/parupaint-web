@@ -1,5 +1,5 @@
 
-var canvasEvents = function(r, net){
+var canvasEvents = function(room, net){
 	var mouseMoveTimer = null;
 	console.log('Creating canvas events')
 
@@ -330,9 +330,9 @@ var canvasEvents = function(r, net){
 						}
 						else if(data.shift){
 							if(isConnected()){
-								ROOM.roomSocket.reload(function(){
-									updateInfo()
-								})
+								room.socketReload(function(){
+									updateInfo();
+								});
 							}
 						}else{
 							var me = $('.canvas-cursor.cursor-self');
