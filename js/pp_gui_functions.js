@@ -1,3 +1,5 @@
+// control the ui...
+
 var guiControl = {
 
 	guiTimeout: null,
@@ -31,5 +33,15 @@ var guiControl = {
 	},
 	setClass: function (on) {
 		$('.gui').toggleClass('visible', on);
+	},
+	
+	
+	// updateInterfaceHsl
+	updateInterface: function(hex) {
+		setColorSliderHex(hex);
+		setPreviewColor(hex);
+	},
+	updateFromBrush: function (brush) {
+		this.updateInterface(brush.color());
 	}
 };

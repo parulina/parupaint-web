@@ -166,6 +166,10 @@ var Brush = {
 	brushname: function(){
 		return this.brushnames[this.cbrush]
 	},
+	switchToBrush: function(b) {
+		this.brush(b);
+		this.update();
+	},
 	size: function(size, cursor){
 		if(size == undefined) return this.brush().size
 		if(cursor == undefined){
@@ -305,6 +309,7 @@ var onRoom = function(room){
 	$('#main-canvas *').unbind();
 	
 	this.room = room;
+	this.brushStrokeRoundtrip = false;
 	
 	this.roomConnected = false;
 	this.wantToConnect = false;
@@ -363,7 +368,7 @@ var onRoom = function(room){
 			Brush.brushes = def;
 			Brush.update()
 		}
-		updateInterfaceHex(Brush.brush().color)
+		guiControl.updateFromBrush(Brush);
 		
 		if(data.rooms && data.rooms[room]){
 		   if(data.rooms[room].data){

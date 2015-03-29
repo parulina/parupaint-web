@@ -136,21 +136,6 @@ var getColorSliderHexAlpha = function(){
 
 
 
-var updateInterfaceHex = function(hex){
-	console.log('set new hex:' + hex)
-	setColorSliderHex(hex)
-	setPreviewColor(hex)
-}
-var updateInterfaceHsl = function(h, s, l, a){
-	if(typeof h == "object"){
-		s = h.s, l = h.l, a = h.a;
-		h = h.h;
-	}
-	setColorSliderHsl(h, s, l, a)
-	setPreviewColor(getColorSliderHexAlpha())
-}
-
-
 var setPreviewColor = function(col){
 	if(!col) col = getColorSliderRgb()
 	if(col[0] == '#') col = hex2rgb(col)
@@ -340,7 +325,8 @@ colorScript = function(onchange){
 			    if(hsl.s < 0) hsl.s = 0;
 			    if(hsl.s > 1) hsl.s = 1;
 		    }
-		    updateInterfaceHsl(hsl);
+			
+		    //updateInterfaceHsl(hsl);
 		    var rgb = setPreviewColor();
 	
 		    s.unbind('mouseout').bind('mouseout', function(e){
