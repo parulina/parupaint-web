@@ -229,6 +229,31 @@ canvas{
     image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor;
 }
+@keyframes layer-blink-out {
+    0%     { opacity:0;   }
+    75%    { opacity:0;   }
+    100%   { opacity:0.3; }
+}
+
+@-webkit-keyframes webkit-layer-blink-out {
+    0%     { opacity:0;   }
+    75%    { opacity:0;   }
+    100%   { opacity:0.3; }
+}
+@-moz-keyframes moz-layer-blink-out {
+    0%     { opacity:0;   }
+    75%    { opacity:0;   }
+    100%   { opacity:0.3; }
+}
+
+body.canvas-preview canvas.partial-focused {
+	opacity:1 !important;
+}
+canvas.partial-focused:not(.focused){
+        -moz-animation:moz-layer-blink-out 1200ms linear;
+        -webkit-animation:webkit-layer-blink-out 1200ms linear;
+        animation:layer-blink-out 1200ms linear;
+}
 canvas.partial-focused{
 	opacity:0.3;
 	display:block;
