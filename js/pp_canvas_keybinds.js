@@ -1,6 +1,6 @@
 
 var canvasEvents = function(r, net){
-	var mouseMoveTimer = null, ignoreGui = false;
+	var mouseMoveTimer = null;
 	console.log('Creating canvas events')
 
 	$('#mouse-pool').sevent(function(e, data){
@@ -220,26 +220,28 @@ var canvasEvents = function(r, net){
 
 			}
 		} else if(e == 'mousedown'){
-			
-			if(data.button == Brush.bmove){
-				$('#mouse-pool').focus()
+		
+			if(data.button == 3) {
+				// disable context menu
 				return false;
-			}
-			else if(data.button == 3) {
-				return false;
-			}
-			temp1 = data.target
-			if(!$('.overlay').has(data.target).length && data.button == 1){
-				var qs = $('.qstatus-brush, .qstatus-settings')
-				if(!qs.has($(e.target)).length && !$(e.target).is(qs)){
-					if(qs.hasClass('panel-open')){
-						return qs.removeClass('panel-open')
+			} else if(data.button == 1) {
+				var target = $(data.target)
+				if(!$('.overlay').has(target).length) {
+					// okay, it's not the overlay thing.
+					
+					// check if the setting dialogs are open...
+					var qs = $('.qstatus-brush, .qstatus-settings');
+					if(!qs.has($(target)).length && !$(target).is(qs)){
+						if(qs.hasClass('panel-open')){
+							return qs.removeClass('panel-open');
+						}
 					}
-				}
-				if($(data.target).is('html') && !$('#mouse-pool').has($(e.target)).length && !$('.gui, .qstatus').has($(e.target)).length){
-					if($('.gui.visible').length) hideOverlay(true)
-					else{
-						showOverlay(2000)
+					
+					// nope, okay, toggle the normal ui.
+					var p = $('#mouse-pool');
+					// is it not the canvases, and is it not the ui itself?
+					if(!p.has(target).length && !p.is(target) && !$('.gui').has(target).length){
+						guiControl.toggle(true);
 					}
 				}
 			}
@@ -318,7 +320,8 @@ var canvasEvents = function(r, net){
 					}
 					case 27: //esc
 					{
-						return hideOverlay(true)
+						guiControl.hide();
+						break;
 					}
 					case 82: // r
 					{
@@ -368,8 +371,19 @@ var canvasEvents = function(r, net){
 						else if(data.shift) 	return !(Brush.tbrushzoom = true)
 						else					return !(Brush.tmoving = true)
 					}
-					case 9:
+					case 9: // tab
 					{
+						if($('input:focus').length) return true;
+						if(guiControl.isVisible()){
+							if(data.shift) {
+								guiControl.hide();
+							} else {
+								guiControl.show(true); // show it permanently if tapped twice
+							}
+						} else {
+							if(!data.shift) guiControl.show(false);
+						}
+						
 						Brush.tabdown = true;
 						return false;
 					}
@@ -399,7 +413,6 @@ var canvasEvents = function(r, net){
 					{
 					    	var sd = (data.key == 83);
 						if(Brush.tabdown){
-							ignoreGui = true;
 							var    	l = $('canvas.focused').data('layer'),
 							    	f = $('canvas.focused').data('frame');
 							if(!isConnected()){
@@ -425,7 +438,6 @@ var canvasEvents = function(r, net){
 					{
 					    	var fd = (data.key == 70);
 						if(Brush.tabdown){
-							ignoreGui = true;
 							var 	l = $('canvas.focused').data('layer'),
 								f = $('canvas.focused').data('frame'),
 
@@ -463,27 +475,17 @@ var canvasEvents = function(r, net){
 					}
 			}
 		} else if(e == 'keyup'){
-			if(data.key == 9)
-			{
-				if($('input:focus').length) return true;
+			// tab
+			if(data.key == 9) {
 				Brush.tabdown = false;
-				if(!ignoreGui){
-
-					if(data.shift){
-						hideOverlay(true)
-					}else{
-						showOverlay(2000)
-					}
-					return false;
-				}
-				ignoreGui = false
+				return false;
 			}
+			// space
 			if(data.key == 32){
 				Brush.tzoomcanvas = Brush.tbrushzoom = Brush.tmoving = false
 				Brush.tzoomstart = null
 				return false;
 			}
-			
 			
 			
 			// below is for normal keycodes for inputs

@@ -67,47 +67,6 @@ var updateInfo = function(){
 }
 
 
-
-var overlayTimeout = null;
-
-var hideOverlay = function(now){
-	if(now){
-		clearTimeout(overlayTimeout)
-		overlayTimeout = null
-	}
-	if(overlayTimeout){
-		var reset = ( $('.gui').is(':hover') || $('textarea.chat-input').is(':focus') )
-		if(reset){
-			overlayTimeout = setTimeout(hideOverlay, 2000)
-			return false;
-		}
-	}
-	clearTimeout(overlayTimeout);
-	$('.overlay .gui').removeClass('visible');
-	$('#mouse-pool').focus()
-}
-
-
-var showOverlay = function(t){
-	if(t != undefined){
-		clearTimeout(overlayTimeout);
-		overlayTimeout = setTimeout(function(){
-			hideOverlay();
-		}, 3000);
-	}
-	if(!$('.gui').hasClass('visible')){
-		$('.gui').addClass('visible');
-	} else {
-		var ta = $('textarea.chat-input')
-		if(ta.is(':focus')){
-			ta.select()
-		}
-		ta.focus()
-	}
-}
-
-
-
 $(document).keydown(function(e){
 	switch(e.keyCode){
 			case 116:
@@ -457,10 +416,8 @@ var onRoom = function(room){
 	});
 	
 	
-	$('.gui .overlay-piece').mouseover(function(e){
-		showOverlay(2000)
-	}).mouseover(function(e){
-		clearTimeout(overlayTimeout);
+	$('.gui .overlay-piece').on('mouseover mousemove', function(e){
+		guiControl.show(false);
 	});
 	
 	
@@ -504,7 +461,7 @@ var onRoom = function(room){
 	
 	
 	$('.qstatus-message').mousedown(function(e){
-		showOverlay(2000)
+		guiControl.show(false);
 	})
 	
 	$('.qstatus-brush, .qstatus-settings').click(function(e){
