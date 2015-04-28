@@ -147,12 +147,26 @@
 .flayer-info-layer .flayer-info-frame{
 	position:relative;
 	background-color: rgb(128, 189, 161);
-	margin-left:1px;
+	border-left:solid gray 1px;
 	flex-basis:10px;
 	flex-shrink:0;
 	display:inline;
 }
-
+.flayer-info-layer .flayer-info-frame.extended {
+	border-color:#80BDA1;
+}
+/*
+.flayer-info-layer .flayer-info-frame:before{
+	position:absolute;
+	content:attr(data-extended);
+	font-family:Monospace;
+	font-size:10px;
+	letter-spacing:10px;
+	top:0;
+	left:0;
+	width:100%;
+}
+*/
 .flayer-info-frame.focused{
 	background-color:#FFF;
 }

@@ -1,6 +1,6 @@
 
 var advanceCanvas = function(nlayer, nframe){
-	var canvas = $('canvas.focused')
+	var canvas = $('canvas.position')
 	if(canvas.length){
 		var layer = canvas.data('layer'),
 			frame = canvas.data('frame'),
@@ -157,16 +157,36 @@ var initCanvas = function(width, height, cdata){
 		for(var l = 0; l < cdata.length; l++){
 			
 			for(var f = 0; f < cdata[l].length; f++){
-				console.log('Creating layer ' + l + " frame " + f)
+			    	if(cdata[l][f].extended) {
+					var ef = f;
+					while(cdata[l][ef].extended != false) {
+						if(ef == 0) break;
+						ef--;
+					}
+					console.log(l, ef);
+					var nc = $('.canvas-pool canvas[data-layer='+l+'][data-frame='+ef+']');
+					if(nc.length) {
+					    var t = (f-ef);
+					    nc.attr('data-extended', t);
+					    /*
+					    console.log('Extending ' + l + " → " + t + ' times.');
+					    
+					    var nc2 = $('#list-flayer-' + l + '-' + ef);
+					    if(nc2.length) nc2.css({width: (t*100) + 'px'});
+					    */
+					}
+				
+				}
+				console.log('Creating ' + l + " → " + f)
 				var id = 'flayer-'+l+'-'+f;
 
 				var nc = $('<canvas width="'+width+'" height="'+height+'" id="'+id+'" data-layer="'+l+'" data-frame="'+f+'"/>')
 				nc[0].getContext('2d').webkitImageSmoothingEnabled = false;
-				nc[0].getContext('2d').webkitimageSmoothingEnabled = false;
 				nc[0].getContext('2d').mozimageSmoothingEnabled = false;
 				nc[0].getContext('2d').imageSmoothingEnabled = false;
+				nc.toggleClass('extended', (typeof cdata[l][f].extended == "boolean" ? cdata[l][f].extended : false));
 				$('.canvas-pool').append(nc)
-
+				
 			}
 		}
 		focusCanvas(0, 0);
@@ -208,10 +228,30 @@ var downloadCanvas = function(){
 
 var focusCanvas = function(layer, frame){
 	if(!$('.canvas-pool canvas[data-layer='+layer+'][data-frame='+frame+']').length) return false;
-	$('.canvas-pool canvas').removeClass('focused partial-focused').filter('[data-frame='+frame+']').addClass('partial-focused').filter('[data-layer='+layer+']').addClass('focused');
+	
+
+	// clear everything
+	$('.canvas-pool canvas').removeClass('focused focused-frame focused-layer position');
+	// set both axis focuses
+	$('.canvas-pool canvas').filter('[data-frame='+frame+']').addClass('focused-frame');
+	$('.canvas-pool canvas').filter('[data-layer='+layer+']').addClass('focused-layer');
+
+	var cframe = $('.canvas-pool canvas[data-layer='+layer+'][data-frame='+frame+']');
+	cframe.addClass('position')
+	if(cframe.hasClass('extended')) {
+	    	// it's extended. roll it back
+		while ( cframe.hasClass('extended') ) {
+			cframe = $('.canvas-pool canvas[data-layer='+layer+'][data-frame='+ (cframe.data('frame')-1) +']');
+		}
+	}
+	cframe.addClass('focused');
+
+	
+
 	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame)
 	$('.flayer-list .flayer-info-frame').removeClass('focused')
 	$('.flayer-list .flayer-info-layer[data-layer='+layer+'] .flayer-info-frame[data-frame='+frame+']').addClass('focused')
+
 	return true;
 }
 
@@ -221,13 +261,33 @@ var updateFrameinfoSlow = function(){
 	$('.flayer-list').html('')
 	
 	$('.canvas-pool canvas[data-frame=0]').each(function(k, e){
-		var l = $(e).data('layer')
+		var l = $(e).data('layer');
 		
 		var fls = $('.flayer-list')
 		if(fls.length){
-			if(list[l] == undefined) list[l] = $('<div/>', {class: 'flayer-info-layer', 'data-layer':l, id:('list-flayer-' + l)})
-			for(var f = 0; f < $('.canvas-pool canvas[data-layer='+l+']').length; f++){
-				list[l].append($('<div/>', {class:'flayer-info-frame', id:('list-flayer-' + l + '-' + f), 'data-frame':f}))
+			if(list[l] == undefined) list[l] = $('<div/>', {
+			    class: 'flayer-info-layer', 
+			    'data-layer':l, 
+			    id:('list-flayer-' + l)
+			});
+			for(var f = 0; f < $('.canvas-pool canvas[data-layer='+l+']').length; f++) {
+			    	var nc = $('.canvas-pool canvas[data-layer='+l+'][data-frame='+f+']');
+
+				var e = nc.data('extended');
+
+				//nc.attr('data-extended', t2)
+				
+				var d = $('<div/>', {
+				    'class':	'flayer-info-frame', 
+				    'id':	('list-flayer-' + l + '-' + f), 
+				    'data-frame': f
+				});
+				if(typeof e == "number"){
+				    var t2 = new Array(e+1).join("_");
+				    d.attr('data-extended', t2);
+				}
+				d.toggleClass('extended', nc.hasClass('extended'));
+				list[l].append(d);
 			}
 		}
 	})

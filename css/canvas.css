@@ -246,20 +246,30 @@ canvas{
     100%   { opacity:0.3; }
 }
 
-body.canvas-preview canvas.partial-focused {
+body.canvas-preview canvas.focused-frame {
 	opacity:1 !important;
 }
-canvas.partial-focused:not(.focused){
+canvas.focused-frame:not(.focused){
         -moz-animation:moz-layer-blink-out 1200ms linear;
         -webkit-animation:webkit-layer-blink-out 1200ms linear;
         animation:layer-blink-out 1200ms linear;
 }
-canvas.partial-focused{
+canvas.focused-frame{
 	opacity:0.3;
 	display:block;
 }
 canvas.focused{
 	opacity:1.0;
+	display:block;
+	pointer-events: all;
+}
+
+canvas.extended {
+    display:none;
+    pointer-events:none !important;
+}
+
+canvas.extended-focus {
 	display:block;
 	pointer-events: all;
 }
