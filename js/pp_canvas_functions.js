@@ -231,7 +231,7 @@ var focusCanvas = function(layer, frame){
 	
 
 	// clear everything
-	$('.canvas-pool canvas').removeClass('focused focused-frame focused-layer position');
+	$('.canvas-pool canvas').removeClass('focused focused-frame focused-layer position focused-left focused-right');
 	// set both axis focuses
 	$('.canvas-pool canvas').filter('[data-frame='+frame+']').addClass('focused-frame');
 	$('.canvas-pool canvas').filter('[data-layer='+layer+']').addClass('focused-layer');
@@ -245,6 +245,8 @@ var focusCanvas = function(layer, frame){
 		}
 	}
 	cframe.addClass('focused');
+	cframe.prev().addClass('focused-left');
+	cframe.next().addClass('focused-right');
 
 	
 

@@ -273,3 +273,14 @@ canvas.extended-focus {
 	display:block;
 	pointer-events: all;
 }
+
+canvas.focused-left,
+canvas.focused-right{
+    opacity:0.2;
+    display:block;
+}
+
+body.canvas-preview canvas.focused-left,
+body.canvas-preview canvas.focused-right{
+	display:none;
+}
