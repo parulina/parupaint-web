@@ -1,223 +1,218 @@
-var url = 'http://sqnya.se:1108';
+"use strict";
+
+console.info("Initializing parupaint-web, paru (c) 2014");
+
+function Parupaint() {
+    // socket, etc
+    var private_var = true;
+    this.public_var = false;
 
 
-var loadSqnyaImage = function(url2, callback){
-	if(typeof chrome != "undefined" && typeof chrome.app != "undefined" && typeof chrome.app.runtime != "undefined"){
-		var xhr = new XMLHttpRequest();
-		xhr.responseType = 'blob';
-		xhr.onload = function(){
-			callback(window.URL.createObjectURL(xhr.response));
-		}
-		xhr.open('GET', url2, true); xhr.send();	
-	} else {
-		callback(url2)
-	}
-	
+    this.server_url = 'sqnya.se:1108';
+    this.default_room = 'sqnya';
+
+    this.socket = null;
+    this.room = null;
+    this.myId = "";
+
+	this.ui = new ParupaintInterface();
+
+
+    this.Connect = function() {
+        var pthis = this;
+        this.socket =
+            new golem.Connection('ws://' + this.server_url + '/main', false);
+        this.socket.on('id', function(id) {
+            console.info('You are (' + id + ').')
+            pthis.myId = id;
+        })
+
+    }
+    this.IsConnected = function() {
+        return(typeof this.socket == "object" &&
+            this.socket !== null &&
+            this.socket.connected);
+    }
+    this.Emit = function(id, data){
+        if(this.IsConnected()){
+            this.socket.emit(id, data);
+            return true;
+        }
+        return false;
+    }
+    this.SetConnectedEffect = function(onoff) {
+        $('body').toggleClass('connected', onoff);
+    }
+
+    this.Id = function(i) {
+        if(typeof i == "string") this.myId = i;
+        return this.myId;
+    }
+
+
+    //Cursor funcs
+    this.Cursor = function(thing) {
+        var dd = this.Id();
+        var cur = function(c) {
+
+            this.cursor = null;
+            this.Name = function(n) {
+                if(typeof this.cursor != "object") return "";
+                if(typeof n == "string") this.cursor.data('name', n).attr('name', n)
+                else return this.cursor.data('name');
+            };
+            this.Position = function(x, y) {
+                if(typeof this.cursor != "object") return [0, 0];
+                if(typeof x == "number" &&
+                    typeof y == "number") this.cursor.css({
+                    left: x,
+                    top: y,
+                });
+                else return [this.cursor.css('left'), this.cursor.css('top')];
+            };
+            this.Size = function(s) {
+                if(typeof this.cursor != "object") return 0;
+                if(typeof s == "number") this.cursor.css({
+                    width: s,
+                    height: s,
+                });
+                else return this.cursor.css('width');
+            };
+            this.Id = function() {
+                if(typeof this.cursor != "object") return "";
+                if(!this.cursor.hasClass('cursor-self')) return this.cursor.attr('id');
+                else return this.myId;
+            }
+            if(typeof c == "string") this.cursor = $('#' + c);
+            if(typeof c == "undefined") this.cursor = $('.canvas-cursor.cursor-self');
+            if(typeof c == "object") this.cursor = c;
+        }
+        var cc = new cur();
+        return cc;
+    }
+
+    // either:
+    // set current room, which will toggle states and such
+    // get current room name
+
+    this.Room = function(room_name) {
+        this.ResetBody();
+        $('body').addClass('loading');
+        this.room = ParupaintRoom(this); // clean up and reset
+
+        if(typeof room_name == "string") {
+            console.warn('Creating Parupaint Room [' + room_name + '].');
+
+            $('body').removeClass('loading');
+            this.room = new ParupaintRoom(this, room_name);
+        }
+    }
+
+    this.ResetBody = function() {
+        window.location.hash = '';
+        $('body').removeClass(
+            'is-private is-admin loading disconnected'
+        );
+    }
 }
 
 
 
-// todo make info packet work, scrap this old code
-var updateRoomsTimer = null
-var updateRooms = function(){
-    
-    $('.room-counter').text('').removeAttr('href').removeClass('error').unbind('click')
-    
-	if(typeof updateRoomsTimer == 'null') return false
-	var jj = $.ajax(url + '/info').done(function(data2) {
-		
-		// get all current room children
-		var rest = $('div.show-area').children();
-		for(var r in data2)
-		{
-			var data = data2[r];
-			
-			var ee = $('#room-' + r);
-			if(!ee.length){
-				// doesn't room exist? add it
-				console.log('added new room ' + r);
-				var m = data.lastmod-1;
-				
-				ee = $('<a/>', 
-					   {
-					id: 'room-' + r,
-					class: 'room-link',
-					'data-room': r,
-					'data-save': m,
-					href:'/#' + r
-					   });
-				
-				$('div.show-area').append(ee);
-				
-				ee.click(function(){
-					var hash = $(this).attr('data-room');
-					initParupaint(hash);
-					return false;
-				})
-			}
-			// get last mod
-			var ss = ee.data('save');
-			// filter it out
-			rest = rest.not('#room-' + r); 
-			var aaa = "";
-			if(true)
-			{
-				var ccc = '';
-				for(var c in data.ids){
-					ccc += '<li>'+data.ids[c].name+'</li>';
-				}
-				var active = $('<div class="room-active">last active <span></span></div>');
-				active.children('span').livestamp(Math.round(data.lastmod/1000));
-				var header = $('<h3></h3>').html(r);
-				var list = $('<ul>'+ccc+'</ul>');
+var PP = null;
+$(function() {
+    PP = new Parupaint();
 
-				aaa = $('<div class="room-info"></div>').append(active, header, list);
-			}
-			ee.html(aaa);
-			if(ss != data.lastmod){
-				loadSqnyaImage(url + '/'+(r + '/image?' + Date.now()), function(url){
-					ee.css('background-image', 'url('+url +')');
-				})
-				
-			}
-			ee.data('save', data.lastmod);
-			
-			
-		}
-		var ll = Object.keys(data2).length;
-		$('.room-counter').text(ll + ' room'+(ll == 1 ? '' : 's')+' active');
+    // TODO name set? and stuff
+    ParupaintStorage.GetStorageKey('name', function(e) {
+        var name = e.name;
+        if(typeof name != "string") {
+            name = prompt('Set name.');
+            ParupaintStorage.SetStorageKey({
+                name: name
+            });
+        }
+        PP.Cursor().Name(name);
+    })
 
-		rest.remove();
-		updateRoomsTimer = setTimeout(updateRooms, 3000);
-        
-        
-	}).error(function(xhr, ts, err){
-        console.log(xhr, ts, err)
-		$('.room-counter').text('Error contacting server ('+ ts +').').addClass('error').attr('href', '#').click(function(e){
-            updateRooms()
+    // TABLET SETUP
+    // TODO chrome specific tablet set-up?
+    ParupaintStorage.GetStorageKey('wacom_tablet', function(e) {
+        if(e.wacom_tablet) {
+            console.info("Setting up Wacom Tablet plug-in.");
+            $('body').prepend(
+                $('<object/>', {
+                    id: 'wacomPlugin',
+                    type: 'application/x-wacomtabletplugin'
+                })
+            );
+        }
+    });
+
+    // ROOM
+    if(document.location.hash) {
+        console.log("Want to enter specific room.");
+
+        var room_name = document.location.hash.replace(/#/, '');
+        PP.Room(room_name);
+    }
+
+
+    // SOCKET SETUP
+    // document title is already set
+    if(navigator.onLine) {
+        PP.Connect();
+    } else {
+        PP.Room(PP.default_room);
+		// if disconnected, just load the default room
+		// in offline mode
+    }
+
+    PP.socket.on('open', function(e) {
+        console.log("Opened connection.")
+
+		// FIXME this is for debug only.
+		// i shall change the join to be automatically
+		// in the server later.
+        PP.socket.emit('join', {
+            room: PP.default_room,
+            name: PP.Cursor().Name()
         });
-	});
-	return false;
-};
 
+        PP.SetConnectedEffect(true);
+        if(PP.room !== null) {
+            PP.room.OnOpen(e);
+        }
+    });
+    PP.socket.on('close', function(e) {
+        console.log("Closed connection.", e, e.code)
+        PP.SetConnectedEffect(false);
+        if(PP.room !== null) {
+            PP.room.OnClose(e);
+        }
 
-var connectSocket = function(){
-	$('.room-counter').text('Connecting...');
+        //TODO add chat message
+        //TODO disconnected class for a few seconds, fade out
+    });
+    PP.socket.on('join', function(d) {
+        //console.warn("Server wants us to join [" + d.name + "]");
+        PP.Room(d.name)
+            //TODO PP.Room(d.name)
+    });
+    PP.socket.on('leave', function(d) {
+        console.warn("Got websocket message to leave.");
+        PP.Room();
+        $('body').addClass('disconnected');
+    });
+});
 
+/*
 
-	RoomListSocket = new golem.Connection('ws://sqnya.se:1108/main', false);
-	var tt = setTimeout(function(){
-		$('.room-counter').text('Can\'t connect...?');
-	}, 5000);
-	
-	RoomListSocket.on('close', function(data){
-		$('.room-counter').text('Can\'t connect.');
-		clearTimeout(tt)
-
-	}).on('open', function(data){
-		$('.room-counter').text('Connected.');
-		RoomListSocket.emit('info');
-		clearTimeout(tt)
-
+if(typeof chrome != "undefined" && typeof chrome.permissions != "undefined"){
+	chrome.permissions.contains({permissions:['hid']}, function(e){
+		if(e){
+			$('input.set-tablet').addClass('enabled')
+		}
 	})
 }
 
-var isConnectedSocket = function(){
-	return (typeof RoomListSocket != "undefined" && typeof RoomListSocket.ws != "undefined" && RoomListSocket.ws.readyState == 1);
-}
-
-
-
-
-initParupaint = function(room, opt){
-	document.title = 'Starting up...';
-	
-	
-	
-	window.location.hash = '';
-	if(typeof room == 'string' && room.length){
-		
-		window.location.hash = '#' + room;
-	}
-	
-	$('body').removeClass('room canvas main is-private is-admin');
-	$('.room-status-bar .opt-notify').text('');
-	
-	if(navigator.onLine && !isConnectedSocket()) {
-		connectSocket();
-	}
-	if(typeof ROOM != "undefined" && typeof ROOM.canvasNetwork != "undefined"){
-		// send leave event.. ?
-		console.log('Cleanup room stuff.');
-		ROOM.canvasNetwork.emit('leave')
-		delete ROOM.canvasNetwork;
-		delete ROOM.canvasCallbacks;
-		
-		delete ROOM;
-	}
-	
-	
-	if(!room){
-		console.log('→ Creating lobby...');
-		document.title = '-- parupaint home --';
-		
-		if(typeof chrome != "undefined" && typeof chrome.permissions != "undefined"){
-			chrome.permissions.contains({permissions:['hid']}, function(e){
-				if(e){
-					$('input.set-tablet').addClass('enabled')
-				}
-			})
-		}
-		
-		getStorageKey('name', function(d){
-			if(d && d.name){
-				$('input.name-input').val(d.name)
-			}
-		})
-		
-		
-		$('body').addClass('main');
-		RoomListSocket.on('info', function(data){
-			console.log("info:", data)
-
-		})
-		
-		if(typeof opt != "undefined") {
-			$('.room-status-bar .opt-notify').text(opt)
-		}
-			
-			
-	} else {
-		
-		console.log('→ Creating room...');
-		
-		document.title = ''+room+' (offline)';
-		
-		$('body').addClass('canvas');
-		document.location.hash = room;
-		
-		if(onRoom){
-			ROOM = new onRoom(room);
-		}
-	}
-	
-};
-
-var getRoom = function(){
-	return document.location.hash.substr(1)
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+*/

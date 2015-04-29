@@ -14,7 +14,7 @@
 	-webkit-user-select:none;
 	-moz-user-select:none;
 	user-select:none;
-	
+
 	visibility:hidden;
 	transition:all 100ms ease;
 	transition-property: width, height;
@@ -43,7 +43,7 @@
 	pointer-events:none;
 
 	text-shadow:
-	-1px -1px 0 #000,  
+	-1px -1px 0 #000,
 	1px -1px 0 #000,
 	-1px 1px 0 #000,
 	1px 1px 0 #000;
@@ -128,7 +128,7 @@
 	transform:scale(0);
     -webkit-animation:size-shrink 100ms linear;
     -moz-animation:size-shrink-moz 100ms linear;
-	
+
 
 }
 
@@ -153,22 +153,13 @@
 
 html{
 	height:100%;
-	
+
     display: flex;
     justify-content: flex-start;
     align-items: center;
-	
-	
+
+
 	overflow:scroll;
-}
-body.canvas.connected{
-	background-color: #DAE2D7;
-}
-body.canvas{
-	background-color: #D7D7D7;
-	transition:none;
-	display:inline-block;
-    margin:auto;
 }
 
 
@@ -182,17 +173,17 @@ body.canvas{
 .canvas-workarea{
 	position:relative;
 	margin:0;
-    
+
 	-webkit-user-select: none;
 	-moz-user-select:none;
 	user-select:none;
 	width:32px; height:32px;
 	cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAR0lEQVQYV5WQSQ4AIAgD6f8fXQGFQKJGOUE7YYM8BDYMVWt6LcwUkgKk7EmDDIhYYIPUn4CZNXep7JRgwDHpe6doer3u+LEBmLoZCntZhJ0AAAAASUVORK5CYII=") 5 5, none;
-	
+
 	border: 60px solid transparent;
 	outline:1px dashed #9d9d9d;
     outline-offset: -60px; /*padding*/
-    
+
 	background-clip: content-box;
 	overflow:hidden;
 	transition: none;
@@ -221,7 +212,7 @@ body.canvas{
 canvas{
 	display:none;
 	pointer-events: none;
-    
+
     image-rendering: optimizeSpeed;
     image-rendering: -moz-crisp-edges;
     image-rendering: -webkit-optimize-contrast;

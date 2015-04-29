@@ -1,3 +1,5 @@
+
+
 var getStorageKey = function(key, callback){
 	if(typeof chrome != 'undefined' && typeof chrome.storage != 'undefined'){
 		return chrome.storage.local.get(key, callback)
@@ -32,7 +34,13 @@ var clearStorage = function(){
 	}
 }
 
-
+var ParupaintStorage = function(){
+	// static stuff like this with no vars shall not be 'new ...'
+	this.GetStorageKey = getStorageKey;
+	this.SetStorageKey = setStorageKey;
+	this.ClearStorage = clearStorage;
+	return this;
+}();
 
 
 jQuery.fn.extend({
@@ -58,21 +66,21 @@ jQuery.fn.extend({
 					var csy = (e.clientY - tmouse.oldsy);
 					tmouse.oldsx = e.clientX;
 					tmouse.oldsy = e.clientY;
-                    
+
 					return callback('mousemove', {
-                        button: mb, 
-                        x: e.offsetX + document.documentElement.scrollLeft, y: e.offsetY + document.documentElement.scrollTop, 
-                        
-                        xpage: e.pageX, ypage: e.pageY, 
-                        cx: cx, cy: cy, sx: csx, sy: csy, 
-                        xclient:e.clientX, yclient:e.clientY, target: e.target, 
+                        button: mb,
+                        x: e.offsetX + document.documentElement.scrollLeft, y: e.offsetY + document.documentElement.scrollTop,
+
+                        xpage: e.pageX, ypage: e.pageY,
+                        cx: cx, cy: cy, sx: csx, sy: csy,
+                        xclient:e.clientX, yclient:e.clientY, target: e.target,
                         mozPressure: e.mozPressure});
 
 				}
 			}).mouseenter(function(e){
 				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
 				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
-				
+
 				if(callback){
 					if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
 					if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
