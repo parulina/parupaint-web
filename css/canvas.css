@@ -220,30 +220,9 @@ canvas{
     image-rendering: pixelated;
     -ms-interpolation-mode: nearest-neighbor;
 }
-@keyframes layer-blink-out {
-    0%     { opacity:0;   }
-    75%    { opacity:0;   }
-    100%   { opacity:0.3; }
-}
-
-@-webkit-keyframes webkit-layer-blink-out {
-    0%     { opacity:0;   }
-    75%    { opacity:0;   }
-    100%   { opacity:0.3; }
-}
-@-moz-keyframes moz-layer-blink-out {
-    0%     { opacity:0;   }
-    75%    { opacity:0;   }
-    100%   { opacity:0.3; }
-}
 
 body.canvas-preview canvas.focused-frame {
 	opacity:1 !important;
-}
-canvas.focused-frame:not(.focused){
-        -moz-animation:moz-layer-blink-out 1200ms linear;
-        -webkit-animation:webkit-layer-blink-out 1200ms linear;
-        animation:layer-blink-out 1200ms linear;
 }
 canvas.focused-frame{
 	opacity:0.3;
@@ -274,4 +253,28 @@ canvas.focused-right{
 body.canvas-preview canvas.focused-left,
 body.canvas-preview canvas.focused-right{
 	display:none;
+}
+
+
+@keyframes layer-blink-out {
+    from {opacity:0;}
+    to  {opacity:0.3;}
+}
+
+@-webkit-keyframes webkit-layer-blink-out {
+    from {opacity:0;}
+    to  {opacity:0.3;}
+}
+@-moz-keyframes moz-layer-blink-out {
+    from {opacity:0;}
+    to  {opacity:0.3;}
+}
+
+body:not(.canvas-preview) .canvas-pool.blink-layer >
+    canvas.focused-frame:not(.focused){
+
+    -webkit-animation:webkit-layer-blink-out 600ms steps(1);
+    -moz-animation:moz-layer-blink-out 600ms steps(1);
+    animation:layer-blink-out 600ms steps(1);
+
 }

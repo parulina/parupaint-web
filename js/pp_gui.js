@@ -64,12 +64,14 @@ function ParupaintInterface() {
             case 9: // tab
                 {
                     if($('input:focus').length) return true;
+
                     if(pthis.OverlayVisible()) {
                         if(e.shiftKey) pthis.HideOverlay();
                         else {
                             pthis.ShowOverlay(true)
                         }
                     } else {
+                        pthis.UpdateFrameinfoPosition();
                         pthis.ShowOverlay(false);
                     }
                     pthis.tabDown = true;
@@ -114,12 +116,12 @@ function ParupaintInterface() {
                                 fc: fc
                             });
                         }
-                        return true;
 
                     } else {
-                        return ParupaintCanvas.Advance(null, sd ? 1 : -1);
+                        ParupaintCanvas.Advance(null, sd ? 1 : -1);
                     }
-                    break;
+                    pthis.UpdateFrameinfoPosition();
+                    return true;
                 }
 
             case 68: // d
@@ -138,7 +140,7 @@ function ParupaintInterface() {
                                 return ParupaintCanvas.Focus(l, 0);
                             } else {
                                 ParupaintCanvas.RemoveLayer();
-                                if(!ParupaintCanvas.Focus(l, f1)){
+                                if(!ParupaintCanvas.Focus(l, f1)) {
                                     ParupaintCanvas.Focus(l - 1, f2);
                                 }
                             }
@@ -150,12 +152,12 @@ function ParupaintInterface() {
                                 lc: lc
                             });
                         }
-                        return true;
                     } else {
 
-                        return ParupaintCanvas.Advance(fd ? 1 : -1);
+                        ParupaintCanvas.Advance(fd ? 1 : -1);
                     }
-                    break;
+                    pthis.UpdateFrameinfoPosition();
+                    return true;
                 }
                 /*
             case 46: // del
@@ -379,6 +381,73 @@ function ParupaintInterface() {
         for(var i = 0; i < list.length; i++) { //standard loop is important so that layers get in order
             $('.flayer-list').append(list[i]);
         }
+        this.UpdateFrameinfoPosition();
+    }
+
+    this.UpdateFrameinfoPosition = function() {
+        var sel = $('.canvas-pool canvas.position');
+        if(sel.length) {
+            var layer = sel.data('layer'),
+                frame = sel.data('frame');
+
+            $('.flayer-list .flayer-info-frame').removeClass('focused');
+
+            $('.flayer-list .flayer-info-layer[data-layer=' + layer + ']').
+            children('.flayer-info-frame[data-frame=' + frame + ']').
+            addClass('focused');
+
+            $('.qstatus-piece.qinfo').
+            attr('data-label', layer + 1).
+            attr('data-label-2', frame + 1);
+        }
+
+    }
+
+    this.UpdatePainters = function(artists) {
+        var alist = $('<ul />', {
+            class: 'player-list'
+        });
+
+        artists.each(function(k, e) {
+            var t = $(e);
+            alist.append(
+                $('<li/>', {
+                    class: 'player-list-entry'
+                }).text(
+                    t.data('name')
+                )
+            );
+        });
+        $('.brush-panel').html(alist);
+
+        $('.qstatus-piece.preview-col').attr('data-label-2', artists.length);
+    }
+
+    this.SetConnectionStatus = function(onoff) {
+        $('.qstatus-piece.qinfo').
+        attr('data-label-3', (onoff ? 'multi' : 'single')).
+        toggleClass('online', navigator.onLine);
+
+        $('form.connection-input').
+        toggleClass('enable', onoff).
+        attr('data-label', (onoff ? 'Connected' : 'Disconnected'));
+
+        $('input.con-status').prop('checked', onoff);
+
+    }
+    this.SetRoomName = function(name) {
+        $('.qstatus-message').attr('data-label', name);
+    }
+
+    this.SetPrivate = function(onoff) {
+        $('body').toggleClass('is-private', onoff);
+        $('input.private-status').prop('checked', onoff);
+    }
+
+    this.SetDimensionsInput = function(w, h) {
+        var i = $('form.dimension-input');
+        i.children('.dimension-w-input').val(w);
+        i.children('.dimension-h-input').val(h);
     }
 
 

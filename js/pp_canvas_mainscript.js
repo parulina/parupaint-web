@@ -13,24 +13,6 @@ var updateInfo = function(){
 		width = parseInt($('canvas.focused')[0].width),
 		height = parseInt($('canvas.focused')[0].height)
 
-
-	$('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame).attr('data-label-3', connected_label)
-	$('.qstatus-message').attr('data-label', room)
-	$('.qstatus-piece.qinfo').toggleClass('online', navigator.onLine)
-
-	var players = $('.canvas-cursor').not('.cursor-self')
-	$('.qstatus-piece.preview-col').attr('data-label-2', players.length)
-
-	var list = $('<ul/>', {class: 'player-list'}).text("You're quite lonely.")
-
-	if(players.length){
-		list.html('')
-		players.each(function(k, e){
-			list.append($('<li/>', {class: 'player-list-entry'}).text($(e).data('name')))
-		})
-	}
-	$('.brush-panel').html(list)
-
 	$('form.dimension-input .dimension-w-input').val($('canvas.focused').get(0).width)
 	$('form.dimension-input .dimension-h-input').val($('canvas.focused').get(0).height)
 
@@ -213,13 +195,6 @@ var onRoom = function(room){
 			initCanvas(500, 500, [[{}, {}], [{}, {}]])
 		}
 
-
-        if(data.plugin){
-			console.log('Adding wacom plugin.');
-            $('body').prepend(
-                $('<object/>', {id: 'wacomPlugin', type: 'application/x-wacomtabletplugin'})
-            );
-        }
 
 		// rest init
 		updateInfo()

@@ -42,6 +42,7 @@ function Parupaint() {
     }
     this.SetConnectedEffect = function(onoff) {
         $('body').toggleClass('connected', onoff);
+        this.ui.SetConnectionStatus(onoff);
     }
 
     this.Id = function(i) {
@@ -178,6 +179,7 @@ $(function() {
             room: PP.default_room,
             name: PP.Cursor().Name()
         });
+
 
         PP.SetConnectedEffect(true);
         if(PP.room !== null) {

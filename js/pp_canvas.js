@@ -60,8 +60,20 @@ var ParupaintCanvas = new function() {
 
 
         // clear everything
-        $('.canvas-pool canvas').
-        removeClass('focused focused-frame focused-layer position focused-left focused-right');
+        $('.canvas-pool').children('canvas').
+        removeClass('focused focused-frame position focused-left focused-right blink-layer');
+        // focused-layer has is own logic because css anims
+
+        if(!$('.canvas-pool canvas[data-layer=' + layer + ']').hasClass('focused-layer')) {
+                // focused-layer has changed
+            $('.canvas-pool canvas').removeClass('focused-layer').
+            filter('[data-layer=' + layer + ']').addClass('focused-layer');
+
+            $('.canvas-pool').
+            removeClass('blink-layer').
+            addClass('blink-layer');
+            // make it blink ☆
+        }
 
 
         var getFrameStartEnd = function(frame) {
@@ -101,12 +113,12 @@ var ParupaintCanvas = new function() {
                 start.addClass('focused');
                 // also mark previous and next frames
                 var prev = $('.canvas-pool canvas[data-layer=' +
-                        start.data('layer') + '][data-frame='+
-                        (start.data('frame')-1)+']');
+                    start.data('layer') + '][data-frame=' +
+                    (start.data('frame') - 1) + ']');
 
                 var next = $('.canvas-pool canvas[data-layer=' +
-                        end.data('layer') + '][data-frame='+
-                        (end.data('frame')+1)+']');
+                    end.data('layer') + '][data-frame=' +
+                    (end.data('frame') + 1) + ']');
 
                 var pos_prev = getFrameStartEnd(prev),
                     pos_next = getFrameStartEnd(next);
@@ -120,21 +132,11 @@ var ParupaintCanvas = new function() {
 
         });
 
-        $('.canvas-pool canvas').
-        filter('[data-layer=' + layer + ']').
-        addClass('focused-layer');
 
         // get the real frame pos and mark it
         var cframe = $('.canvas-pool canvas').
         filter('[data-layer=' + layer + '][data-frame=' + frame + ']').
         addClass('position');
-
-        //TODO fix css fadeout to step()
-
-        // TODO move
-        $('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame)
-        $('.flayer-list .flayer-info-frame').removeClass('focused')
-        $('.flayer-list .flayer-info-layer[data-layer=' + layer + '] .flayer-info-frame[data-frame=' + frame + ']').addClass('focused')
 
         return true;
     }
@@ -282,7 +284,10 @@ var ParupaintCanvas = new function() {
 
         if(typeof width != "number" ||
             typeof height != "number") {
-            return;
+
+            var width = parseInt($('canvas').prop('width')),
+                height = parseInt($('canvas').prop('height'));
+            return [width, height];
         }
         // set some basics
 

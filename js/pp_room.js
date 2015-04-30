@@ -117,10 +117,27 @@ var ParupaintRoom = function(main, room_name) {
     this.Private = function(onoff) {
         if(typeof onoff == "boolean") {
             this.private = onoff;
-            $('body').toggleClass('is-private', onoff);
+            main.ui.SetPrivate(onoff);
         } else {
             return this.private;
         }
+    }
+
+    this.UpdatePainters = function() {
+        this.artists = $('.canvas-cursor:not(.cursor-self)');
+        main.ui.UpdatePainters(this.artists)
+    }
+    this.UpdateTitle = function() {
+
+        var d = ParupaintCanvas.Init(); // get dimensions
+        var ll = [
+            '[' + this.name + ']',
+            this.artists.length + ' artists',
+            '['+d[0]+'×'+d[1]+']'
+        ];
+
+        document.title = ll.join(' ');
+
     }
 
 
@@ -130,6 +147,7 @@ var ParupaintRoom = function(main, room_name) {
         // safen the room_name for hash
         return room_name;
     }();
+    main.ui.SetRoomName(room_name);
     document.location.hash = this.urlsafe_name;
 
 
@@ -161,6 +179,7 @@ var ParupaintRoom = function(main, room_name) {
                 if(typeof d.private != "undefined") {
                     rthis.Private(d.private);
                 }
+                rthis.UpdateTitle();
             });
             main.socket.on('canvas', function(d) {
                 console.info('New canvas [' + d.width + ' x ' + d.height + ' : ' + d.layers.length + ' layers].');
@@ -170,15 +189,21 @@ var ParupaintRoom = function(main, room_name) {
                     ParupaintCanvas.Init(d.width, d.height)
                 }
                 main.ui.UpdateFrameinfo();
+                rthis.UpdateTitle();
+
                 ParupaintCanvas.Focus(0, 0);
                 main.Emit('img');
+            });
+            main.socket.on('peer', function(d) {
+
+                rthis.UpdatePainters();
+                rthis.UpdateTitle();
             });
             main.socket.on('img', function(d) {
                 var l = parseInt(d.l),
                     f = parseInt(d.f),
                     decodedData = window.atob(d.data),
-                    binData = new Uint8Array(decodedData.split('').
-                    map(function(x) {
+                    binData = new Uint8Array(decodedData.split('').map(function(x) {
                         return x.charCodeAt(0);
                     })),
 
