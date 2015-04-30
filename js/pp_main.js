@@ -153,7 +153,8 @@ $(function() {
         console.log("Want to enter specific room.");
 
         var room_name = document.location.hash.replace(/#/, '');
-        PP.Room(room_name);
+        PP.default_room = room_name;
+        //PP.Room(room_name);
     }
 
 
