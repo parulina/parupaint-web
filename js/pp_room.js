@@ -195,7 +195,7 @@ var ParupaintRoom = function(main, room_name) {
                     });
 
                     var CC = main.Cursor(cursor);
-                    
+
                     CC.Size(d.brushdata.Size);
                     CC.Position(d.brushdata.X, d.brushdata.Y);
                     CC.LayerFrame(d.brushdata.Layer, d.brushdata.Frame);
@@ -660,13 +660,13 @@ var ParupaintRoom = function(main, room_name) {
                             16,
                             64
                         ];
-                        this.brush.Size(sizes[k]).UpdateLocal();
+                        pthis.brush.Size(sizes[k]).UpdateLocal();
 
                         var cc = main.Cursor();
                         main.Emit('draw', {
                             x: cc.Position()[0],
                             y: cc.Position()[1],
-                            s: s,
+                            s: pthis.brush.Size(),
                             c: pthis.brush.Color(),
                             d: false
                         });
