@@ -249,7 +249,7 @@ var ParupaintCanvas = new function() {
                         nc.attr('data-extended', t);
 
                     }
-                    console.log('Creating ' + l + " → " + f)
+                    //console.log('Creating ' + l + " → " + f + " ("+ext+")")
                     var id = 'flayer-' + l + '-' + f;
 
                     var nc = $('<canvas width="' + width +
@@ -260,7 +260,7 @@ var ParupaintCanvas = new function() {
                     nc[0].getContext('2d').webkitImageSmoothingEnabled = false;
                     nc[0].getContext('2d').mozimageSmoothingEnabled = false;
                     nc[0].getContext('2d').imageSmoothingEnabled = false;
-                    if(ext == "boolean" && ext) nc.addClass('extended');
+                    if(typeof ext == "boolean" && ext) nc.addClass('extended');
 
                     $('.canvas-pool').append(nc);
                 }
