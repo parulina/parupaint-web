@@ -60,7 +60,7 @@ var ParupaintCanvas = new function() {
 
 
         // clear everything
-        $('.canvas-pool').children('canvas').
+        $('.canvas-pool').removeClass('blink-layer').children('canvas').
         removeClass('focused focused-frame position focused-left focused-right blink-layer');
         // focused-layer has is own logic because css anims
 
