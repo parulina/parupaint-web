@@ -171,7 +171,8 @@ function ParupaintInterface() {
                         ParupaintCanvas.Advance(fd ? 1 : -1);
                     }
                     pthis.UpdateFrameinfoPosition();
-                    
+
+                    //TODO move this somewhere else.. ?
                     var dd = [
                         $('canvas.focused').data('layer'),
                         $('canvas.focused').data('frame')
@@ -397,11 +398,11 @@ function ParupaintInterface() {
 
     this.UpdateBrushinfo = function(brush) {
         if(typeof brush != "undefined") {
-            //var cssrgba = rgba2css((this.brush().color[0] == '#') ? hex2rgb(this.brush().color) : this.brush().color)
-            var cssrgba = "FIXME"; //FIXME
+
+            var col = new ParupaintColor(brush.color);
 
             $('.qstatus-piece.preview-col').
-            css('background-color', cssrgba).
+            css('background-color', col.ToCssString()).
             attr('data-label', brush.name);
 
         }

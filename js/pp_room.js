@@ -23,7 +23,6 @@ function ParupaintBrushglass() {
         PP.ui.UpdateBrushinfo(this.Brush());
     }
 
-
     // Functions to reflect the important brush variables
     // do not store X,Y or whatever.
 
@@ -83,6 +82,7 @@ var ParupaintRoom = function(main, room_name) {
     //TODO finish this up
 
     this.brush = new ParupaintBrushglass();
+    this.brush.UpdateLocal();
     this.key_eraser = 3;
 
     this.picking_color = false;
@@ -383,7 +383,7 @@ var ParupaintRoom = function(main, room_name) {
 
 
     $('#mouse-pool').unbind('').sevent(function(e, data) {
-        
+
         if(e == 'mousemove' && data.target.tagName == 'CANVAS') {
 
             if(main.ui.movingCanvas || (data.button == main.ui.key_move)) {
