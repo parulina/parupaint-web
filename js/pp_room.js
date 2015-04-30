@@ -1,5 +1,7 @@
 "use strict";
 
+// Brush glass
+// Keeps a record of brushes and handy functions for them
 function ParupaintBrushglass() {
     this.current = 0;
     this.brushes = [
@@ -9,50 +11,36 @@ function ParupaintBrushglass() {
 
     this.UpdateCursor = function(cursor) {
         if(cursor) {
-            cursor.css({
-                width: this.Size(),
-                height: this.Size()
-            });
-            //okay, no color???
-            cursor.toggleClass("eraser", (this.current === 1));
+            cursor.Size(this.Size());
+            cursor.Color(this.Color());
+            cursor.cursor.toggleClass("eraser", (this.current === 1));
         }
     }
 
-    this.Update = function(cursor, ui) {
-        this.UpdateCursor(cursor);
+    this.UpdateLocal = function() {
 
-        ui.UpdateBrushinfo(this.Brush());
+        this.UpdateCursor(PP.Cursor());
+        PP.ui.UpdateBrushinfo(this.Brush());
     }
+
+
+    // Functions to reflect the important brush variables
+    // do not store X,Y or whatever.
 
     this.Size = function(size, cursor) {
         if(typeof size == "undefined") return this.Brush().size;
-        if(cursor.length) {
-            cursor.data('size', size);
-            if(cursor.hasClass('cursor-self')) {
-                //todo use a faster way to check if self?
-                this.brushes[this.current].size = size;
-            }
-        }
+
+        this.brushes[this.current].size = size;
+        if(cursor) cursor.Size(size);
+
         return this;
     }
     this.Color = function(color, cursor) {
         if(typeof color == "undefined") return this.Brush().color;
-        if(cursor.length) {
-            //TODO color convertion
-            cursor.data('color', color);
-            if(cursor.hasClass('cursor-self')) {
-                //todo use a faster way to check if self?
-                this.brushes[this.current].color = color;
-            }
-        }
-        return this;
-    }
-    this.Position = function(x, y) {
-        if(typeof x == "undefined" ||
-            typeof y == "undefined") return [this.Brush().x, this.Brush().y];
 
-        this.Brush().x = x;
-        this.Brush().y = y;
+        this.brushes[this.current].color = color;
+        if(cursor) cursor.Color(color);
+
         return this;
     }
 
@@ -91,7 +79,8 @@ var ParupaintRoom = function(main, room_name) {
     }
     this.name = room_name;
     this.artists = [];
-    this.slow_move = false; // roundtrip to server
+    this.server_roundtrip = true; // roundtrip to server
+    //TODO finish this up
 
     this.brush = new ParupaintBrushglass();
     this.key_eraser = 3;
@@ -108,6 +97,8 @@ var ParupaintRoom = function(main, room_name) {
             $('.canvas-cursor').removeClass('admin');
 
             cursor.cursor.addClass('admin');
+            main.ui.SetAdmin(cursor.IsMe());
+
             this.admin = cursor;
         }
         return this.admin;
@@ -133,7 +124,7 @@ var ParupaintRoom = function(main, room_name) {
         var ll = [
             '[' + this.name + ']',
             this.artists.length + ' artists',
-            '['+d[0]+'×'+d[1]+']'
+            '[' + d[0] + '×' + d[1] + ']'
         ];
 
         document.title = ll.join(' ');
@@ -164,17 +155,13 @@ var ParupaintRoom = function(main, room_name) {
                 // data
                 if(typeof d.admin != "undefined") {
 
-                    if(d.admin == main.Cursor().Id()) {
-                        //me!
-                        $('body').addClass('is-admin');
-                        rthis.Admin(main.Cursor());
-                    } else {
-                        var c = main.Cursor('#' + d.admin);
-                        if(c == null) {
-                            return console.error("Admin cursor doesn't exist!")
-                        }
-                        rthis.Admin(c);
+                    var c = main.Cursor('#' + d.admin);
+                    if(c == null) {
+                        return console.error("Admin cursor doesn't exist!")
                     }
+                    rthis.Admin(c);
+                    console.debug('Admin is ', d.admin)
+                    $('body').toggleClass('is-admin', c.IsMe());
                 }
                 if(typeof d.private != "undefined") {
                     rthis.Private(d.private);
@@ -182,19 +169,39 @@ var ParupaintRoom = function(main, room_name) {
                 rthis.UpdateTitle();
             });
             main.socket.on('canvas', function(d) {
-                console.info('New canvas [' + d.width + ' x ' + d.height + ' : ' + d.layers.length + ' layers].');
+                console.info('New canvas [' + d.width + ' x ' + d.height + '] : ' + (typeof d.layers != "undefined" ? d.layers.length : 'no') + ' layers.');
+
                 if(d.layers != undefined) { // create new
                     ParupaintCanvas.Init(d.width, d.height, d.layers)
                 } else {
                     ParupaintCanvas.Init(d.width, d.height)
                 }
-                main.ui.UpdateFrameinfo();
-                rthis.UpdateTitle();
-
                 ParupaintCanvas.Focus(0, 0);
+                main.ui.UpdateHeavy();
+                rthis.UpdateTitle();
                 main.Emit('img');
             });
             main.socket.on('peer', function(d) {
+
+                console.info('Peer connected [' + d.id + '] (' + d.name + ').');
+                var id = $('#' + d.id);
+                if(d.disconnect && id.length) {
+                    id.remove();
+                } else if(!d.disconnect) {
+                    var cursor = $('<div/>', {
+                        class: 'canvas-cursor',
+                        id: d.id,
+                        'data-name': d.name
+                    });
+
+                    var CC = main.Cursor(cursor);
+                    
+                    CC.Size(d.brushdata.Size);
+                    CC.Position(d.brushdata.X, d.brushdata.Y);
+                    CC.LayerFrame(d.brushdata.Layer, d.brushdata.Frame);
+
+                    $('#mouse-pool').append(cursor);
+                }
 
                 rthis.UpdatePainters();
                 rthis.UpdateTitle();
@@ -225,6 +232,115 @@ var ParupaintRoom = function(main, room_name) {
                     ctx.putImageData(cc, 0, 0)
                 }
             });
+
+            // TODO make all "personal" packets
+            // work with .id == myId
+
+            main.socket.on('lf', function(d) {
+
+                var l = parseInt(d.l),
+                    f = parseInt(d.f);
+
+                var c = main.Cursor(d.id);
+                if(c === null) return console.error("Cursor doesn't exist.");
+                if(rthis.server_roundtrip && c.IsMe()) {
+                    ParupaintCanvas.Focus(l, f);
+                    main.ui.UpdateHeavy();
+                }
+                c.LayerFrame(l, f);
+                //console.info('Changed layers to '+ c.LayerFrame() +'.');
+            });
+            main.socket.on('draw', function(d) {
+                var x = d.xo, // net original x
+                    y = d.yo, // net original y
+                    l = d.l, // net l
+                    f = d.f, // net f
+
+                    // required
+                    xx = d.x, // net x
+                    yy = d.y, // net y
+                    ss = d.s, // net size
+                    cc = d.c, // net color
+                    dd = d.d; // net drawing
+
+
+
+                if(typeof d.id != "undefined") {
+                    //someone.
+                    var c = main.Cursor(d.id);
+                    if(c === null) {
+                        return console.error("Cursor doesn't exist.");
+                    }
+                    if(!rthis.server_roundtrip && c.IsMe()) {
+                        // ignore this is this is me and roundtrip is off
+                        return false;
+                    }
+                    var od = ParupaintCanvas.Init(),
+                        nd = [
+                            $('.canvas-workarea').width(),
+                            $('.canvas-workarea').height()
+                        ];
+
+                    // get saved position
+                    var pp = c.Position(),
+                        lf = c.LayerFrame();
+
+                    if(c.IsMe()){
+                        // need to have special stuff for yourself.
+                        // due to Position() being applied outside
+                        // of this context.
+
+                        //pp = [c.cursor.data('dx'), c.cursor.data('dy')];
+
+                    }else {
+                        if(typeof xx != "undefined" &&
+                            typeof yy != "undefined") {
+
+                            c.Position((xx / od[0]) * nd[0],
+                                (yy / od[1]) * nd[1]);
+                        }
+                        if(typeof ss != "undefined") c.Size(ss);
+                        if(typeof cc != "undefined") c.Color(cc);
+                        if(typeof l != "undefined" &&
+                            typeof f != "undefined"){
+                                c.LayerFrame(l, f);
+                                lf[0] = l;
+                                lf[1] = f;
+                            }
+                        // save the 'raw' cursor pos.
+                        c.cursor.data({
+                            dx: xx,
+                            dy: yy
+                        });
+                    }
+                    if(typeof dd != "undefined" &&
+                        dd != c.Drawing()) {
+                        if(dd) {
+                            //starting to draw
+                            pp[0] = xx, pp[1] = yy;
+                        }
+                        c.Drawing(dd);
+                    }
+                    if( c.Drawing() &&
+                        typeof lf[0] == "number" &&
+                        typeof lf[1] == "number" &&
+                        typeof xx != "undefined" &&
+                        typeof yy != "undefined") {
+
+                        var canvas = $('.canvas-pool canvas').
+                        filter('[data-layer='+lf[0]+'][data-frame='+lf[1]+']');
+                        ParupaintCanvas.DrawLine(canvas,
+                            pp[0], pp[1], xx, yy, cc, ss);
+                    }
+                } else {
+                    var canvas = $('.canvas-pool canvas').
+                    filter('[data-layer='+l+'][data-frame='+f+']');
+                    ParupaintCanvas.DrawLine(canvas,
+                        x, y, xx, yy, cc, ss);
+                }
+
+            })
+
         }
     }
     this.SetNetwork(false);
@@ -233,9 +349,28 @@ var ParupaintRoom = function(main, room_name) {
     }
     this.OnClose = function(e) {
         this.SetNetwork(false);
+        $('.canvas-cursor:not(.cursor-self)').remove();
+        $('.canvas-cursor.cursor-self').removeClass('admin');
     }
+
+
     if(main.IsConnected()) {
         this.SetNetwork(true);
+
+        var lf = main.Cursor().LayerFrame();
+        main.Emit('lf', {
+            l: lf[0],
+            f: lf[1]
+        });
+    } else {
+        console.info('Not connected, creating a blank canvas.');
+        ParupaintCanvas.Init(800, 800, [
+            [{}]
+        ]);
+
+        this.UpdateTitle();
+        ParupaintCanvas.Focus(0, 0);
+        main.ui.UpdateHeavy();
     }
 
     // THIS OBJECT IS ONLY FOR CONTROLLING CANVASES AND CURSORS AND WHAT NOT!
@@ -246,7 +381,9 @@ var ParupaintRoom = function(main, room_name) {
     // do network/callback/canvas funcs object
 
     var pthis = this;
-    $('#mouse-pool').sevent(function(e, data) {
+
+
+    $('#mouse-pool').unbind('').sevent(function(e, data) {
         if(e == 'mousemove' && data.target.tagName == 'CANVAS') {
             if(main.ui.movingCanvas) {
                 let b = $(window);
@@ -255,9 +392,10 @@ var ParupaintRoom = function(main, room_name) {
                 return true;
 
             } else if(pthis.picking_color) {
+
                 if(pthis.pick_canvas.length) {
-                    var x = pthis.brush.Position()[0],
-                        y = pthis.brush.Position()[1];
+                    var x = data.x,
+                        y = data.y;
 
                     var px = pthis.pick_canvas.get(0).
                     getContext('2d').getImageData(x, y, 1, 1).data;
@@ -269,8 +407,7 @@ var ParupaintRoom = function(main, room_name) {
                     var hex = "#" + ("00000000" + (r + g + b + a)).slice(-8);
 
                     if(hex != pthis.brush.Color()) {
-                        pthis.brush.Color(hex, main.Cursor().cursor).
-                        Update(main.Cursor().cursor, main.ui);
+                        pthis.brush.Color(hex, main.Cursor()).UpdateLocal();
 
                         main.Cursor().cursor.css('background-color',
                             'rgba(' +
@@ -302,6 +439,7 @@ var ParupaintRoom = function(main, room_name) {
             var cc = main.Cursor();
             var cursor = cc.cursor;
             if(cursor.length) {
+                // move the cursor.
 
                 var left = parseInt(cursor.css('left')),
                     top = parseInt(cursor.css('top'));
@@ -315,17 +453,8 @@ var ParupaintRoom = function(main, room_name) {
 
                 // use a higher distance when not drawing to skip updating more
                 if(color || dist > (drawing ? 2 : 15)) {
-                    var set_cursor = function(x, y) {
-                        cursor.css({
-                            left: x,
-                            top: y
-                        });
-                        pthis.brush.Position(x, y);
-                    };
-                    set_cursor(data.x, data.y);
 
                     if(!drawing && !color) {
-
                         main.Emit('draw', {
                             x: mx,
                             y: my,
@@ -333,12 +462,17 @@ var ParupaintRoom = function(main, room_name) {
                             c: c,
                             d: false
                         });
-
                     }
-                    if(pthis.mouseTimer) clearTimeout(pthis.mouseTimer);
-                    pthis.mouseTimer = setTimeout(function() {
-                        set_cursor(data.x, data.y);
-                    }, 800);
+
+                    if(!pthis.server_roundtrip) {
+                        cc.Position(data.x, data.y);
+                    }
+                    if(!pthis.server_roundtrip){
+                        if(pthis.mouseTimer) clearTimeout(pthis.mouseTimer);
+                        pthis.mouseTimer = setTimeout(function() {
+                            cc.Position(data.x, data.y);
+                        }, 800);
+                    }
                 }
             }
 
@@ -428,7 +562,7 @@ var ParupaintRoom = function(main, room_name) {
                         c: c,
                         d: true
                     });
-                    if(!pthis.slow_move) {
+                    if(!pthis.server_roundtrip) {
                         ParupaintCanvas.DrawLine(
                             $('canvas.focused'), nx1, ny1,
                             mx, my, c, s);
@@ -447,14 +581,11 @@ var ParupaintRoom = function(main, room_name) {
                 var nb = pthis.brush.OppositeBrush();
                 //autoswitch = false
 
-                if(!pthis.slow_move) {
-                    pthis.brush.Brush(nb).
-                    Update(main.Cursor().cursor, main.ui);
-                }
-                //TODO emit
+                pthis.brush.Brush(nb).UpdateLocal();
+
                 main.Emit('draw', {
-                    x: pthis.brush.Position()[0],
-                    y: pthis.brush.Position()[1],
+                    x: data.x,
+                    y: data.y,
                     s: pthis.brush.Size(),
                     c: pthis.brush.Color(),
                     d: false
@@ -470,8 +601,8 @@ var ParupaintRoom = function(main, room_name) {
         } else if(e == 'mouseout') {
 
             main.Emit('draw', {
-                x: pthis.brush.Position()[0],
-                y: pthis.brush.Position()[1],
+                x: data.x,
+                y: data.y,
                 s: pthis.brush.Size(),
                 c: pthis.brush.Color(),
                 d: false
@@ -487,13 +618,12 @@ var ParupaintRoom = function(main, room_name) {
                     if(s > 256) s = 256;
 
                     pthis.brush.
-                    Size(s, main.Cursor().cursor).
-                    Update(main.Cursor().cursor, main.ui);
+                    Size(s, main.Cursor()).UpdateLocal();
 
-
+                    var cc = main.Cursor();
                     main.Emit('draw', {
-                        x: pthis.brush.Position()[0],
-                        y: pthis.brush.Position()[1],
+                        x: cc.Position()[0],
+                        y: cc.Position()[1],
                         s: s,
                         c: pthis.brush.Color(),
                         d: false
@@ -530,12 +660,12 @@ var ParupaintRoom = function(main, room_name) {
                             16,
                             64
                         ];
-                        this.brush.Size(sizes[k]).
-                        Update(main.Cursor().cursor, main.ui);
+                        this.brush.Size(sizes[k]).UpdateLocal();
 
+                        var cc = main.Cursor();
                         main.Emit('draw', {
-                            x: pthis.brush.Position()[0],
-                            y: pthis.brush.Position()[1],
+                            x: cc.Position()[0],
+                            y: cc.Position()[1],
                             s: s,
                             c: pthis.brush.Color(),
                             d: false
@@ -563,14 +693,15 @@ var ParupaintRoom = function(main, room_name) {
                         var nb = pthis.brush.OppositeBrush();
                         //autoswitch = false
 
-                        if(!pthis.slow_move) {
+                        if(!pthis.server_roundtrip) {
                             pthis.brush.Brush(nb).
-                            Update(main.Cursor().cursor, main.ui);
+                            UpdateLocal();
                         }
-                        //TODO emit
+
+                        var cc = main.Cursor();
                         main.Emit('draw', {
-                            x: pthis.brush.Position()[0],
-                            y: pthis.brush.Position()[1],
+                            x: cc.Position()[0],
+                            y: cc.Position()[1],
                             s: pthis.brush.Size(),
                             c: pthis.brush.Color(),
                             d: false

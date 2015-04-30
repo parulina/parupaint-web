@@ -34,18 +34,19 @@
             };
 
         function Connection(addr, debug) {
-            
+
             this.ws = new WebSocket(addr);
-            
+
             this.callbacks = {};
-            
+
             this.debug = debug;
-			
+
 			this.connected = false;
 
             this.ws.onclose = this.onClose.bind(this);
             this.ws.onopen = this.onOpen.bind(this);
             this.ws.onmessage = this.onMessage.bind(this);
+            this.ws.onerror = this.onError.bind(this);
         }
 
         Connection.prototype = {
@@ -80,6 +81,12 @@
                 }
 				this.connected = true;
                 if (this.callbacks["open"]) this.callbacks["open"](evt);
+            },
+            onError: function(evt) {
+                if (this.debug) {
+                    console.log("golem: Error.");
+                }
+                if (this.callbacks["error"]) this.callbacks["error"](evt);
             },
             on: function(name, callback) {
                 this.callbacks[name] = callback;

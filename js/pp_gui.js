@@ -21,6 +21,10 @@ function ParupaintInterface() {
 
     var pthis = this;
 
+    $(window).scroll(function() {
+        return !$('.qstatus-brush, .qstatus-settings').hasClass('panel-open');
+    })
+
     this.OverlayVisible = function(b) {
         if(typeof b == "boolean") $('.gui').toggleClass('visible', b);
         return $('.gui').hasClass('visible');
@@ -50,6 +54,7 @@ function ParupaintInterface() {
         }
     };
     $('html').on('keydown', function(e) {
+        if($('input:focus, textarea:focus').length) return true;
         switch(e.keyCode) {
             case 27: // esc
                 {
@@ -231,7 +236,7 @@ function ParupaintInterface() {
                 if(ras != Brush.brush().size && ras <= 128 && ras >= 1) {
                     if(ras < 0) ras = 0;
                     else if(ras > 128) ras = 128;
-                    Brush.size(ras).update()
+                    //Brush.size(ras).update()
 
                 }
             }
@@ -272,12 +277,28 @@ function ParupaintInterface() {
                     !$('.gui').has(target).length) {
                     pthis.HideOverlay();
                 }
-            } else if($('.qstatus').has(target).length &&
-                target.hasClass('qstatus-piece')) {
-                target.parent().toggleClass('panel-open');
-            } else if(target.hasClass('qstatus-message')) {
-                pthis.ShowOverlay();
+            } else {
+
+                if($('.qstatus').has(target).length &&
+                    target.hasClass('qstatus-piece')) {
+                    target.parent().toggleClass('panel-open');
+                    return true;
+
+                } else if(target.hasClass('qstatus-message')) {
+                    pthis.ShowOverlay();
+                } else if(target.is('.flayer-info-frame')) {
+
+                    var l = target.closest('.flayer-info-layer').data('layer'),
+                        f = target.data('frame');
+
+                    ParupaintCanvas.Focus(l, f);
+                    pthis.UpdateFrameinfoPosition();
+                    pthis.ShowOverlay(true);
+                }
+
             }
+
+
 
         }
     }).on('mousewheel DOMMouseScroll', function(e) {
@@ -286,7 +307,23 @@ function ParupaintInterface() {
             ed = e.originalEvent.detail * -1,
             scroll = wd || ed;
 
-        if($('.overlay').has(target).length) return false;
+        if($('.overlay').has(target).length) {
+            if(target.is('.flayer-info-frame')) {
+                var p = target.closest('.flayer-info-layer');
+                var l = p.data('layer'),
+                    f = p.children('.flayer-info-frame.focused').data('frame');
+                if(typeof f != "number") {
+                    f = target.data('frame');
+                }
+
+                ParupaintCanvas.Focus(l, scroll > 0 ? f + 1 : f - 1);
+                pthis.UpdateFrameinfoPosition();
+                pthis.ShowOverlay(true);
+
+            } else {
+                return false;
+            }
+        }
         if(pthis.movingCanvas) {
             //while moving canvas
             var z = pthis.zoom || 1.0;
@@ -297,7 +334,8 @@ function ParupaintInterface() {
             pthis.Zoom(z);
         }
         return false;
-    })
+    });
+
 
 
     this.Zoom = function(z) {
@@ -403,12 +441,12 @@ function ParupaintInterface() {
 
     }
 
-    this.UpdatePainters = function(artists) {
+    this.UpdatePainters = function(painters) {
         var alist = $('<ul />', {
             class: 'player-list'
         });
 
-        artists.each(function(k, e) {
+        painters.each(function(k, e) {
             var t = $(e);
             alist.append(
                 $('<li/>', {
@@ -420,7 +458,14 @@ function ParupaintInterface() {
         });
         $('.brush-panel').html(alist);
 
-        $('.qstatus-piece.preview-col').attr('data-label-2', artists.length);
+        $('.qstatus-piece.preview-col').attr('data-label-2', painters.length);
+    }
+
+    this.UpdateHeavy = function(painters){
+        if(painters) this.UpdatePainters(painters);
+        this.UpdateFrameinfo();
+        this.UpdateFrameinfoPosition();
+        this.UpdateDimensionsInput();
     }
 
     this.SetConnectionStatus = function(onoff) {
@@ -439,6 +484,11 @@ function ParupaintInterface() {
         $('.qstatus-message').attr('data-label', name);
     }
 
+    this.SetAdmin = function(onoff) {
+        //TODO admin button to let someone else take it?
+        $('body').toggleClass('is-admin', onoff);
+    }
+
     this.SetPrivate = function(onoff) {
         $('body').toggleClass('is-private', onoff);
         $('input.private-status').prop('checked', onoff);
@@ -450,6 +500,33 @@ function ParupaintInterface() {
         i.children('.dimension-h-input').val(h);
     }
 
+    this.UpdateDimensionsInput = function() {
+        let d = ParupaintCanvas.Init();
+        this.SetDimensionsInput(d[0], d[1]);
+    }
+
+    this.Loading = function(txt){
+        this.ClearLoading();
+        if(typeof txt == "undefined") return;
+
+        $('body').addClass('loading').
+            attr('data-loading', txt);
+    }
+    this.ClearLoading = function(){
+        $('body').removeClass('loading');
+    }
+    this.ConnectionError = function(txt){
+        this.ClearError();
+        this.ClearLoading();
+        if(typeof txt == "undefined") return;
+
+        $('body').addClass('disconnected').
+        attr('data-disconnect', txt);
+
+    }
+    this.ClearError = function(){
+        $('body').removeClass('connected disconnected');
+    }
 
     // updateInterfaceHsl
     this.updateInterface = function(hex) {
