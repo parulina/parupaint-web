@@ -693,10 +693,9 @@ var ParupaintRoom = function(main, room_name) {
                         var nb = pthis.brush.OppositeBrush();
                         //autoswitch = false
 
-                        if(!pthis.server_roundtrip) {
-                            pthis.brush.Brush(nb).
-                            UpdateLocal();
-                        }
+                        //FIXME maybe?
+                        pthis.brush.Brush(nb).
+                        UpdateLocal();
 
                         var cc = main.Cursor();
                         main.Emit('draw', {
