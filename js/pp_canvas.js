@@ -8,10 +8,15 @@ function hex2rgb(hex) {
     });
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
 
-	if(!result) {
-		console.error('invalid color.', hex)
-		return {r: 255, g: 255, b: 255, a: 255};
-	}
+    if(!result) {
+        console.error('invalid color.', hex)
+        return {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 255
+        };
+    }
 
     return result ? {
         r: parseInt(result[1], 16),
@@ -55,25 +60,78 @@ var ParupaintCanvas = new function() {
 
 
         // clear everything
-        $('.canvas-pool canvas').removeClass('focused focused-frame focused-layer position focused-left focused-right');
-        // set both axis focuses
-        $('.canvas-pool canvas').filter('[data-frame=' + frame + ']').addClass('focused-frame');
-        $('.canvas-pool canvas').filter('[data-layer=' + layer + ']').addClass('focused-layer');
+        $('.canvas-pool canvas').
+        removeClass('focused focused-frame focused-layer position focused-left focused-right');
 
-        var cframe = $('.canvas-pool canvas[data-layer=' + layer + '][data-frame=' + frame + ']');
-        cframe.addClass('position')
-        if(cframe.hasClass('extended')) {
-            // it's extended. roll it back
-            while(cframe.hasClass('extended')) {
-                cframe = $('.canvas-pool canvas[data-layer=' + layer + '][data-frame=' + (cframe.data('frame') - 1) + ']');
+
+        var getFrameStartEnd = function(frame) {
+                var start = $(frame),
+                    end = $(frame);
+                // find out the start
+                while(start.hasClass('extended')) {
+                    start = $('.canvas-pool canvas').
+                    filter('[data-layer=' + start.data('layer') + ']').
+                    filter('[data-frame=' + (start.data('frame') - 1) + ']');
+                }
+                // find out the end
+                while((end.is('[data-extended]') || end.hasClass('extended'))) {
+                    // reverse
+                    end = $('.canvas-pool canvas').
+                    filter('[data-layer=' + end.data('layer') + ']').
+                    filter('[data-frame=' + (end.data('frame') + 1) + ']');
+                }
+
+                return [start, end];
             }
-        }
-        cframe.addClass('focused');
-        cframe.prev().addClass('focused-left');
-        cframe.next().addClass('focused-right');
+            // set both axis focuses
+        $('.canvas-pool canvas').filter('[data-frame=' + frame + ']').
+        each(function(k, e) {
+            // loop each layer and set which frames are displayed
+            var frame = $(e);
+            var pos = getFrameStartEnd(frame);
+            var start = pos[0],
+                end = pos[1];
+
+            // focus only the frame
+            start.addClass('focused-frame');
+
+            // only for the selected layer
+            if(start.data('layer') == layer) {
+                // then just mark it focused to catch drawing
+                start.addClass('focused');
+                // also mark previous and next frames
+                var prev = $('.canvas-pool canvas[data-layer=' +
+                        start.data('layer') + '][data-frame='+
+                        (start.data('frame')-1)+']');
+
+                var next = $('.canvas-pool canvas[data-layer=' +
+                        end.data('layer') + '][data-frame='+
+                        (end.data('frame')+1)+']');
+
+                var pos_prev = getFrameStartEnd(prev),
+                    pos_next = getFrameStartEnd(next);
+
+                pos_prev[0].addClass('focused-left');
+                pos_next[0].addClass('focused-right');
 
 
+            }
 
+
+        });
+
+        $('.canvas-pool canvas').
+        filter('[data-layer=' + layer + ']').
+        addClass('focused-layer');
+
+        // get the real frame pos and mark it
+        var cframe = $('.canvas-pool canvas').
+        filter('[data-layer=' + layer + '][data-frame=' + frame + ']').
+        addClass('position');
+
+        //TODO fix css fadeout to step()
+
+        // TODO move
         $('.qstatus-piece.qinfo').attr('data-label', layer).attr('data-label-2', frame)
         $('.flayer-list .flayer-info-frame').removeClass('focused')
         $('.flayer-list .flayer-info-layer[data-layer=' + layer + '] .flayer-info-frame[data-frame=' + frame + ']').addClass('focused')
@@ -98,8 +156,8 @@ var ParupaintCanvas = new function() {
             }
             if(typeof nframe == "number") {
                 var nf = (frame + nframe >= maxframes ?
-                            ((frame + nframe) % maxframes) :
-                            frame + nframe);
+                    ((frame + nframe) % maxframes) :
+                    frame + nframe);
                 var cc = $('canvas[data-frame=' + nf + '][data-layer=' + layer + ']')
                 if(cc.length) {
                     this.Focus(layer, nf)
