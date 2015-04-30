@@ -233,8 +233,7 @@ var ParupaintRoom = function(main, room_name) {
                 }
             });
 
-            // TODO make all "personal" packets
-            // work with .id == myId
+            // TODO merge lf with draw?
 
             main.socket.on('lf', function(d) {
 
@@ -384,8 +383,10 @@ var ParupaintRoom = function(main, room_name) {
 
 
     $('#mouse-pool').unbind('').sevent(function(e, data) {
+        
         if(e == 'mousemove' && data.target.tagName == 'CANVAS') {
-            if(main.ui.movingCanvas) {
+
+            if(main.ui.movingCanvas || (data.button == main.ui.key_move)) {
                 let b = $(window);
                 b.scrollLeft(b.scrollLeft() - data.sx);
                 b.scrollTop(b.scrollTop() - data.sy);
