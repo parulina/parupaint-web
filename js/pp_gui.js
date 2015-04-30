@@ -126,6 +126,15 @@ function ParupaintInterface() {
                         ParupaintCanvas.Advance(null, sd ? 1 : -1);
                     }
                     pthis.UpdateFrameinfoPosition();
+
+                    var dd = [
+                        $('canvas.focused').data('layer'),
+                        $('canvas.focused').data('frame')
+                    ]
+                    PP.Emit('lf', {
+                        l: dd[0],
+                        f: dd[1]
+                    });
                     return true;
                 }
 
@@ -162,6 +171,15 @@ function ParupaintInterface() {
                         ParupaintCanvas.Advance(fd ? 1 : -1);
                     }
                     pthis.UpdateFrameinfoPosition();
+                    
+                    var dd = [
+                        $('canvas.focused').data('layer'),
+                        $('canvas.focused').data('frame')
+                    ]
+                    PP.Emit('lf', {
+                        l: dd[0],
+                        f: dd[1]
+                    });
                     return true;
                 }
                 /*
@@ -461,7 +479,7 @@ function ParupaintInterface() {
         $('.qstatus-piece.preview-col').attr('data-label-2', painters.length);
     }
 
-    this.UpdateHeavy = function(painters){
+    this.UpdateHeavy = function(painters) {
         if(painters) this.UpdatePainters(painters);
         this.UpdateFrameinfo();
         this.UpdateFrameinfoPosition();
@@ -505,17 +523,17 @@ function ParupaintInterface() {
         this.SetDimensionsInput(d[0], d[1]);
     }
 
-    this.Loading = function(txt){
+    this.Loading = function(txt) {
         this.ClearLoading();
         if(typeof txt == "undefined") return;
 
         $('body').addClass('loading').
-            attr('data-loading', txt);
+        attr('data-loading', txt);
     }
-    this.ClearLoading = function(){
+    this.ClearLoading = function() {
         $('body').removeClass('loading');
     }
-    this.ConnectionError = function(txt){
+    this.ConnectionError = function(txt) {
         this.ClearError();
         this.ClearLoading();
         if(typeof txt == "undefined") return;
@@ -524,7 +542,7 @@ function ParupaintInterface() {
         attr('data-disconnect', txt);
 
     }
-    this.ClearError = function(){
+    this.ClearError = function() {
         $('body').removeClass('connected disconnected');
     }
 
