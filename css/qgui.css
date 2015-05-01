@@ -505,49 +505,24 @@ form.knob-thing input[type=checkbox]{
 .setting-bottom-row{
 	display:flex;
 	justify-content: space-around;
+	flex:0 0 70px;
+	background-color:#888;
 }
 
 .setting-bottom-row > div:hover{
-	background: rgb(218, 217, 201);
+	background-color: rgb(218, 217, 201);
 }
 .setting-bottom-row > div{
-	flex:1 1;
+	flex:0 1 70px;
 	border:none;
 	position:relative;
-	background: rgb(192, 190, 164);
-	border-top: 1px solid rgb(174, 170, 170);
-}
-.setting-bottom-row > div[data-label]:before{
-	content:attr(data-label);
-	position:absolute;
-	top:0; left:0; right:0; bottom:0;
-	margin:auto;
-	text-align:center;
-	font-size: 16px;
-	color: rgb(150, 86, 86);
-	padding: 8px;
+	background-repeat:no-repeat;
+	background-color:#BDBCBC;
 }
 
-.setting-quit-btn.confirm:before{
-	content:"are you sure?" !important;
-	max-height:50px !important;
-}
-.setting-quit-btn{
-	background: rgb(232, 109, 109) !important;
-}
-.setting-quit-btn:hover{
-	background: rgb(255, 152, 152) !important;
-}
-.setting-quit-btn:before{
-	color: rgb(253, 209, 209) !important;
-}
+.setting-down-img {
+	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHsAAAA4CAIAAABSaRDqAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAadEVYdFNvZnR3YXJlAFBhaW50Lk5FVCB2My41LjExR/NCNwAAAutJREFUeF7tlcFxGzEQBB2An346Ij+UlUNwAE7KT4fgFOSt2tkuaO8AggLvSIk71Q8VBjcYzkdfXkvnqhY/W7X42Xqz+Lev3x8cFf3IqsXP1s7iLz9ewE/+/vtzMr0mKjqU33wcVCtUix+OaoVq8cNRrdBnXrz93MFKz70bAtNDBpZqhWrxJQhMDxlYqhWqxZcgMD1kYKlWqBZfgsD0kIGlWqFafAkC00MGlmqFavElCEwPGViqFarFlyAwPWRgqVaoFl+CwPSQgaVaoVp8CQLTQwaWaoVq8SUITA8ZWKoVqsWXIDA9ZGCpVqgWX4LA9JCBpVqhWnwJAtNDBpZqhWrxJQhMDxlYqhWqxZcgMD1kYKlWqBZfgsD0kIGlWqFafAkC00MGlmqFavElCEwPGViqFXquxYE7i6TYFu6oVqgWXyLFtnBHtUK1+BIptoU7qhW6sLjj52mUgxh3UNGh/OZuyJlQQ7VCtfhRUEO1QlOLO0QcSnoU3FXRoS5GnQM1VCv0XItj3Zz0kIGlWqErFr8vu+135Td3fwjWzUkPGViqFarFb0N6yMBSrdCTLv7z1+95+CqlGTOWaoVq8cvwVUozZizVCj3cf04nPW34uYoOdTHESJuO4auUZsxYqhV69sU5ASzASmnGjKVaoasXT20mGSe39G76uYoO5TcHIUYq1oIFWCnNmLFUK1SL6wSwACulGTOWaoXeubj/vYWWCXdT4C69m36uokP5zUGIkYq1YAFWSjNmLNUK1eI6ASzASmnGjKVaoaXFe+6W7f0evZt+rqJD+c1BiJGKtWABVkozZizVCn3CxZF/0qZxkoq1YAEWOTBjqU2oFtcJYAEWOTBjqU2oFtcJYAEWOTBjqU3ozeKucURboudu2d7v0bvp56p4pfzbe6ESoVr8cFQitLO4y29vf3Nvwdbdsr3fo3fTz1XuSvm390IlQk+x+EOpu7jLf+fjoFofWbX42bqweOnmqsXPVi1+rl5f/wOjjTH566yiRQAAAABJRU5ErkJggg==);
 
-
-
-.setting-bottom-row{
-	flex:0 0;
-	flex-basis:40px;
-	background-color:#CCC;
 }
 
 .setting-input-row{

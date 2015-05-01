@@ -29,14 +29,6 @@ body.loading,
 body.disconnected:after{
     background-position: 50% 50%;
     background-repeat: no-repeat;
-
-    /* copypasted from mdn's image-render */
-    image-rendering: -moz-crisp-edges;
-    image-rendering: -o-crisp-edges;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
-    -ms-interpolation-mode: nearest-neighbor;
 }
 
 body.disconnected:before {
@@ -97,4 +89,14 @@ body a:hover {
     left: 0;
     right: 0;
     bottom: 0;
+}
+
+.crisp-image{
+    /* copypasted from mdn's image-render */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -o-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    -ms-interpolation-mode: nearest-neighbor;
 }
