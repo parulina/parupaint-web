@@ -520,7 +520,7 @@ function ParupaintInterface() {
     }
 
     this.UpdateDimensionsInput = function() {
-        let d = ParupaintCanvas.Init();
+        var d = ParupaintCanvas.Init();
         this.SetDimensionsInput(d[0], d[1]);
     }
 

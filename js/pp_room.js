@@ -455,7 +455,7 @@ var ParupaintRoom = function(main, room_name) {
         if(e == 'mousemove' && data.target.tagName == 'CANVAS') {
 
             if(main.ui.movingCanvas || (data.button == main.ui.key_move)) {
-                let b = $(window);
+                var b = $(window);
                 b.scrollLeft(b.scrollLeft() - data.sx);
                 b.scrollTop(b.scrollTop() - data.sy);
                 return true;
@@ -490,7 +490,7 @@ var ParupaintRoom = function(main, room_name) {
                 }
 
             }
-            let drawing = (data.button == 1);
+            var drawing = (data.button == 1);
             var plugin = document.getElementById('wacomPlugin');
 
             // original dimensions and new (zoomed) dimensions
@@ -662,7 +662,7 @@ var ParupaintRoom = function(main, room_name) {
 
             }
         } else if(e == 'mouseup') {
-            let c = main.Cursor();
+            var c = main.Cursor();
             if(c != null) {
                 c.cursor.children('.cursor-pressure-size').removeAttr('style');
                 // clear pressure sensitivity marker
