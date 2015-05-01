@@ -346,7 +346,9 @@ $(function() {
         if(e.is('.setting-down-img')) {
             ParupaintCanvas.Download();
         } else if(e.is('.setting-save-img')) {
-            console.error('Local save not yet implemented.');
+            PP.room.SaveCanvas(function(){
+                console.info('Saved canvas.')
+            });
         } else if(e.is('.setting-reload-img')) {
             PP.Emit('img');
         }

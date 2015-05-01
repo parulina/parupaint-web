@@ -78,7 +78,7 @@ var ParupaintRoom = function(main, room_name) {
     }
     this.name = room_name;
     this.artists = [];
-    this.server_roundtrip = true; // roundtrip to server
+    this.server_roundtrip = false; // roundtrip to server
     //TODO finish this up
 
     this.brush = new ParupaintBrushglass();
@@ -429,8 +429,6 @@ var ParupaintRoom = function(main, room_name) {
 
         this.GetCanvas(function(key){
             if(key){
-                key = JSON.parse(key);
-
                 var w = key.width || 800,
                     h = key.height || 800;
 
