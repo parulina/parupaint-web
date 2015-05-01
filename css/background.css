@@ -57,24 +57,27 @@ body.disconnected:after {
     z-index:10;
 }
 
-body.disconnected:before,
-body.disconnected:after {
+body:after,
+body:before {
     visibility:hidden;
-    pointer-events:none;
     opacity:0;
     position:fixed;
     left:0;
     right:0;
     top:0;
     bottom:0;
-    animation:disconnect-timeout 2.5s linear;
 }
-
 
 @keyframes disconnect-timeout {
     from    {opacity:1; visibility: visible;}
     50%     {opacity:1;}
     to      {opacity:0;}
+}
+
+body.disconnected:before,
+body.disconnected:after {
+    pointer-events:none;
+    animation:disconnect-timeout 2.5s linear;
 }
 
 body.loading {
