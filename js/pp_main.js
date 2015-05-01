@@ -11,27 +11,25 @@ function Parupaint() {
     this.server_url = 'sqnya.se:1108';
     this.default_room = 'sqnya';
 
-    this.socket = null;
+
     this.room = null;
     this.myId = "";
+    this.painters = [];
+
+    this.socket = new ParupaintSocket('ws://' + this.server_url + '/main').
+    on('id', function(id) {
+        console.info('You are (' + id + ').');
+        this.myId = id;
+    });
 
     this.ui = new ParupaintInterface();
 
-
     this.Connect = function() {
         var pthis = this;
-        this.socket =
-            new golem.Connection('ws://' + this.server_url + '/main', false);
-        this.socket.on('id', function(id) {
-            console.info('You are (' + id + ').')
-            pthis.myId = id;
-        })
-
+        this.socket.Connect();
     }
     this.IsConnected = function() {
-        return(typeof this.socket == "object" &&
-            this.socket !== null &&
-            this.socket.connected);
+        return(this.socket.IsConnected());
     }
     this.Emit = function(id, data) {
         if(this.IsConnected()) {
@@ -176,6 +174,26 @@ function Parupaint() {
         );
     }
 
+    this.UpdatePainters = function() {
+        this.painters = $('.canvas-cursor:not(.cursor-self)');
+        this.ui.UpdatePainters(this.painters)
+    }
+    this.Update = function(){
+        this.UpdatePainters();
+
+        if(this.room){
+            var d = ParupaintCanvas.Init(); // get dimensions
+            var ll = [
+                '[' + this.room.name + ']',
+                this.painters.length + ' artists',
+                '[' + d[0] + '×' + d[1] + ']'
+            ];
+
+            document.title = ll.join(' ');
+
+        }
+    }
+
 }
 
 
@@ -241,8 +259,6 @@ $(function() {
     }
 
 
-    // SOCKET SETUP
-    // document title is already set
     if(navigator.onLine) {
         PP.Connect();
     } else {
@@ -251,6 +267,7 @@ $(function() {
         // in offline mode
     }
 
+    // ONE-TIME SOCKET SETUP
     PP.socket.on('open', function(e) {
         console.log("Opened connection.");
 
@@ -311,6 +328,78 @@ $(function() {
         console.warn("Got websocket message to leave.");
         PP.Room(PP.default_room);
         PP.ui.ConnectionError('you were kicked.')
+    });
+
+    // canvas specific events
+    PP.socket.on('canvas', function(d) {
+        console.info('New canvas [' + d.width + ' x ' + d.height + '] : ' + (typeof d.layers != "undefined" ? d.layers.length : 'no') + ' layers.');
+
+        if(d.layers != undefined) { // create new
+            ParupaintCanvas.Init(d.width, d.height, d.layers)
+        } else {
+            ParupaintCanvas.Init(d.width, d.height)
+        }
+        ParupaintCanvas.Focus(0, 0);
+        PP.ui.UpdateHeavy();
+        PP.Update();
+        PP.Emit('img');
+    });
+    PP.socket.on('img', function(d) {
+        var l = parseInt(d.l),
+            f = parseInt(d.f),
+            decodedData = window.atob(d.data),
+            binData = new Uint8Array(decodedData.split('').map(function(x) {
+                return x.charCodeAt(0);
+            })),
+
+            data = pako.inflate(binData),
+            iw = parseInt(d.w),
+            ih = parseInt(d.h),
+            bpp = 4;
+
+        var e = $('#flayer-' + l + '-' + f);
+        if(e.length) {
+            var ctx = e.get(0).getContext('2d');
+            var cc = ctx.createImageData(iw, ih);
+            for(var i = 0, len = cc.data.length; i < len; i += 4) {
+                cc.data[i] = data[i + 2];
+                cc.data[i + 1] = data[i + 1];
+                cc.data[i + 2] = data[i];
+                cc.data[i + 3] = data[i + 3];
+            }
+            ctx.putImageData(cc, 0, 0)
+        }
+    });
+
+    // chat
+    PP.socket.on('chat', function(d) {
+        //addChatMessage(null, d.msg, d.name, d.time, true)
+        console.error('Chat not implemented.', d)
+    });
+
+    PP.socket.on('peer', function(d) {
+
+        console.info('Peer connected [' + d.id + '] (' + d.name + ').');
+        var id = $('#' + d.id);
+        if(d.disconnect && id.length) {
+            id.remove();
+        } else if(!d.disconnect) {
+            var cursor = $('<div/>', {
+                class: 'canvas-cursor',
+                id: d.id,
+                'data-name': d.name
+            });
+
+            var CC = PP.Cursor(cursor);
+
+            CC.Size(d.brushdata.Size);
+            CC.Position(d.brushdata.X, d.brushdata.Y);
+            CC.LayerFrame(d.brushdata.Layer, d.brushdata.Frame);
+
+            $('#mouse-pool').append(cursor);
+        }
+
+        PP.Update();
     });
 
 

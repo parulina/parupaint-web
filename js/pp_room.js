@@ -77,7 +77,6 @@ var ParupaintRoom = function(main, room_name) {
         return null;
     }
     this.name = room_name;
-    this.artists = [];
     this.server_roundtrip = false; // roundtrip to server
     //TODO finish this up
 
@@ -100,7 +99,6 @@ var ParupaintRoom = function(main, room_name) {
 
     this.admin = null;
     this.Admin = function(cursor) {
-        //TODO loop this.artists and remove admin
         if(cursor !== null) {
             $('.canvas-cursor').removeClass('admin');
 
@@ -122,22 +120,6 @@ var ParupaintRoom = function(main, room_name) {
         }
     }
 
-    this.UpdatePainters = function() {
-        this.artists = $('.canvas-cursor:not(.cursor-self)');
-        main.ui.UpdatePainters(this.artists)
-    }
-    this.UpdateTitle = function() {
-
-        var d = ParupaintCanvas.Init(); // get dimensions
-        var ll = [
-            '[' + this.name + ']',
-            this.artists.length + ' artists',
-            '[' + d[0] + '×' + d[1] + ']'
-        ];
-
-        document.title = ll.join(' ');
-
-    }
     this.GetCanvasKey = function() {
         return "room_" + this.name;
     }
@@ -205,10 +187,7 @@ var ParupaintRoom = function(main, room_name) {
         if(onoff) {
             // put network code here that affects the canvas ONLY
             console.info("Setting up network events.");
-            main.socket.on('chat', function(d) {
-                //addChatMessage(null, d.msg, d.name, d.time, true)
-                console.error('Chat not implemented.', d)
-            })
+
 
             main.socket.on('rs', function(d) {
                 // data
@@ -225,74 +204,11 @@ var ParupaintRoom = function(main, room_name) {
                 if(typeof d.private != "undefined") {
                     rthis.Private(d.private);
                 }
-                rthis.UpdateTitle();
-            });
-            main.socket.on('canvas', function(d) {
-                console.info('New canvas [' + d.width + ' x ' + d.height + '] : ' + (typeof d.layers != "undefined" ? d.layers.length : 'no') + ' layers.');
-
-                if(d.layers != undefined) { // create new
-                    ParupaintCanvas.Init(d.width, d.height, d.layers)
-                } else {
-                    ParupaintCanvas.Init(d.width, d.height)
-                }
-                ParupaintCanvas.Focus(0, 0);
-                main.ui.UpdateHeavy();
-                rthis.UpdateTitle();
-                main.Emit('img');
-            });
-            main.socket.on('peer', function(d) {
-
-                console.info('Peer connected [' + d.id + '] (' + d.name + ').');
-                var id = $('#' + d.id);
-                if(d.disconnect && id.length) {
-                    id.remove();
-                } else if(!d.disconnect) {
-                    var cursor = $('<div/>', {
-                        class: 'canvas-cursor',
-                        id: d.id,
-                        'data-name': d.name
-                    });
-
-                    var CC = main.Cursor(cursor);
-
-                    CC.Size(d.brushdata.Size);
-                    CC.Position(d.brushdata.X, d.brushdata.Y);
-                    CC.LayerFrame(d.brushdata.Layer, d.brushdata.Frame);
-
-                    $('#mouse-pool').append(cursor);
-                }
-
-                rthis.UpdatePainters();
-                rthis.UpdateTitle();
-            });
-            main.socket.on('img', function(d) {
-                var l = parseInt(d.l),
-                    f = parseInt(d.f),
-                    decodedData = window.atob(d.data),
-                    binData = new Uint8Array(decodedData.split('').map(function(x) {
-                        return x.charCodeAt(0);
-                    })),
-
-                    data = pako.inflate(binData),
-                    iw = parseInt(d.w),
-                    ih = parseInt(d.h),
-                    bpp = 4;
-
-                var e = $('#flayer-' + l + '-' + f);
-                if(e.length) {
-                    var ctx = e.get(0).getContext('2d');
-                    var cc = ctx.createImageData(iw, ih);
-                    for(var i = 0, len = cc.data.length; i < len; i += 4) {
-                        cc.data[i] = data[i + 2];
-                        cc.data[i + 1] = data[i + 1];
-                        cc.data[i + 2] = data[i];
-                        cc.data[i + 3] = data[i + 3];
-                    }
-                    ctx.putImageData(cc, 0, 0)
-                }
+                main.Update();
             });
 
-            // TODO merge lf with draw?
+            // not sure if the rest needs to be initiated
+            // every time a room is created...
 
             main.socket.on('lf', function(d) {
 
@@ -343,14 +259,8 @@ var ParupaintRoom = function(main, room_name) {
                     var pp = c.Position(),
                         lf = c.LayerFrame();
 
-                    if(c.IsMe()) {
-                        // need to have special stuff for yourself.
-                        // due to Position() being applied outside
-                        // of this context.
+                    if(!c.IsMe()) {
 
-                        //pp = [c.cursor.data('dx'), c.cursor.data('dy')];
-
-                    } else {
                         if(typeof xx != "undefined" &&
                             typeof yy != "undefined") {
 
@@ -425,7 +335,7 @@ var ParupaintRoom = function(main, room_name) {
             [{}]
         ]);
 
-        this.UpdateTitle();
+        main.Update();
         ParupaintCanvas.Focus(0, 0);
         main.ui.UpdateHeavy();
 
@@ -756,8 +666,7 @@ var ParupaintRoom = function(main, room_name) {
                         var nb = pthis.brush.OppositeBrush();
                         //autoswitch = false
 
-                        pthis.brush.Brush(nb).
-                        UpdateLocal();
+                        pthis.brush.Brush(nb).UpdateLocal();
 
                         var cc = main.Cursor();
                         main.Emit('draw', {
