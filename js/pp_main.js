@@ -178,10 +178,10 @@ function Parupaint() {
         this.painters = $('.canvas-cursor:not(.cursor-self)');
         this.ui.UpdatePainters(this.painters)
     }
-    this.Update = function(){
+    this.Update = function() {
         this.UpdatePainters();
 
-        if(this.room){
+        if(this.room) {
             var d = ParupaintCanvas.Init(); // get dimensions
             var ll = [
                 '[' + this.room.name + ']',
@@ -208,9 +208,9 @@ $(function() {
         var name = d;
         if(typeof name != "string") {
             name = prompt('Set name.');
-            if(!name){
+            if(!name) {
                 console.warn("Fine, if that's what you want.");
-                name = ('unnamed_mofo'+(Date.now().toString().slice(-5)));
+                name = ('unnamed_mofo' + (Date.now().toString().slice(-5)));
             }
             ParupaintStorage.SetStorageKey({
                 name: name
@@ -221,16 +221,24 @@ $(function() {
 
     // TABLET SETUP
     // TODO chrome specific tablet set-up?
-    var SetTablet = function(d){
-        $('body #wacomPlugin').remove();
+    var SetTablet = function(d) {
+        $('#wacomPlugin').remove();
         PP.ui.SetTabletInput(d);
-        if(d){
+        if(d) {
             $('body').prepend(
                 $('<object/>', {
                     id: 'wacomPlugin',
                     type: 'application/x-wacomtabletplugin'
                 })
             );
+
+            var w = document.getElementById('wacomPlugin');
+            try {
+                w.penAPI;
+            } catch(e) {
+                console.error('Cannot access wacom plugin.');
+                document.body.removeChild(w);
+            }
         }
     }
     ParupaintStorage.GetStorageKey('wacom_tablet', function(d) {
@@ -449,7 +457,7 @@ $(function() {
         if(e.is('.setting-down-img')) {
             ParupaintCanvas.Download();
         } else if(e.is('.setting-save-img')) {
-            PP.room.SaveCanvas(function(){
+            PP.room.SaveCanvas(function() {
                 console.info('Saved canvas.')
             });
         } else if(e.is('.setting-reload-img')) {
@@ -459,95 +467,153 @@ $(function() {
 });
 
 jQuery.fn.extend({
-	sevent: function(callback) {
-		return this.each(function(k, e) {
-			var mb = 0, tmouse = {};
+    sevent: function(callback) {
+        return this.each(function(k, e) {
+            var mb = 0,
+                tmouse = {};
 
-			$(e).unbind().bind('mousemove mousedown', function(e){
-				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
-				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
-				if(callback){
-					if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
-					if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
-					if(tmouse.oldsx === undefined) tmouse.oldsx = e.clientX;
-					if(tmouse.oldsy === undefined) tmouse.oldsy = e.clientY;
+            $(e).unbind().bind('mousemove mousedown', function(e) {
+                if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+                if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
+                if(callback) {
+                    if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
+                    if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
+                    if(tmouse.oldsx === undefined) tmouse.oldsx = e.clientX;
+                    if(tmouse.oldsy === undefined) tmouse.oldsy = e.clientY;
 
-					var cx = (e.offsetX - tmouse.oldx);
-					var cy = (e.offsetY - tmouse.oldy);
-					tmouse.oldx = e.offsetX;
-					tmouse.oldy = e.offsetY;
+                    var cx = (e.offsetX - tmouse.oldx);
+                    var cy = (e.offsetY - tmouse.oldy);
+                    tmouse.oldx = e.offsetX;
+                    tmouse.oldy = e.offsetY;
 
-					var csx = (e.clientX - tmouse.oldsx);
-					var csy = (e.clientY - tmouse.oldsy);
-					tmouse.oldsx = e.clientX;
-					tmouse.oldsy = e.clientY;
+                    var csx = (e.clientX - tmouse.oldsx);
+                    var csy = (e.clientY - tmouse.oldsy);
+                    tmouse.oldsx = e.clientX;
+                    tmouse.oldsy = e.clientY;
 
-					return callback('mousemove', {
+                    return callback('mousemove', {
                         button: mb,
-                        x: e.offsetX + document.documentElement.scrollLeft, y: e.offsetY + document.documentElement.scrollTop,
+                        x: e.offsetX + document.documentElement.scrollLeft,
+                        y: e.offsetY + document.documentElement.scrollTop,
 
-                        xpage: e.pageX, ypage: e.pageY,
-                        cx: cx, cy: cy, sx: csx, sy: csy,
-                        xclient:e.clientX, yclient:e.clientY, target: e.target,
-                        mozPressure: e.mozPressure});
+                        xpage: e.pageX,
+                        ypage: e.pageY,
+                        cx: cx,
+                        cy: cy,
+                        sx: csx,
+                        sy: csy,
+                        xclient: e.clientX,
+                        yclient: e.clientY,
+                        target: e.target,
+                        mozPressure: e.mozPressure
+                    });
 
-				}
-			}).mouseenter(function(e){
-				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
-				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
+                }
+            }).mouseenter(function(e) {
+                if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+                if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
 
-				if(callback){
-					if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
-					if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
-					mb = (e.buttons != undefined ? e.buttons : e.which)
-					return callback('mouseenter', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
-				}
-			}).mouseout(function(e){
-				if(callback){
-					tmouse.oldx = undefined;
-					tmouse.oldy = undefined;
-					return callback('mouseout', {button: (e.which || e.button), x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
-				}
-			}).mousedown(function(e){
-				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
-				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
-				if(callback){
-					tmouse.oldx = e.offsetX;
-					tmouse.oldy = e.offsetY;
-					mb = e.which
-					return callback('mousedown', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
-				}
-			}).mouseup(function(e){
-				if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
-				if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
-				if(callback){
-					tmouse.oldx = e.offsetX;
-					tmouse.oldy = e.offsetY;
-					mb = 0
-					return callback('mouseup', {button: e.which, x: e.offsetX, y: e.offsetY, xpage: e.pageX, ypage: e.pageY, xclient:e.clientX, yclient:e.clientY, target: e.target});
-				}
-			}).keydown(function(e){
-				if(callback){
-					return callback('keydown', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
-				}
-			}).keyup(function(e){
-				if(callback){
-					return callback('keyup', {key: e.keyCode, shift:e.shiftKey, ctrl:e.ctrlKey});
-				}
-			}).bind('mousewheel DOMMouseScroll', function(e){
+                if(callback) {
+                    if(tmouse.oldx === undefined) tmouse.oldx = e.offsetX;
+                    if(tmouse.oldy === undefined) tmouse.oldy = e.offsetY;
+                    mb = (e.buttons != undefined ? e.buttons : e.which)
+                    return callback('mouseenter', {
+                        button: (e.which || e.button),
+                        x: e.offsetX,
+                        y: e.offsetY,
+                        xpage: e.pageX,
+                        ypage: e.pageY,
+                        xclient: e.clientX,
+                        yclient: e.clientY,
+                        target: e.target
+                    });
+                }
+            }).mouseout(function(e) {
+                if(callback) {
+                    tmouse.oldx = undefined;
+                    tmouse.oldy = undefined;
+                    return callback('mouseout', {
+                        button: (e.which || e.button),
+                        x: e.offsetX,
+                        y: e.offsetY,
+                        xpage: e.pageX,
+                        ypage: e.pageY,
+                        xclient: e.clientX,
+                        yclient: e.clientY,
+                        target: e.target
+                    });
+                }
+            }).mousedown(function(e) {
+                if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+                if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
+                if(callback) {
+                    tmouse.oldx = e.offsetX;
+                    tmouse.oldy = e.offsetY;
+                    mb = e.which
+                    return callback('mousedown', {
+                        button: e.which,
+                        x: e.offsetX,
+                        y: e.offsetY,
+                        xpage: e.pageX,
+                        ypage: e.pageY,
+                        xclient: e.clientX,
+                        yclient: e.clientY,
+                        target: e.target
+                    });
+                }
+            }).mouseup(function(e) {
+                if(e.offsetX == undefined) e.offsetX = e.clientX - $(e.target).offset().left
+                if(e.offsetY == undefined) e.offsetY = e.clientY - $(e.target).offset().top
+                if(callback) {
+                    tmouse.oldx = e.offsetX;
+                    tmouse.oldy = e.offsetY;
+                    mb = 0
+                    return callback('mouseup', {
+                        button: e.which,
+                        x: e.offsetX,
+                        y: e.offsetY,
+                        xpage: e.pageX,
+                        ypage: e.pageY,
+                        xclient: e.clientX,
+                        yclient: e.clientY,
+                        target: e.target
+                    });
+                }
+            }).keydown(function(e) {
+                if(callback) {
+                    return callback('keydown', {
+                        key: e.keyCode,
+                        shift: e.shiftKey,
+                        ctrl: e.ctrlKey
+                    });
+                }
+            }).keyup(function(e) {
+                if(callback) {
+                    return callback('keyup', {
+                        key: e.keyCode,
+                        shift: e.shiftKey,
+                        ctrl: e.ctrlKey
+                    });
+                }
+            }).bind('mousewheel DOMMouseScroll', function(e) {
 
-				var wd = e.originalEvent.wheelDelta / 100;
-				var ed = e.originalEvent.detail * -1;
-				if(wd || ed) return callback('mousewheel', {scroll: wd || ed, target: e.target})
+                var wd = e.originalEvent.wheelDelta / 100;
+                var ed = e.originalEvent.detail * -1;
+                if(wd || ed) return callback('mousewheel', {
+                    scroll: wd || ed,
+                    target: e.target
+                })
 
-			}).on('paste', function(e){
-				if(callback){
-					return callback('paste', {clipdata: (e.originalEvent || e).clipboardData})
-				}
-			})
+            }).on('paste', function(e) {
+                if(callback) {
+                    return callback('paste', {
+                        clipdata: (e.originalEvent || e).clipboardData
+                    })
+                }
+            })
 
-		})
-	}
+        })
+    }
 })
 
 /*
