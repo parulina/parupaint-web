@@ -38,8 +38,9 @@ function Parupaint() {
         }
         return false;
     }
-    this.SetConnectedEffect = function(onoff) {
+    this.SetConnected = function(onoff) {
         $('body').toggleClass('connected', onoff);
+        $('body').toggleClass('disconnected', !onoff);
         this.ui.SetConnectionStatus(onoff);
     }
 
@@ -281,16 +282,15 @@ $(function() {
 
 
 
-        PP.SetConnectedEffect(true);
+        PP.SetConnected(true);
         if(PP.room !== null) {
             PP.room.OnOpen(e);
         }
     });
     PP.socket.on('close', function(e) {
-        PP.SetConnectedEffect(false);
+        PP.SetConnected(false);
         if(PP.room !== null) {
             PP.room.OnClose(e);
-            console.log(PP.room);
             PP.ui.ConnectionError("socket closed.");
         }
 
@@ -421,9 +421,9 @@ $(function() {
     $('input.con-status').change(function(e) {
         var c = $(e.target).is(':checked');
         if(PP.IsConnected()) {
-            //TODO
+            PP.socket.Close();
         } else {
-
+            PP.socket.Connect();
         }
     })
     $('input.private-status').change(function(e) {

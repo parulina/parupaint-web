@@ -68,15 +68,15 @@ function ParupaintBrushglass() {
 var ParupaintRoom = function(main, room_name) {
 
     // clean up.
-
+    
+    if(main.socket !== null) {
+        var clear = ["rs", "lf", "draw"];
+        for(var i in clear) {
+            main.socket.callbacks[i] = null;
+        }
+    }
 
     if(typeof room_name != "string") {
-        if(main.socket !== null) {
-            var clear = ["rs", "canvas"];
-            for(var i in clear) {
-                main.socket.callbacks[i] = null;
-            }
-        }
         return null;
     }
 

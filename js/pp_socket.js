@@ -46,6 +46,11 @@ var ParupaintSocket = function(addr){
         this.ws.onerror = this.onError.bind(this);
         return this;
     };
+    this.Close = function(){
+        this.ws.close();
+        this.connected = false;
+        delete this.ws;
+    }
 
     this.IsConnected = function(){
         return (this.connected);
