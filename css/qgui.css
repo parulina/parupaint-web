@@ -187,7 +187,7 @@
 .qstatus-message:before{
 	content: attr(data-label);
 	position:absolute;
-	top: 0px; left:0; right:0; 
+	top: 0px; left:0; right:0;
 	margin:auto;
 	bottom: 0;
 	font-size: 15px;
@@ -364,8 +364,9 @@ body .multi-only{
 body.connected .multi-only{
 	display: flex;
 }
-.setting-middle-row form{
-	
+
+.setting-input-row form{
+
 	flex-basis: 36px;
 	background: linear-gradient(#DADADA, #D3D3D3);
 	padding: 0px 16px;
@@ -379,6 +380,12 @@ body.connected .multi-only{
 	box-shadow: 0 0 0px 1px rgb(216, 216, 216);
 	-webkit-animation:setting-appear 500ms normal;
 }
+.setting-top-row form {
+	background: linear-gradient(#F9E1E1, #F7DEDE);
+	font-weight:bold;
+}
+
+
 .setting-middle-row .dimension-input input{
 	font-size: 17px;
 	margin:0;
@@ -417,12 +424,12 @@ form.dimension-input input[type="number"]{
 	border-radius: 4px;
 	padding: 2px 6px;
 }
-.setting-middle-row form input[type="submit"]:active,
-.setting-middle-row form input[type="checkbox"]:active:after{
+.setting-input-row form input[type="submit"]:active,
+.setting-input-row form input[type="checkbox"]:active:after{
 	background: rgb(221, 226, 219);
 }
 
-.setting-middle-row form input[type="submit"]{
+.setting-input-row form input[type="submit"]{
 	padding: 0px 4px;
 	background: rgb(231, 237, 228);
 	font-size: 16px;
@@ -485,7 +492,7 @@ form.knob-thing input[type=checkbox]+label{
 	visibility: hidden;
 	margin:0 auto;
 	padding:0;
-	
+
 	width:120px;
 	height:24px;
 	margin-right: 0;
@@ -537,17 +544,18 @@ form.knob-thing input[type=checkbox]{
 
 
 
-.setting-top-row, .setting-bottom-row{
+.setting-bottom-row{
 	flex:0 0;
 	flex-basis:40px;
 	background-color:#CCC;
 }
-.setting-top-row{
-	background-color:transparent;
-}
 
-.setting-middle-row{
+.setting-input-row{
 	flex-grow:1;
 	flex-direction:column;
 	overflow: hidden;
+}
+
+.setting-top-row {
+	flex:0 1 auto;
 }

@@ -203,15 +203,22 @@ $(function() {
 
     // TABLET SETUP
     // TODO chrome specific tablet set-up?
-    ParupaintStorage.GetStorageKey('wacom_tablet', function(d) {
-        if(d) {
-            console.info("Setting up Wacom Tablet plug-in.");
+    var SetTablet = function(d){
+        $('body #wacomPlugin').remove();
+        PP.ui.SetTabletInput(d);
+        if(d){
             $('body').prepend(
                 $('<object/>', {
                     id: 'wacomPlugin',
                     type: 'application/x-wacomtabletplugin'
                 })
             );
+        }
+    }
+    ParupaintStorage.GetStorageKey('wacom_tablet', function(d) {
+        if(d) {
+            console.info("Setting up Wacom Tablet plug-in.");
+            SetTablet(d);
         }
     });
     ParupaintStorage.GetStorageKey('default_brush', function(d) {
@@ -338,6 +345,13 @@ $(function() {
                 private: c
             });
         }
+    })
+    $('#tablet-input-id').change(function(e) {
+        var c = $(e.target).is(':checked');
+        ParupaintStorage.SetStorageKey({
+            'wacom_tablet': c
+        });
+        SetTablet(c);
     })
 
 

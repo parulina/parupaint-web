@@ -523,6 +523,10 @@ function ParupaintInterface() {
         var d = ParupaintCanvas.Init();
         this.SetDimensionsInput(d[0], d[1]);
     }
+    this.SetTabletInput = function(d){
+        $('#tablet-input-id').prop('checked', d);
+    }
+
 
     this.Loading = function(txt) {
         this.ClearLoading();

@@ -26,6 +26,21 @@ function ParupaintBrushglass() {
     // Functions to reflect the important brush variables
     // do not store X,Y or whatever.
 
+
+    // set/get the brush id.
+    this.Brush = function(b) {
+        if(b != null) {
+            this.current = b;
+            return this;
+        }
+        return this.brushes[this.current];
+    }
+    this.OppositeBrush = function() {
+        return(this.current == 0 ? 1 : 0)
+    }
+    this.Name = function() {
+        return this.brushes[this.current].name;
+    }
     this.Size = function(size, cursor) {
         if(typeof size == "undefined") return this.Brush().size;
 
@@ -41,21 +56,6 @@ function ParupaintBrushglass() {
         if(cursor) cursor.Color(color);
 
         return this;
-    }
-
-    // set/get the brush id.
-    this.Brush = function(b) {
-        if(b != null) {
-            this.current = b;
-            return this;
-        }
-        return this.brushes[this.current];
-    }
-    this.OppositeBrush = function() {
-        return(this.current == 0 ? 1 : 0)
-    }
-    this.Name = function() {
-        return this.brushes[this.current].name;
     }
 
     return this;
@@ -87,6 +87,8 @@ var ParupaintRoom = function(main, room_name) {
 
     this.picking_color = false;
     this.pick_canvas = null;
+
+    this.autoswitch = false;
 
     this.mouseTimer = null;
 
@@ -136,16 +138,16 @@ var ParupaintRoom = function(main, room_name) {
         document.title = ll.join(' ');
 
     }
-    this.GetCanvasKey = function(){
+    this.GetCanvasKey = function() {
         return "room_" + this.name;
     }
 
-    this.GetCanvas = function(callback){
+    this.GetCanvas = function(callback) {
         ParupaintStorage.GetStorageKey(this.GetCanvasKey(),
-        function(key) {
-            if(typeof key == "string") key = JSON.parse(key)
-            if(typeof callback == "function") callback(key);
-        });
+            function(key) {
+                if(typeof key == "string") key = JSON.parse(key)
+                if(typeof callback == "function") callback(key);
+            });
     };
     //TODO actually make this work.
     this.SaveCanvas = function(callback) {
@@ -427,8 +429,8 @@ var ParupaintRoom = function(main, room_name) {
         ParupaintCanvas.Focus(0, 0);
         main.ui.UpdateHeavy();
 
-        this.GetCanvas(function(key){
-            if(key){
+        this.GetCanvas(function(key) {
+            if(key) {
                 var w = key.width || 800,
                     h = key.height || 800;
 
@@ -549,43 +551,35 @@ var ParupaintRoom = function(main, room_name) {
             var tabletPressure = null; {
 
                 var tabletSwitch = function(e) {
-                    //TODO fix
-                    Brush.switchToBrush(er);
-                    guiControl.updateFromBrush(Brush);
+                    pthis.brush.Brush(e).UpdateLocal();
 
-
-                    net.Emit('draw', {
-                        x: mx,
-                        y: my,
-                        s: s,
-                        c: c,
+                    var cc = main.Cursor();
+                    main.Emit('draw', {
+                        x: cc.Position()[0],
+                        y: cc.Position()[1],
+                        s: pthis.brush.Size(),
+                        c: pthis.brush.Color(),
                         d: false
                     });
+                    //TODO put d as cc.Drawing()?
                 };
 
+                var eraser = pthis.brush.current;
                 // switch brush if tablet pen has flipped
-                if(typeof tabletConnection != "undefined" &&
-                    tabletConnection.connections) {
-
-                    // check if different and is allowed to switch
-                    if(tabletConnection.e != Brush.cbrush &&
-                        tabletConnection.autoswitch) {
-                        // switch it
-                        tabletSwitch(parseInt(tabletConnection.e));
-                    }
-                    tabletPressure = tabletConnection.p;
-                }
                 if(plugin && plugin.penAPI) {
-                    // bool to int
-                    var er = plugin.penAPI.isEraser ? 1 : 0;
-
-                    if(tabletConnection.autoswitch &&
-                        Brush.cbrush != er) {
-                        tabletSwitch(er)
-                    }
+                    eraser = plugin.penAPI.isEraser ? 1 : 0;
                     if(plugin.penAPI.pointerType != 0) {
                         tabletPressure = plugin.penAPI.pressure;
                     }
+
+                }
+                if(typeof tabletConnection != "undefined" &&
+                    tabletConnection.connections) {
+                    eraser = parseInt(tabletConnection.e);
+                    tabletPressure = tabletConnection.p;
+                }
+                if(eraser != pthis.brush.current) {
+                    tabletSwitch(eraser);
                 }
             }
 
@@ -762,7 +756,6 @@ var ParupaintRoom = function(main, room_name) {
                         var nb = pthis.brush.OppositeBrush();
                         //autoswitch = false
 
-                        //FIXME maybe?
                         pthis.brush.Brush(nb).
                         UpdateLocal();
 

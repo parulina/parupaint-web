@@ -1,151 +1,158 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <link rel=icon href="css/icon16.png">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel=icon href="css/icon16.png">
 
-  <link href="css/background.css" rel="stylesheet"></link>
-  <link href="css/canvas.css" rel="stylesheet"></link>
-  <link href="css/guifront.css" rel="stylesheet"></link>
-  <link href="css/qgui.css" rel="stylesheet"></link>
+        <link href="css/background.css" rel="stylesheet"></link>
+        <link href="css/canvas.css" rel="stylesheet"></link>
+        <link href="css/guifront.css" rel="stylesheet"></link>
+        <link href="css/qgui.css" rel="stylesheet"></link>
 
-  <script src="js/jquery-2.1.1.min.js"></script>
-  <script src="js/moment.min.js"></script>
-  <script src="js/livestamp.min.js"></script>
-  <script src="js/pako.min.js"></script>
-  <script src="js/golem.js"></script>
+        <script src="js/jquery-2.1.1.min.js"></script>
+        <script src="js/moment.min.js"></script>
+        <script src="js/livestamp.min.js"></script>
+        <script src="js/pako.min.js"></script>
+        <script src="js/golem.js"></script>
 
 
-  <script src="js/pp_functions.js"></script>
-  <script src="js/pp_chrome.js"></script>
-  <script src="js/pp_storage.js"></script>
-  <script src="js/pp_color.js"></script>
-  <script src="js/pp_brush.js"></script>
-  <script src="js/pp_gui.js"></script>
-  <script src="js/pp_canvas.js"></script>
-  <script src="js/pp_room.js"></script>
-  <script src="js/pp_main.js"></script>
-  <title>Initializing parupaint-web...</title>
-</head>
+        <script src="js/pp_functions.js"></script>
+        <script src="js/pp_chrome.js"></script>
+        <script src="js/pp_storage.js"></script>
+        <script src="js/pp_color.js"></script>
+        <script src="js/pp_brush.js"></script>
+        <script src="js/pp_gui.js"></script>
+        <script src="js/pp_canvas.js"></script>
+        <script src="js/pp_room.js"></script>
+        <script src="js/pp_main.js"></script>
+        <title>Initializing parupaint-web...</title>
+    </head>
 
-<body class="loading">
-  <div class="canvas-workarea" id="mouse-pool" tabindex="1">
-    <div class="canvas-pool"></div>
+    <body class="loading">
+        <div class="canvas-workarea" id="mouse-pool" tabindex="1">
+            <div class="canvas-pool"></div>
 
-    <div class="canvas-cursor cursor-self">
-      <div class="cursor-pressure-size"></div>
-    </div>
-  </div>
-
-  <div id="main-canvas" class="body-page overlay">
-    <div class="gui">
-      <!-- COLOR PICKER -->
-      <div class="color-spinner overlay-piece">
-        <div class="hsl-select-pick">
-          <div class="alpha-pick">
-            <div class="color-selector"></div>
-          </div>
-          <div class="light-pick">
-            <div class="color-selector"></div>
-          </div>
-
-          <div class="saturation-pick">
-            <div class="color-selector"></div>
-          </div>
-
-          <div class="hue-pick">
-            <div class="preview-col"></div>
-            <div class="color-selector"></div>
-          </div>
+            <div class="canvas-cursor cursor-self">
+                <div class="cursor-pressure-size"></div>
+            </div>
         </div>
 
+        <div id="main-canvas" class="body-page overlay">
+            <div class="gui">
+                <!-- COLOR PICKER -->
+                <div class="color-spinner overlay-piece">
+                    <div class="hsl-select-pick">
+                        <div class="alpha-pick">
+                            <div class="color-selector"></div>
+                        </div>
+                        <div class="light-pick">
+                            <div class="color-selector"></div>
+                        </div>
 
-        <div class="palette-storage"></div>
-      </div>
-      <!-- CHAT BOX -->
-      <div class="chat-box overlay-piece">
-        <div class="chat-content">
+                        <div class="saturation-pick">
+                            <div class="color-selector"></div>
+                        </div>
+
+                        <div class="hue-pick">
+                            <div class="preview-col"></div>
+                            <div class="color-selector"></div>
+                        </div>
+                    </div>
+
+
+                    <div class="palette-storage"></div>
+                </div>
+                <!-- CHAT BOX -->
+                <div class="chat-box overlay-piece">
+                    <div class="chat-content">
+                    </div>
+
+                    <div class="chat-input-box">
+                        <textarea class="chat-input" tabindex="-1"></textarea>
+                        <div class="ci-size"></div>
+                    </div>
+                </div>
+
+
+                <!-- FLAYER LIST -->
+                <div class="flayer-list-container overlay-piece">
+                    <div class="flayer-info"></div>
+
+                    <div class="flayer-list">
+                        <div class="flayer-info-layer" data-layer="0" id="list-flayer-0">
+                            <div class="flayer-info-frame" data-frame="0" id="list-flayer-0-0"></div>
+
+                            <div class="flayer-info-frame" data-frame="1" id="list-flayer-0-1"></div>
+                        </div>
+
+                        <div class="flayer-info-layer" data-layer="1" id="list-flayer-1">
+                            <div class="flayer-info-frame" data-frame="0" id="list-flayer-1-0"></div>
+
+                            <div class="flayer-info-frame" data-frame="1" id="list-flayer-1-1"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="qstatus overlay-piece visible">
+                <div class="qstatus-brush" title="[#artists] - [current brush]">
+                    <div class="qstatus-piece preview-col" data-label="brush" data-label-2="0"></div>
+
+                    <div class="qstatus-panel brush-panel">
+                        <div class="player-list" style="margin-left: 2em">
+                            You're quite lonely.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="qstatus-message" data-label="test" title="↡ pull down for overlay ↡"></div>
+
+                <div class="qstatus-settings" title="[layer] - [frame] - [connected]">
+                    <div class="qstatus-piece qinfo online"></div>
+
+                    <div class="qstatus-panel setting-panel">
+                        <!-- Settings -->
+                        <div class="setting-top-row setting-input-row">
+                            <form class="tablet-input knob-thing" data-label="Tablet plugin">
+                                <input id="tablet-input-id" type="checkbox">
+                                <label for="tablet-input-id"></label>
+                            </form>
+                        </div>
+
+                        <div class="setting-middle-row setting-input-row">
+
+                            <form class="connection-input knob-thing" data-label="Disconnected">
+                                <input class="con-status" id="con-status-id" type="checkbox">
+                                <label for="con-status-id"></label>
+                            </form>
+
+                            <form class="private-input knob-thing multi-only admin-only" data-label="Private">
+                                <input class="private-status" id="private-status-id" type="checkbox">
+                                <label for="private-status-id"></label>
+                            </form>
+
+                            <form class="dimension-input admin-only">
+                                <input class="dimension-confirm" type="submit" value="Set dimensions">
+                                <label></label>
+                                <input class="dimension-w-input" max="4096" min="0" type="number">
+                                <label></label>
+                                <input class="dimension-h-input" max="4096" min="0" type="number">
+                                <label></label>
+                            </form>
+                        </div>
+
+                        <div class="setting-bottom-row">
+                            <div class="setting-down-img" data-label="download image" type="button"></div>
+                            <div class="setting-reload-img multi-only" data-label="reload" type="button"></div>
+                            <div class="setting-save-img" data-label="save" type="button"></div>
+                            <div class="setting-quit-btn" data-label="quit" type="button"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="chat-input-box">
-          <textarea class="chat-input" tabindex="-1"></textarea>
-          <div class="ci-size"></div>
-        </div>
-      </div>
-
-
-      <!-- FLAYER LIST -->
-      <div class="flayer-list-container overlay-piece">
-        <div class="flayer-info"></div>
-
-        <div class="flayer-list">
-          <div class="flayer-info-layer" data-layer="0" id="list-flayer-0">
-            <div class="flayer-info-frame" data-frame="0" id="list-flayer-0-0"></div>
-
-            <div class="flayer-info-frame" data-frame="1" id="list-flayer-0-1"></div>
-          </div>
-
-          <div class="flayer-info-layer" data-layer="1" id="list-flayer-1">
-            <div class="flayer-info-frame" data-frame="0" id="list-flayer-1-0"></div>
-
-            <div class="flayer-info-frame" data-frame="1" id="list-flayer-1-1"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="qstatus overlay-piece visible">
-      <div class="qstatus-brush" title="[#artists] - [current brush]">
-        <div class="qstatus-piece preview-col" data-label="brush" data-label-2="0"></div>
-
-        <div class="qstatus-panel brush-panel">
-          <div class="player-list" style="margin-left: 2em">
-            You're quite lonely.
-          </div>
-        </div>
-      </div>
-
-      <div class="qstatus-message" data-label="test" title="↡ pull down for overlay ↡"></div>
-
-      <div class="qstatus-settings" title="[layer] - [frame] - [connected]">
-        <div class="qstatus-piece qinfo online"></div>
-
-        <div class="qstatus-panel setting-panel">
-          <div class="setting-top-row"></div>
-
-          <div class="setting-middle-row">
-            <form class="connection-input knob-thing" data-label="Reconnecting [4/5]...">
-              <input class="con-status" id="con-status-id" type="checkbox">
-              <label for="con-status-id"></label>
-            </form>
-
-            <form class="private-input knob-thing multi-only admin-only" data-label="Private">
-              <input class="private-status" id="private-status-id" type="checkbox">
-              <label for="private-status-id"></label>
-            </form>
-
-            <form class="dimension-input admin-only">
-              <input class="dimension-confirm" type="submit" value="Set dimensions">
-              <label></label>
-              <input class="dimension-w-input" max="4096" min="0" type="number">
-              <label></label>
-              <input class="dimension-h-input" max="4096" min="0" type="number">
-              <label></label>
-            </form>
-          </div>
-
-          <div class="setting-bottom-row">
-            <div class="setting-down-img" data-label="download image" type="button"></div>
-            <div class="setting-reload-img multi-only" data-label="reload" type="button"></div>
-            <div class="setting-save-img" data-label="save" type="button"></div>
-            <div class="setting-quit-btn" data-label="quit" type="button"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</body>
+    </body>
 
 </html>
