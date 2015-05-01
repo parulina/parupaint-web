@@ -247,15 +247,6 @@ $(function() {
             SetTablet(d);
         }
     });
-    ParupaintStorage.GetStorageKey('default_brush', function(d) {
-        if(d != null) {
-            if(typeof d == "string") d = JSON.parse(d);
-
-            // TODO move all the brush shit out from ParupaintRoom?
-            // or move all this in to room?
-            // PP.room.brush = d;
-        }
-    });
 
     // ROOM
     if(document.location.hash) {

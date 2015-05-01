@@ -21,6 +21,9 @@ function ParupaintBrushglass() {
 
         this.UpdateCursor(PP.Cursor());
         PP.ui.UpdateBrushinfo(this.Brush());
+        ParupaintStorage.SetStorageKey({
+            'default_brush': this.brushes
+        });
     }
 
     // Functions to reflect the important brush variables
@@ -76,11 +79,20 @@ var ParupaintRoom = function(main, room_name) {
         }
         return null;
     }
+
+
+    var pthis = this;
     this.name = room_name;
     this.server_roundtrip = false; // roundtrip to server
     //TODO finish this up
 
     this.brush = new ParupaintBrushglass();
+    ParupaintStorage.GetStorageKey('default_brush', function(d) {
+        if(d != null) {
+            if(typeof d == "string") d = JSON.parse(d);
+            pthis.brush.brushes = d;
+        }
+    });
     this.brush.UpdateLocal();
     this.key_eraser = 3;
 
@@ -95,6 +107,7 @@ var ParupaintRoom = function(main, room_name) {
         // safen the room_name for hash
         return room_name;
     }();
+
 
 
     this.admin = null;
@@ -359,7 +372,7 @@ var ParupaintRoom = function(main, room_name) {
     // get painters, update all painters, get num painters etc
     // do network/callback/canvas funcs object
 
-    var pthis = this;
+
 
 
     $('#mouse-pool').unbind('').sevent(function(e, data) {
