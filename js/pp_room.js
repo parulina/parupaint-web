@@ -90,6 +90,12 @@ var ParupaintRoom = function(main, room_name) {
 
     this.mouseTimer = null;
 
+    this.urlsafe_name = function() {
+        // safen the room_name for hash
+        return room_name;
+    }();
+
+
     this.admin = null;
     this.Admin = function(cursor) {
         //TODO loop this.artists and remove admin
@@ -130,14 +136,60 @@ var ParupaintRoom = function(main, room_name) {
         document.title = ll.join(' ');
 
     }
+    this.GetCanvasKey = function(){
+        return "room_" + this.name;
+    }
+
+    this.GetCanvas = function(callback){
+        ParupaintStorage.GetStorageKey(this.GetCanvasKey(),
+        function(key) {
+            if(typeof key == "string") key = JSON.parse(key)
+            if(typeof callback == "function") callback(key);
+        });
+    };
+    //TODO actually make this work.
+    this.SaveCanvas = function(callback) {
+        var ke = this.GetCanvasKey();
+
+        this.GetCanvas(function(key) {
+
+            var kk = {};
+            var ra = {};
+            if(typeof key != "undefined" && key) ra = key;
+
+            console.info('Saving room to storage.', key);
+
+            var d = ParupaintCanvas.Init();
+            ra.width = d[0];
+            ra.height = d[1];
+            ra.data = [];
+
+            $('.canvas-pool canvas').each(function(k, e) {
+                var l = $(e).data('layer'),
+                    f = $(e).data('frame'),
+                    bytes = e.toDataURL();
+
+                if(typeof ra.data[l] == "undefined") {
+                    ra.data[l] = [];
+                }
+                if(typeof ra.data[l][f] == "undefined") {
+                    ra.data[l][f] = {};
+                }
+
+                ra.data[l][f].data = bytes;
+
+            });
+
+            kk[ke] = ra;
+            ParupaintStorage.SetStorageKey(kk, function() {
+                if(typeof callback == "function") callback();
+            })
+        });
+    }
 
 
 
 
-    this.urlsafe_name = function() {
-        // safen the room_name for hash
-        return room_name;
-    }();
     main.ui.SetRoomName(room_name);
     document.location.hash = this.urlsafe_name;
 
@@ -151,6 +203,11 @@ var ParupaintRoom = function(main, room_name) {
         if(onoff) {
             // put network code here that affects the canvas ONLY
             console.info("Setting up network events.");
+            main.socket.on('chat', function(d) {
+                //addChatMessage(null, d.msg, d.name, d.time, true)
+                console.error('Chat not implemented.', d)
+            })
+
             main.socket.on('rs', function(d) {
                 // data
                 if(typeof d.admin != "undefined") {
@@ -284,28 +341,27 @@ var ParupaintRoom = function(main, room_name) {
                     var pp = c.Position(),
                         lf = c.LayerFrame();
 
-                    if(c.IsMe()){
+                    if(c.IsMe()) {
                         // need to have special stuff for yourself.
                         // due to Position() being applied outside
                         // of this context.
 
                         //pp = [c.cursor.data('dx'), c.cursor.data('dy')];
 
-                    }else {
+                    } else {
                         if(typeof xx != "undefined" &&
                             typeof yy != "undefined") {
 
-                            c.Position((xx / od[0]) * nd[0],
-                                (yy / od[1]) * nd[1]);
+                            c.Position((xx / od[0]) * nd[0], (yy / od[1]) * nd[1]);
                         }
                         if(typeof ss != "undefined") c.Size(ss);
                         if(typeof cc != "undefined") c.Color(cc);
                         if(typeof l != "undefined" &&
-                            typeof f != "undefined"){
-                                c.LayerFrame(l, f);
-                                lf[0] = l;
-                                lf[1] = f;
-                            }
+                            typeof f != "undefined") {
+                            c.LayerFrame(l, f);
+                            lf[0] = l;
+                            lf[1] = f;
+                        }
                         // save the 'raw' cursor pos.
                         c.cursor.data({
                             dx: xx,
@@ -320,20 +376,20 @@ var ParupaintRoom = function(main, room_name) {
                         }
                         c.Drawing(dd);
                     }
-                    if( c.Drawing() &&
+                    if(c.Drawing() &&
                         typeof lf[0] == "number" &&
                         typeof lf[1] == "number" &&
                         typeof xx != "undefined" &&
                         typeof yy != "undefined") {
 
                         var canvas = $('.canvas-pool canvas').
-                        filter('[data-layer='+lf[0]+'][data-frame='+lf[1]+']');
+                        filter('[data-layer=' + lf[0] + '][data-frame=' + lf[1] + ']');
                         ParupaintCanvas.DrawLine(canvas,
                             pp[0], pp[1], xx, yy, cc, ss);
                     }
                 } else {
                     var canvas = $('.canvas-pool canvas').
-                    filter('[data-layer='+l+'][data-frame='+f+']');
+                    filter('[data-layer=' + l + '][data-frame=' + f + ']');
                     ParupaintCanvas.DrawLine(canvas,
                         x, y, xx, yy, cc, ss);
                 }
@@ -370,6 +426,20 @@ var ParupaintRoom = function(main, room_name) {
         this.UpdateTitle();
         ParupaintCanvas.Focus(0, 0);
         main.ui.UpdateHeavy();
+
+        this.GetCanvas(function(key){
+            if(key){
+                key = JSON.parse(key);
+
+                var w = key.width || 800,
+                    h = key.height || 800;
+
+                ParupaintCanvas.Init(w, h, key.data);
+
+                ParupaintCanvas.Focus(0, 0);
+                main.ui.UpdateHeavy();
+            }
+        })
     }
 
     // THIS OBJECT IS ONLY FOR CONTROLLING CANVASES AND CURSORS AND WHAT NOT!
@@ -468,7 +538,7 @@ var ParupaintRoom = function(main, room_name) {
                     if(!pthis.server_roundtrip) {
                         cc.Position(data.x, data.y);
                     }
-                    if(!pthis.server_roundtrip){
+                    if(!pthis.server_roundtrip) {
                         if(pthis.mouseTimer) clearTimeout(pthis.mouseTimer);
                         pthis.mouseTimer = setTimeout(function() {
                             cc.Position(data.x, data.y);

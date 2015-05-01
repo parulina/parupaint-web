@@ -301,6 +301,8 @@ var ParupaintCanvas = new function() {
                 for(var f = 0; f < cdata[l].length; f++) {
                     // add each frame
                     var ext = cdata[l][f].extended;
+                    var dat = cdata[l][f].data;
+
                     if(ext) {
                         var ef = f;
                         while((ext && ef != 0)) {
@@ -320,15 +322,23 @@ var ParupaintCanvas = new function() {
                         '" id="' + id +
                         '" data-layer="' + l +
                         '" data-frame="' + f + '"/>');
-                    nc[0].getContext('2d').webkitImageSmoothingEnabled = false;
-                    nc[0].getContext('2d').mozimageSmoothingEnabled = false;
-                    nc[0].getContext('2d').imageSmoothingEnabled = false;
+
+                    var ctx = nc[0].getContext('2d');
+                    ctx.webkitImageSmoothingEnabled = false;
+                    ctx.mozimageSmoothingEnabled = false;
+                    ctx.imageSmoothingEnabled = false;
+
                     if(typeof ext == "boolean" && ext) nc.addClass('extended');
+                    if(typeof dat == "string"){
+                        // wow there's data
+                        var img = new Image;
+                        img.src = dat;
+                        ctx.drawImage(img, 0, 0);
+                    }
 
                     $('.canvas-pool').append(nc);
                 }
             }
-            //TODO focus
 
         } else {
             $('.canvas-pool').children('canvas').each(function(k, e) {
