@@ -40,7 +40,7 @@ function Parupaint() {
     }
     this.SetConnected = function(onoff) {
         $('body').toggleClass('connected', onoff);
-        $('body').toggleClass('disconnected', !onoff);
+        $('body').removeClass('disconnected');
         this.ui.SetConnectionStatus(onoff);
     }
 
@@ -267,10 +267,12 @@ $(function() {
         // in offline mode
     }
 
+    var manual_disconnect = false;
     // ONE-TIME SOCKET SETUP
     PP.socket.on('open', function(e) {
         console.log("Opened connection.");
 
+        manual_disconnect = false;
         // FIXME this is for debug only.
         // i shall change the join to be automatically
         // in the server later.
@@ -291,7 +293,9 @@ $(function() {
         PP.SetConnected(false);
         if(PP.room !== null) {
             PP.room.OnClose(e);
-            PP.ui.ConnectionError("socket closed.");
+            if(!manual_disconnect){
+                PP.ui.ConnectionError("socket closed.");
+            }
         }
 
         PP.ui.SetPrivate(false);
@@ -421,6 +425,7 @@ $(function() {
     $('input.con-status').change(function(e) {
         var c = $(e.target).is(':checked');
         if(PP.IsConnected()) {
+            manual_disconnect = true;
             PP.socket.Close();
         } else {
             PP.socket.Connect();
