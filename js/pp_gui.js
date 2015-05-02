@@ -66,6 +66,12 @@ function ParupaintInterface() {
                     $('body').toggleClass('canvas-preview');
                     return;
                 }
+            case 13:
+            {
+                if($('textarea:focus').length) return true;
+                $('textarea.chat-input').focus();
+                return false;
+            }
             case 9: // tab
                 {
                     if($('input:focus').length) return true;

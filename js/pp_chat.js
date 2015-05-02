@@ -29,7 +29,8 @@ var ParupaintChat = function(){
                 })
             } else {
                 pthis.Message({
-                    msg: msg
+                    msg: msg,
+                    name: PP.Cursor().Name()
                 })
             }
             $(this).val((msg = ''));
@@ -39,9 +40,17 @@ var ParupaintChat = function(){
         pthis.SetChatinputExpandable(msg);
 
     }).on('focus', function(e){
-        //PP.ui.ShowOverlay(true);
+        $(this).closest('.chat-input-box').addClass('focused');
+    }).on('blur', function(e){
+        $(this).closest('.chat-input-box').removeClass('focused');
     });
 
+    this.pushEntry = function(entry){
+        if(typeof entry == "object" && entry.length){
+            var h = $('.chat-content').append(entry).prop('scrollHeight');
+            $('.chat-content').scrollTop(h);
+        }
+    }
     this.Message = function(d){
         // d.name (if null, assume system)
         // d.time (if null, assume now)
@@ -72,7 +81,11 @@ var ParupaintChat = function(){
             if(typeof d.name == "string"){
                 var last = content.children().last();
                 if(last.data('name') == d.name){
-                    return last.append(message);
+
+                    content.children().last().remove();
+                    last.append(message);
+                    this.pushEntry(last);
+                    return;
                 }
             }
 
@@ -82,7 +95,7 @@ var ParupaintChat = function(){
             });
             if(typeof d.name == "string") entry.attr('data-name', d.name);
 
-            return content.append(entry);
+            return this.pushEntry(entry);
 
         }
 

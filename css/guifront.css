@@ -11,11 +11,18 @@
 .overlay .gui.visible+.qstatus{
 	display:none;
 }
-.overlay .gui{
-	display:none;
+
+
+.overlay .gui > *{
+	visibility:hidden;
 }
-.overlay .gui.visible{
-	display:block;
+.overlay .gui > .chat-box {
+	visibility:visible;
+}
+
+
+.overlay .gui.visible > *{
+	visibility:visible;
 	pointer-events: all;
 	user-select:none;
 	-moz-user-select:none;
@@ -45,10 +52,11 @@
 	width:45%; height:30%;
 	min-width:300px;min-height:200px;
 	position:absolute;
-	top:0;
+	top:30px;
 	right:0;
 	-webkit-animation:color-show-webkit 170ms ease-out;
 	animation:color-show 170ms ease-out;
+	background-color:transparent;
 }
 
 .color-spinner.overlay-piece{
@@ -364,30 +372,38 @@
 .chat-box{
 	font-size:13px;
 }
-.chat-entry:before{
+.chat-entry[data-name]:before{
 	content:attr(data-name);
-}
-
-.chat-entry.is-admin:before{
-	content:"+" attr(data-name);
-}
-
-
-.chat-entry:before{
 	padding:0 3px;
 	margin-right:4px;
 	margin-left:2px;
-	background-color: rgba(239, 245, 241, 0.92);
+	background-color: rgba(239, 245, 241, 1);
 }
 
-.chat-entry:not([data-name]):before {
-    display: none;
+.chat-entry.is-admin[data-name]:before{
+	content:"+" attr(data-name);
+}
+
+@keyframes chat-fade {
+	from 	{opacity:1;}
+	50% 	{opacity:1;}
+	to 		{opacity:0;}
 }
 
 .chat-entry{
-	background-color:rgba(255,255,255,0.5);
+	background-color:rgba(0, 0, 0,0.65);
+	color:white;
 	margin:4px;
 	padding:2px;
+
+	opacity:0;
+	animation:chat-fade 3s linear;
+}
+
+.chat-input-box.focused + .chat-content .chat-entry,
+.gui.visible .chat-content .chat-entry {
+	opacity:1;
+	animation:none;
 }
 
 .chat-box:hover{
@@ -396,8 +412,11 @@
 	-webkit-user-select:all;
 }
 .chat-content{
-	overflow: auto;
+	overflow: hidden;
 	max-height: 100%;
+}
+.chat-input-box.focused + .chat-content {
+	overflow:auto;
 }
 
 .chat-entry.is-admin .chat-message{
@@ -454,13 +473,6 @@
 	left:0; right:0; top:100%;
 	margin: 0 16px;
 	padding: 0;
-	display:block;
-	border:1px solid #AAA;
-
-	border-radius:8px;
-	border-top-left-radius:0;
-	border-top-right-radius:0;
-	border-top:none;
 	overflow:hidden;
 }
 
@@ -475,13 +487,24 @@
 	font-family:"DroidSans", sans-serif;
 	border:0;
 }
-.chat-input-box textarea.chat-input{
 
+.chat-input-box textarea.chat-input{
 	height:100%;
 	resize:none;
 	white-space: normal;
 	position:absolute;
+	opacity:0;
 }
+.chat-input-box textarea.chat-input:focus,
+.chat-input-box.focused textarea.chat-input{
+	opacity:1;
+}
+
+.chat-input-box.focused + .chat-content {
+
+}
+
+
 .chat-input-box .ci-size{
 	visibility:hidden;
 	white-space: pre-wrap;
