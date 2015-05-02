@@ -68,7 +68,7 @@ function ParupaintBrushglass() {
 var ParupaintRoom = function(main, room_name) {
 
     // clean up.
-    
+
     if(main.socket !== null) {
         var clear = ["rs", "lf", "draw"];
         for(var i in clear) {
@@ -112,7 +112,7 @@ var ParupaintRoom = function(main, room_name) {
 
     this.admin = null;
     this.Admin = function(cursor) {
-        if(cursor !== null) {
+        if(typeof cursor != "undefined" && cursor) {
             $('.canvas-cursor').removeClass('admin');
 
             cursor.cursor.addClass('admin');
@@ -211,12 +211,9 @@ var ParupaintRoom = function(main, room_name) {
                         return console.error("Admin cursor doesn't exist!")
                     }
                     rthis.Admin(c);
-                    console.debug('Admin is ', d.admin)
                     $('body').toggleClass('is-admin', c.IsMe());
                 }
-                if(typeof d.private != "undefined") {
-                    rthis.Private(d.private);
-                }
+                rthis.Private(d.password);
                 main.Update();
             });
 
@@ -373,9 +370,17 @@ var ParupaintRoom = function(main, room_name) {
     // do network/callback/canvas funcs object
 
 
+    $('form.password-input').unbind().submit(function(e) {
+        var p = $(this).children('.password-change').val();
+        if(pthis.Admin()) {
+            main.Emit('rs', {
+                password: p
+            });
+        }
+        return false;
+    })
 
-
-    $('#mouse-pool').unbind('').sevent(function(e, data) {
+    $('#mouse-pool').unbind().sevent(function(e, data) {
 
         if(e == 'mousemove' && data.target.tagName == 'CANVAS') {
 

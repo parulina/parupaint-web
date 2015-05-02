@@ -16,11 +16,7 @@ function Parupaint() {
     this.myId = "";
     this.painters = [];
 
-    this.socket = new ParupaintSocket('ws://' + this.server_url + '/main').
-    on('id', function(id) {
-        console.info('You are (' + id + ').');
-        this.myId = id;
-    });
+    this.socket = new ParupaintSocket('ws://' + this.server_url + '/main');
 
     this.ui = new ParupaintInterface();
     this.chat = new ParupaintChat();
@@ -55,7 +51,7 @@ function Parupaint() {
     // this is to control the cursor and save data in .data calls
     // REMEMBER, CURSOR IS ONLY FOR MANIPULATING THE ACTUAL DOM.
     this.Cursor = function(thing) {
-            var dd = this.Id();
+            var pthis = this;
 
             var cur = new function(c) {
                 this.cursor = null;
@@ -127,20 +123,20 @@ function Parupaint() {
                     if(this.cursor == null) return "";
                     if(!this.cursor.hasClass('cursor-self')) {
                         return this.cursor.attr('id');
-                    } else return this.myId;
+                    } else return pthis.Id();
                 };
                 this.IsMe = function() {
-                    return(this.Id() == dd);
+                    return (this.Id() == pthis.Id());
                 };
                 return this;
             };
 
             if(typeof thing == "string") {
                 var d = thing.replace(/#/, "");
-                if(d == dd) {
+                if(d == pthis.myId) {
                     cur.cursor = $('.canvas-cursor.cursor-self');
                 } else {
-                    cur.cursor = $('#' + d);
+                    cur.cursor = $(thing);
                 }
 
             } else if(typeof thing == "undefined") {
@@ -270,6 +266,10 @@ $(function() {
 
     var manual_disconnect = false;
     // ONE-TIME SOCKET SETUP
+    PP.socket.on('id', function(id) {
+        console.info('You are (' + id + ').');
+        PP.Id(id);
+    });
     PP.socket.on('open', function(e) {
         console.log("Opened connection.");
 
@@ -319,9 +319,28 @@ $(function() {
     })
     PP.socket.on('join', function(d) {
         //console.warn("Server wants us to join [" + d.name + "]");
-        if(!d.success) {
+        if(d.code) {
             //todo show error
-            PP.ui.ConnectionError('invalid password.');
+            console.error("Error joining room.", d);
+            var p = null;
+            if(d.code == 2) {
+                p = prompt("room requires a password");
+            } else if(d.code == 3) {
+                p = prompt("invalid password")
+            }
+
+            if(p === null) {
+                PP.socket.Close();
+                PP.Room(PP.default_room);
+                manual_disconnect = true;
+                PP.ui.ClearLoading();
+            } else {
+                console.log(p)
+                PP.Emit('join', {
+                    room: d.name,
+                    password: p
+                });
+            }
             return;
         }
         PP.Room(d.name);
@@ -433,14 +452,6 @@ $(function() {
             PP.socket.Close();
         } else {
             PP.socket.Connect();
-        }
-    })
-    $('input.private-status').change(function(e) {
-        var c = $(e.target).is(':checked');
-        if(pthis.Admin()) {
-            PP.Emit('rs', {
-                private: c
-            });
         }
     })
     $('#tablet-input-id').change(function(e) {

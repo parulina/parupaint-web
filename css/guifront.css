@@ -14,33 +14,24 @@
 
 
 .overlay .gui > *{
-	visibility:hidden;
-}
-.overlay .gui > .chat-box {
-	visibility:visible;
+	display:none;
 }
 
 
 .overlay .gui.visible > *{
-	visibility:visible;
 	pointer-events: all;
 	user-select:none;
 	-moz-user-select:none;
 	-webkit-user-select:none;
 }
+.overlay .gui > .chat-box {
+	display:block;
+}
 
 
-@-webkit-keyframes color-show-webkit {
-	0% {transform: translateY(-100%); opacity:0;}
-	100% {transform: translateY(0); opacity:100;}
-}
-@-webkit-keyframes color-show-bottom-webkit {
-	0% {transform: translateY(100%); opacity:0;}
-	100% {transform: translateY(0); opacity:100;}
-}
 @keyframes color-show {
-	0% {transform: translateY(-100%); opacity:0;}
-	100% {transform: translateY(0); opacity:100;}
+	0% {transform: translateX(-100%); opacity:0;}
+	100% {transform: translateX(0); opacity:100;}
 }
 @keyframes color-show-bottom {
 	0% {transform: translateY(100%); opacity:0;}
@@ -48,26 +39,34 @@
 }
 
 
+
+.gui.visible .chat-box.overlay-piece{
+	animation:color-show 170ms ease-out;
+}
 .chat-box.overlay-piece{
 	width:45%; height:30%;
 	min-width:300px;min-height:200px;
 	position:absolute;
 	top:30px;
 	right:0;
-	-webkit-animation:color-show-webkit 170ms ease-out;
-	animation:color-show 170ms ease-out;
 	background-color:transparent;
 }
 
+
+.gui.visible .color-spinner.overlay-piece{
+	display:block;
+}
 .color-spinner.overlay-piece{
 	width:280px; max-height:288px;
 	position:absolute;
 	top:0;
 	left:0;
 	padding:0 2px 2px 0;
-	-webkit-animation:color-show-webkit 170ms ease-out;
 	animation:color-show 170ms ease-out;
 
+}
+.gui.visible .flayer-list-container.overlay-piece{
+	display:flex;
 }
 .flayer-list-container.overlay-piece{
 	height:200px;
@@ -78,7 +77,6 @@
 	padding:0 2px 2px 0;
 	-webkit-animation:color-show-bottom-webkit 170ms ease-out;
 	animation:color-show-bottom 170ms ease-out;
-	display:flex;
 	flex-flow:column;
 	justify-content:flex-end;
 
@@ -495,7 +493,7 @@
 	position:absolute;
 	opacity:0;
 }
-.gui.visible .chat-input-box textarea.chat-input,
+.gui.visible .chat-input-box textarea.chat-input
 .chat-input-box textarea.chat-input:focus,
 .chat-input-box.focused textarea.chat-input{
 	opacity:1;

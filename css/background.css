@@ -15,7 +15,7 @@ body {
 }
 
 body.connected{
-	background-color: #DAE2D7 !important;
+	background-color: #DAE2D7;
 }
 
 body.disconnected {

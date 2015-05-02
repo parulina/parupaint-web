@@ -73,6 +73,7 @@ var ParupaintSocket = function(addr){
         this.cc('open', e);
     }
     this.onError = function(e){
+        this.connected = false;
         this.cc('error', e);
     }
     this.on = function(c, d){

@@ -4,6 +4,7 @@ body {
 
 .panel-open .qstatus-panel {
     background-color: #C3AC8E;
+    border-radius: 0;
 }
 
 .qstatus-expandable {
@@ -42,8 +43,13 @@ form.knob-thing input[type=checkbox] + label:hover {
     cursor:pointer;
 }
 
-form.dimension-input input[type="number"] {
-    background: #DEBD98;
+.setting-input-row form input[type="text"]{
+    width:145px;
+    text-align:center;
+}
+.setting-input-row form input[type="text"],
+.setting-input-row form input[type="number"]{
+    background: #77614F;
     color: white;
     font-family: inherit;
     font-size: 20px;
