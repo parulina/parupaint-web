@@ -225,7 +225,7 @@ var ParupaintRoom = function(main, room_name) {
                 var l = parseInt(d.l),
                     f = parseInt(d.f);
 
-                var c = main.Cursor(d.id);
+                var c = main.Cursor('#' + d.id);
                 if(c === null) return console.error("Cursor doesn't exist.");
                 if(rthis.server_roundtrip && c.IsMe()) {
                     ParupaintCanvas.Focus(l, f);
@@ -251,7 +251,7 @@ var ParupaintRoom = function(main, room_name) {
 
                 if(typeof d.id != "undefined") {
                     //someone.
-                    var c = main.Cursor(d.id);
+                    var c = main.Cursor('#' + d.id);
                     if(c === null) {
                         return console.error("Cursor doesn't exist.");
                     }
@@ -506,9 +506,14 @@ var ParupaintRoom = function(main, room_name) {
                     eraser = parseInt(tabletConnection.e);
                     tabletPressure = tabletConnection.p;
                 }
-                if(eraser != pthis.brush.current) {
+                if(eraser != pthis.brush.current &&
+                    !pthis.autoswitch) {
                     tabletSwitch(eraser);
-                }
+                } else if (eraser == pthis.brush.current &&
+                    pthis.autoswitch){
+                        // turn it off if we match
+                        pthis.autoswitch = false;
+                    }
             }
 
             // we might actually be drawing right now.
@@ -570,7 +575,7 @@ var ParupaintRoom = function(main, room_name) {
             }
             if(data.button == pthis.key_eraser) {
                 var nb = pthis.brush.OppositeBrush();
-                //autoswitch = false
+                pthis.autoswitch = true;
 
                 pthis.brush.Brush(nb).UpdateLocal();
 
@@ -682,7 +687,7 @@ var ParupaintRoom = function(main, room_name) {
                 case 69: // e
                     {
                         var nb = pthis.brush.OppositeBrush();
-                        //autoswitch = false
+                        pthis.autoswitch = true;
 
                         pthis.brush.Brush(nb).UpdateLocal();
 
@@ -694,11 +699,6 @@ var ParupaintRoom = function(main, room_name) {
                             c: pthis.brush.Color(),
                             d: false
                         });
-
-                        // make sure the tablet doesn't immediately
-                        // switch back to brush mode
-                        //FIXME
-                        //tabletConnection.autoswitch = false;
                         break;
                     }
             }
