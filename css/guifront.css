@@ -4,11 +4,8 @@
 }
 
 
-.overlay-piece{
-	background-color:rgba(0, 0, 0, 0.5);
-	box-shadow: 0px 0px 40px -20px black;
-	border: 1px solid rgb(195, 195, 195);
-	border-radius: 4px;
+.gui .overlay-piece{
+	background-color:rgba(0, 0, 0, 0.65);
 }
 
 .overlay .gui.visible+.qstatus{
@@ -62,7 +59,7 @@
 	padding:0 2px 2px 0;
 	-webkit-animation:color-show-webkit 170ms ease-out;
 	animation:color-show 170ms ease-out;
-	
+
 }
 .flayer-list-container.overlay-piece{
 	height:200px;
@@ -76,7 +73,7 @@
 	display:flex;
 	flex-flow:column;
 	justify-content:flex-end;
-	
+
 }
 
 .flayer-info{
@@ -140,7 +137,7 @@
 	right:0;
 	border-radius:0;
 	border-bottom-right-radius:16px;
-	
+
 	background:linear-gradient(to left, rgb(216, 234, 216) 0%, white 30%, white);
 	text-align:left;
 }
@@ -177,7 +174,6 @@
 	overflow:hidden;
 	height:200px;
 	margin:4px;
-	padding:4px 6px;
 	z-index:1;
 	position:relative;
 
@@ -199,15 +195,6 @@
 	margin-top: 6px;
 
 
-}
-
-.hue-pick:hover,
-.color-spinner .light-pick:hover,
-.color-spinner .alpha-pick:hover,
-.hue-pick .preview-col:hover {
-
-	transition:box-shadow 300ms linear;
-	box-shadow:0px 0px 6px 1px #444;
 }
 
 .color-spinner .preview-col:before{
@@ -257,7 +244,7 @@
 	position:relative;
 	margin-left:5px;
 	background: rgba(255,255,255,0.0);
-	
+
 }
 
 .color-spinner .light-pick{
@@ -282,7 +269,7 @@
 	right:100%;
 }
 .alpha-pick .color-selector:after{
-	
+
 	left:100%;
 	border-right:8px solid white;
 }
@@ -331,7 +318,6 @@
 
 .color-spinner .palette-storage{
 	display:block;
-	border-top:1px solid black;
 	margin:4px auto 0px auto;
 	overflow:hidden;
 	text-align:center;
@@ -418,9 +404,9 @@
 	background-color:white;
 }
 .chat-message{
-	
+
 	clear:both;
-	
+
 	padding:1px 0;
 	padding-left:24px;
 	padding-right:70px;
@@ -470,7 +456,7 @@
 	padding: 0;
 	display:block;
 	border:1px solid #AAA;
-	
+
 	border-radius:8px;
 	border-top-left-radius:0;
 	border-top-right-radius:0;
@@ -490,7 +476,7 @@
 	border:0;
 }
 .chat-input-box textarea.chat-input{
-	
+
 	height:100%;
 	resize:none;
 	white-space: normal;
@@ -502,13 +488,3 @@
 	word-wrap: break-word;
 	overflow-wrap: break-word;
 }
-
-
-
-
-
-
-
-
-
-

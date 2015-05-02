@@ -1,0 +1,49 @@
+body {
+    font-family: monospace;
+}
+
+.panel-open .qstatus-panel {
+    background-color: #C3AC8E;
+}
+
+.qstatus-expandable > .qstatus-piece:after{
+    color: white;
+    font-size: 12px;
+    background-color: transparent;
+    width: 86px;
+    padding: 2px;
+}
+
+
+.setting-input-row form{
+    background:none;
+    box-shadow:none;
+}
+
+form.knob-thing input[type=checkbox]+label:after {
+    display:none;
+}
+
+form.knob-thing input[type=checkbox]+label:before {
+    border-radius:0;
+    background:none;
+    box-shadow:none;
+
+    background:white;
+}
+
+.setting-input-row form:after{
+    font-size: 20px;
+    color: white;
+}
+
+.setting-bottom-row {
+	background-color:#DEBD98;
+}
+.setting-bottom-row > div {
+    background-color: #77614F;
+}
+
+.qstatus-message{
+    background:#464646;
+}
