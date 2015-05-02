@@ -310,7 +310,7 @@ function ParupaintInterface() {
                     return true;
 
                 } else if(target.hasClass('qstatus-message')) {
-                    pthis.ShowOverlay();
+                    pthis.ShowOverlay(true);
                 } else if(target.is('.flayer-info-frame')) {
 
                     var l = target.closest('.flayer-info-layer').data('layer'),
@@ -500,7 +500,7 @@ function ParupaintInterface() {
 
         $('form.connection-input').
         toggleClass('enable', onoff).
-        attr('data-label', (onoff ? 'Connected' : 'Disconnected'));
+        attr('data-label', (onoff ? 'connected' : 'disconnected'));
 
         $('input.con-status').prop('checked', onoff);
 

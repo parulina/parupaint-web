@@ -6,11 +6,16 @@ body {
     background-color: #C3AC8E;
 }
 
+.qstatus-expandable {
+    background-color: #C3AC8E;
+    max-width:130px;
+}
+
 .qstatus-expandable > .qstatus-piece:after{
     color: white;
     font-size: 12px;
     background-color: transparent;
-    width: 86px;
+    width: 94px;
     padding: 2px;
 }
 
@@ -32,7 +37,28 @@ form.knob-thing input[type=checkbox]+label:before {
     background:white;
 }
 
-.setting-input-row form:after{
+.setting-bottom-row > div:hover,
+form.knob-thing input[type=checkbox] + label:hover {
+    cursor:pointer;
+}
+
+form.dimension-input input[type="number"] {
+    background: #DEBD98;
+    color: white;
+    font-family: inherit;
+    font-size: 20px;
+    padding: 0;
+}
+
+.setting-input-row form input[type="submit"] {
+    background:none;
+    font-family: inherit;
+    text-decoration:underline;
+    cursor:pointer;
+}
+
+.setting-input-row form:after,
+.setting-input-row form input[type="submit"]{
     font-size: 20px;
     color: white;
 }
@@ -45,5 +71,67 @@ form.knob-thing input[type=checkbox]+label:before {
 }
 
 .qstatus-message{
-    background:#464646;
+    background:#000;
+}
+
+
+.chat-entry[data-name]:before{
+	background-color:#B1A087;
+}
+
+/* gui stuff */
+
+
+.color-spinner.overlay-piece {
+    width:250px;
+    padding:0;
+}
+.color-spinner .hsl-select-pick {
+    margin:4px 0;
+}
+.color-spinner .light-pick,
+.color-spinner .alpha-pick {
+    margin:0;
+}
+.color-spinner .palette-storage {
+    margin:0;
+}
+
+.chat-box.overlay-piece{
+    right:initial;
+    top:initial;
+    left:0;
+    bottom:230px; /* flayerlist */
+    width:480px;
+    background:none;
+}
+
+.gui.visible .chat-input-box,
+.chat-box .chat-input-box.focused {
+    background:#000;
+    background-color:rgba(0, 0, 0, 0.78);
+    border:1px solid gray;
+}
+.chat-box .chat-input-box {
+    border-radius:0;
+    margin:0;
+}
+
+.chat-input-box textarea.chat-input {
+    background:none;
+    color:white;
+    font-size:17px;
+    font-family:monospace;
+}
+
+.chat-input-box > *{
+    min-height:30px;
+}
+
+.flayer-list {
+    border:none;
+
+    padding:0 6px;
+    padding-top:6px;
+    border-top:none;
 }

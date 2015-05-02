@@ -336,15 +336,12 @@ body.connected.is-private .qstatus-message:before{
 
 
 
-body .multi-only{
+.multi-only{
 	display:none;
 }
 @-webkit-keyframes setting-appear{
 	0% {opacity:0; transform:translateY(-10%);}
 	100% {opacity:1; transform:translateY(0);}
-}
-body.connected .multi-only{
-	display: flex;
 }
 
 .setting-input-row form{
@@ -391,6 +388,12 @@ body.connected form.admin-only{
 	display:none;
 }
 
+body form.multi-only {
+	display:none;
+}
+body.connected form.multi-only{
+	display: flex;
+}
 
 form.dimension-input .dimension-w-input,
 form.dimension-input .dimension-h-input{
