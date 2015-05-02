@@ -23,6 +23,7 @@ function Parupaint() {
     });
 
     this.ui = new ParupaintInterface();
+    this.chat = new ParupaintChat();
 
     this.Connect = function() {
         var pthis = this;
@@ -376,8 +377,11 @@ $(function() {
 
     // chat
     PP.socket.on('chat', function(d) {
-        //addChatMessage(null, d.msg, d.name, d.time, true)
-        console.error('Chat not implemented.', d)
+        PP.chat.Message({
+            msg: d.msg,
+            name: d.name,
+            time: d.time
+        });
     });
 
     PP.socket.on('peer', function(d) {
