@@ -269,27 +269,26 @@ var ParupaintRoom = function(main, room_name) {
                     var pp = c.Position(),
                         lf = c.LayerFrame();
 
-                    if(!c.IsMe()) {
 
-                        if(typeof xx != "undefined" &&
-                            typeof yy != "undefined") {
-
-                            c.Position((xx / od[0]) * nd[0], (yy / od[1]) * nd[1]);
-                        }
-                        if(typeof ss != "undefined") c.Size(ss);
-                        if(typeof cc != "undefined") c.Color(cc);
-                        if(typeof l != "undefined" &&
-                            typeof f != "undefined") {
-                            c.LayerFrame(l, f);
-                            lf[0] = l;
-                            lf[1] = f;
-                        }
-                        // save the 'raw' cursor pos.
-                        c.cursor.data({
-                            dx: xx,
-                            dy: yy
-                        });
+                    if(typeof xx != "undefined" &&
+                        typeof yy != "undefined") {
+                        c.Position((xx / od[0]) * nd[0], (yy / od[1]) * nd[1]);
                     }
+                    if(typeof ss != "undefined") c.Size(ss);
+                    if(typeof cc != "undefined") c.Color(cc);
+                    if(typeof l != "undefined" &&
+                        typeof f != "undefined") {
+                        c.LayerFrame(l, f);
+                        lf[0] = l;
+                        lf[1] = f;
+                    }
+                    // save the 'raw' cursor pos.
+                    c.cursor.data({
+                        x: xx,
+                        y: yy
+                    });
+
+
                     if(typeof dd != "undefined" &&
                         dd != c.Drawing()) {
                         if(dd) {
