@@ -418,9 +418,12 @@ $(function() {
 
             var CC = PP.Cursor(cursor);
 
-            CC.Size(d.brushdata.Size);
-            CC.Position(d.brushdata.X, d.brushdata.Y);
-            CC.LayerFrame(d.brushdata.Layer, d.brushdata.Frame);
+            CC.Color(d.brushdata.c);
+            CC.Size(d.brushdata.s);
+            
+            CC.Position(d.brushdata.x, d.brushdata.y);
+            CC.LayerFrame(d.brushdata.l, d.brushdata.f);
+            CC.Drawing(d.brushdata.d);
 
             $('#mouse-pool').append(cursor);
         }
