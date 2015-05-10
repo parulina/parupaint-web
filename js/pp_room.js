@@ -515,6 +515,10 @@ var ParupaintRoom = function(main, room_name) {
                     }
             }
 
+            if(tabletPressure === 0) {
+                tabletPressure = null;
+            }
+
             // we might actually be drawing right now.
             if(drawing) {
 
