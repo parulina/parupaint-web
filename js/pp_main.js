@@ -248,13 +248,27 @@ $(function() {
     });
 
     // ROOM
-    if(document.location.hash) {
-        console.log("Want to enter specific room.");
+    var current_hash = document.location.hash;
 
+    $(window).on('hashchange', function(){
         var room_name = document.location.hash.replace(/#/, '');
-        PP.default_room = room_name;
-        //PP.Room(room_name);
-    }
+        if(document.location.hash === current_hash){
+            PP.default_room = room_name;
+            return;
+        }
+        current_hash = document.location.hash = document.location.hash;
+        console.info('Switching to new room.', room_name);
+
+
+        PP.Room(room_name);
+        if(PP.IsConnected()){
+            PP.socket.emit('leave');
+            PP.socket.emit('join', {
+                room: room_name
+            });
+        }
+
+    })
 
 
     if(navigator.onLine) {
