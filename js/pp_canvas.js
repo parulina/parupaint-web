@@ -364,7 +364,7 @@ var ParupaintCanvas = new function() {
                 //link = $('<a/>', {href: iframes.get(0).toDataURL(), download: fname}).text('download canvas ['+fname+']')
                 //console.log(link)
                 //link.get(0).click()
-            a = document.createElement('a');
+            var a = document.createElement('a');
             document.body.appendChild(a);
             a.download = fname;
             a.href = iframes.get(0).toDataURL();
