@@ -20,6 +20,7 @@ function Parupaint() {
 
     this.ui = new ParupaintInterface();
     this.chat = new ParupaintChat();
+    this.color = new ParupaintSwatch();
 
     this.Connect = function() {
         var pthis = this;
@@ -420,7 +421,7 @@ $(function() {
 
             CC.Color(d.brushdata.c);
             CC.Size(d.brushdata.s);
-            
+
             CC.Position(d.brushdata.x, d.brushdata.y);
             CC.LayerFrame(d.brushdata.l, d.brushdata.f);
             CC.Drawing(d.brushdata.d);

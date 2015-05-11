@@ -21,6 +21,10 @@ function ParupaintBrushglass() {
 
         this.UpdateCursor(PP.Cursor());
         PP.ui.UpdateBrushinfo(this.Brush());
+
+        var hsl = new ParupaintColor(this.Color()).ToHsl();
+        PP.color.Hsl(hsl.h, hsl.s, hsl.l, hsl.a);
+
         ParupaintStorage.SetStorageKey({
             'default_brush': this.brushes
         });
@@ -329,6 +333,14 @@ var ParupaintRoom = function(main, room_name) {
         $('.canvas-cursor.cursor-self').removeClass('admin');
     }
 
+    main.color.OnColor = function(rgba){
+
+        var c = new ParupaintColor(rgba.r, rgba.g, rgba.b, rgba.a);
+        var hex = c.ToHex();
+        console.info('New color.', rgba, hex);
+
+        pthis.brush.Color(hex, main.Cursor()).UpdateLocal();
+    }
 
     if(main.IsConnected()) {
         this.SetNetwork(true);
@@ -405,6 +417,10 @@ var ParupaintRoom = function(main, room_name) {
                     var hex = "#" + ("00000000" + (r + g + b + a)).slice(-8);
 
                     if(hex != pthis.brush.Color()) {
+
+                        var hsl = new ParupaintColor(px[0], px[1], px[2], px[3]).ToHsl();
+                        main.color.Hsl(hsl.h, hsl.s, hsl.l, hsl.a);
+
                         pthis.brush.Color(hex, main.Cursor()).UpdateLocal();
 
                         main.Cursor().cursor.css('background-color',
