@@ -17,28 +17,37 @@ var ParupaintChat = function(){
     $('textarea.chat-input').keypress(function(e){
         var c =     e.which || e.keyCode,
             ch =    String.fromCharCode(c),
-            msg =   $(this).val()+ch;
+            msg =   $(this).val()+ch,
+            ll =    $(this).val().length;
         if(c == 13) {
             msg += '\n ';
         }
         if(e.keyCode == 13 && !e.shiftKey){
-
-            if(PP.IsConnected()){
-                PP.Emit('chat', {
-                    msg: msg
-                })
-            } else {
-                pthis.Message({
-                    msg: msg,
-                    name: PP.Cursor().Name()
-                })
+            if(ll){
+                if(PP.IsConnected()){
+                    PP.Emit('chat', {
+                        msg: msg
+                    })
+                } else {
+                    pthis.Message({
+                        msg: msg,
+                        name: PP.Cursor().Name()
+                    })
+                }
+                $(this).val((msg = ''));
+                pthis.SetChatinputExpandable(msg);
             }
-            $(this).val((msg = ''));
-            pthis.SetChatinputExpandable(msg);
+            $(this).blur();
             return false;
         }
         pthis.SetChatinputExpandable(msg);
 
+    }).on('keydown', function(e){
+        console.log(e.keyCode)
+        if(e.keyCode == 27 || e.keyCode == 9){
+            $(this).blur();
+            return false;
+        }
     }).on('focus', function(e){
         $(this).closest('.chat-input-box').addClass('focused');
     }).on('blur', function(e){
