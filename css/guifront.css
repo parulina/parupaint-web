@@ -33,15 +33,27 @@
 	0% {transform: translateX(-100%); opacity:0;}
 	100% {transform: translateX(0); opacity:100;}
 }
+
+@-webkit-keyframes -webkit-color-show {
+	0% {transform: translateX(-100%); opacity:0;}
+	100% {transform: translateX(0); opacity:100;}
+}
 @keyframes color-show-bottom {
+	0% {transform: translateY(100%); opacity:0;}
+	100% {transform: translateY(0); opacity:100;}
+}
+@-webkit-keyframes -webkit-color-show-bottom {
 	0% {transform: translateY(100%); opacity:0;}
 	100% {transform: translateY(0); opacity:100;}
 }
 
 
 
-.gui.visible .chat-box.overlay-piece{
+.gui.visible .chat-box.overlay-piece,
+.color-spinner.overlay-piece{
+
 	animation:color-show 170ms ease-out;
+	-webkit-animation:-webkit-color-show 170ms ease-out;
 }
 .chat-box.overlay-piece{
 	width:45%; height:30%;
@@ -62,7 +74,6 @@
 	top:0;
 	left:0;
 	padding:0 2px 2px 0;
-	animation:color-show 170ms ease-out;
 
 }
 .gui.visible .flayer-list-container.overlay-piece{
@@ -75,7 +86,7 @@
 	left:0;
 	right:0;
 	padding:0 2px 2px 0;
-	-webkit-animation:color-show-bottom-webkit 170ms ease-out;
+	-webkit-animation:-webkit-color-show-bottom 170ms ease-out;
 	animation:color-show-bottom 170ms ease-out;
 	flex-flow:column;
 	justify-content:flex-end;
@@ -388,6 +399,12 @@
 	to 		{opacity:0;}
 }
 
+@-webkit-keyframes -webkit-chat-fade {
+	from 	{opacity:1;}
+	50% 	{opacity:1;}
+	to 		{opacity:0;}
+}
+
 .chat-entry{
 	background-color:rgba(0, 0, 0,0.65);
 	color:white;
@@ -396,12 +413,14 @@
 
 	opacity:0;
 	animation:chat-fade 3s linear;
+	-webkit-animation:-webkit-chat-fade 3s linear;
 }
 
 .chat-input-box.focused + .chat-content .chat-entry,
 .gui.visible .chat-content .chat-entry {
 	opacity:1;
 	animation:none;
+	-webkit-animation:none;
 }
 
 .chat-box:hover{
