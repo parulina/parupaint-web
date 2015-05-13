@@ -463,12 +463,10 @@ var ParupaintRoom = function(main, room_name) {
 
                 var dist = Math.sqrt(dx * dx + dy * dy);
 
-                var color = cursor.hasClass('pick-color');
-
                 // use a higher distance when not drawing to skip updating more
-                if(color || dist > (drawing ? 2 : 15)) {
+                if(pthis.picking_color || dist > (drawing ? 2 : 15)) {
 
-                    if(!drawing && !color) {
+                    if(!drawing && !pthis.picking_color) {
                         main.Emit('draw', {
                             x: mx,
                             y: my,
@@ -610,10 +608,10 @@ var ParupaintRoom = function(main, room_name) {
                 // clear pressure sensitivity marker
             }
         } else if(e == 'mouseout') {
-
+            var c = main.Cursor();
             main.Emit('draw', {
-                x: data.x,
-                y: data.y,
+                x: c.Position()[0],
+                y: c.Position()[1],
                 s: pthis.brush.Size(),
                 c: pthis.brush.Color(),
                 d: false
