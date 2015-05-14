@@ -221,28 +221,38 @@ $(function() {
     // TABLET SETUP
     // TODO chrome specific tablet set-up?
     var SetTablet = function(d) {
-        $('#wacomPlugin').remove();
         PP.ui.SetTabletInput(d);
-        if(d) {
-            $('body').prepend(
-                $('<object/>', {
-                    id: 'wacomPlugin',
-                    type: 'application/x-wacomtabletplugin'
-                })
-            );
 
-            var w = document.getElementById('wacomPlugin');
-            try {
-                w.penAPI;
-            } catch(e) {
-                console.error('Cannot access wacom plugin.');
-                document.body.removeChild(w);
+        if(ParupaintChrome.IsChrome()){
+            ParupaintChrome.Tablet(d);
+        } else {
+            // wacom
+            $('#wacomPlugin').remove();
+            if(d) {
+                $('body').prepend(
+                    $('<object/>', {
+                        id: 'wacomPlugin',
+                        type: 'application/x-wacomtabletplugin'
+                    })
+                );
+
+                var w = document.getElementById('wacomPlugin');
+                try {
+                    w.penAPI;
+                } catch(e) {
+                    console.error('Cannot access wacom plugin.');
+                    document.body.removeChild(w);
+                }
             }
         }
     }
-    ParupaintStorage.GetStorageKey('wacom_tablet', function(d) {
+    ParupaintStorage.GetStorageKey('tablet', function(d) {
         if(d) {
-            console.info("Setting up Wacom Tablet plug-in.");
+            if(ParupaintChrome.IsChrome()){
+                console.info("Setting up Chrome tablet access.");
+            } else {
+                console.info("Setting up Wacom Tablet plug-in.");
+            }
             SetTablet(d);
         }
     });
@@ -474,10 +484,31 @@ $(function() {
     })
     $('#tablet-input-id').change(function(e) {
         var c = $(e.target).is(':checked');
-        ParupaintStorage.SetStorageKey({
-            'wacom_tablet': c
-        });
-        SetTablet(c);
+        var setup = function(){
+            console.log("setting up tablet.")
+            if(SetTablet(c)){
+                ParupaintStorage.SetStorageKey({
+                    'tablet': c
+                });
+            }
+        }
+
+        if(ParupaintChrome.IsChrome()){
+            var hh = {permissions: ['hid']};
+            chrome.permissions.contains(hh, function(e){
+                if(!e){
+                    chrome.permissions.request(hh, function(g){
+                        if(g) {
+                            setup();
+                        }
+                    });
+                } else {
+                    setup();
+                }
+            })
+        } else {
+            setup();
+        }
     })
 
 

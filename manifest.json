@@ -25,14 +25,6 @@
 	"optional_permissions":[
 		"alwaysOnTopWindows",
 		 "hid", {"usbDevices":[
-			// [default] list of tablets.
-			// [] vendorId: 	required. 1386 is wacom, 5935 is Waltop/Trust.
-			// [] productId: 	required.
-			// ['??'] name: 	the name of the tablet. it's a good thing to have it...
-			// [2000] w: 		the width of the tablet in units reported by hid.receive.
-			// [2000] h: 		see above, but height.
-			// [1024] p: 		maximum pressure hid.receive will report.
-			 
 { "vendorId": 1386, "productId": 0, "name":			"PenPartner" },
 { "vendorId": 1386, "productId": 16, "name":		"Graphire" },
 { "vendorId": 1386, "productId": 17, "name":		"Graphire2 4x5" },
@@ -113,6 +105,7 @@
 { "vendorId": 1386, "productId": 788, "name":		"Intuos Pro S" },
 { "vendorId": 1386, "productId": 789, "name":		"Intuos Pro M" },
 { "vendorId": 1386, "productId": 791, "name":		"Intuos Pro L" },
+{ "vendorId": 1386, "productId": 770, "name":		"Intuos Pro P&T" },
 { "vendorId": 1386, "productId": 63, "name":		"Cintiq 21UX" },
 { "vendorId": 1386, "productId": 197, "name":		"Cintiq 20WSX" },
 { "vendorId": 1386, "productId": 198, "name":		"Cintiq 12WX" },
@@ -172,7 +165,7 @@
 { "vendorId": 5935, "productId": 1281, "name": "" },
 { "vendorId": 5935, "productId": 1282, "name": "" },
 { "vendorId": 5935, "productId": 1283, "name": "" }
-			 
+
 		]}
 	]
 }

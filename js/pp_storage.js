@@ -3,7 +3,10 @@
 var ParupaintStorage = new function() {
     this.GetStorageKey = function(key, callback) {
         if(typeof chrome != 'undefined' && typeof chrome.storage != 'undefined') {
-            return chrome.storage.local.get(key, callback)
+            return chrome.storage.local.get(key, function(d){
+                if(typeof d[key] == 'object') d = d[key];
+                if(typeof callback == "function") callback(d);
+            })
         } else {
             var a = {};
             if(key != null){

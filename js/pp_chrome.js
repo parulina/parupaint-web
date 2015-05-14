@@ -2,9 +2,12 @@
 
 // Chrome specific code.
 
-if(typeof chrome != "undefined" &&
-    true) { // check if it's a chromeapp, etc
-    $(document).keydown(function(e) {
+var ParupaintChrome = new function(){
+
+    var tablet_devices = [];
+
+    this.BindKeys = function(){
+        $(document).keydown(function(e) {
             switch(e.keyCode) {
                 case 116:
                     {
@@ -41,4 +44,40 @@ if(typeof chrome != "undefined" &&
                     }
             }
         });
+    };
+    this.Tablet = function(d){
+
+        if(d){
+            if(!tablet_devices.length) return;
+            chrome.permissions.contains({permissions:['hid']}, function(e){
+                if(e){
+                    chrome.hid.getDevices({filters: tablet_devices}, function(dev){
+                        console.log('---> ',dev, tablet_devices.length)
+                    });
+                }
+            })
+        }
     }
+    this.IsChrome = function(){
+        return (typeof chrome != "undefined" && typeof chrome.runtime.getBackgroundPage == "function");
+    }
+
+    if(this.IsChrome()){
+
+        console.info("It's a chrome app.");
+        this.BindKeys();
+
+        var manifest =  chrome.runtime.getManifest(),
+            devs =      manifest.permissions.slice(-1)[0].usbDevices;
+
+        for(var pid in devs){
+            tablet_devices.push({
+                vendorId: devs[pid].vendorId,
+                productId: devs[pid].productId,
+            })
+        }
+        // get ids
+    }
+    // initialize tablet...
+
+}

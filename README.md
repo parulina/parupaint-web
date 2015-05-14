@@ -1,3 +1,15 @@
+```
+// [default] list of tablets.
+// [] vendorId: 	required. 1386 is wacom, 5935 is Waltop/Trust.
+// [] productId: 	required.
+// ['??'] name: 	the name of the tablet. it's a good thing to have it...
+// [2000] w: 		the width of the tablet in units reported by hid.receive.
+// [2000] h: 		see above, but height.
+// [1024] p: 		maximum pressure hid.receive will report.
+```
+
+this is under construction.
+
 # parupaint-web
 this is the web app interface to parupaint.
 it has support for wacom's tablet plugin.
@@ -18,25 +30,7 @@ or, <kbd>Shift</kbd>+<kbd>Space</kbd> and move the mouse up and down. you might 
 * <kbd>Tab</kbd> to show infopanels, tap twice to enter a chat message.
 * <kbd>Shift</kbd>+<kbd>Tab</kbd> to hide infopanels.
 
-## code structure
-- `pp_init.js` is the starting point of the app. it checks whether it's a chrome app, in which case it'll try and connect a tablet. it then calls initParupaint, which is in..
-- `pp_main.js`. it contains:
-	- connectSocket, which connects.. the socket
-	- initParupaint(room, opt), which, if room is a string, creates a canvas room with that name. otherwise it creates the lobby
-- initParupaint then creates an onRoom object (`pp_canvas_mainscript.js`), which makes an object containing properties and objects related to rooms.
-	- it sets up network (`pp_canvas_network.js`)
-	- it sets up key- and mouse-bindings (`pp_canvas_keybinds.js`)
-	- it uses chat functions (`pp_canvas_chat.js`)
-	- it uses color function for the color wheel (`pp_canvas_color.js`)
-- `pp_canvas_functions.js` contains handy functions for handling the actual canvas.
-- `pp_functions.js` contains some functions to simplify the javascript.
-- `index.html` should be pretty self-explanatory.
-
-all-in-all, i'd like the code to not be any more split up than it needs to be.
-
 ## todo
-- only two brushes right now, add more in the future perhaps?
-- clean up and possibly organize code
-- proper error checking in code (which i'm sloppy with)
-- layer/frame sync with server
-
+- move Brushglass to pp_main.js
+- extend layer/frame
+- make hid work
