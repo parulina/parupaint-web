@@ -210,7 +210,7 @@ var ParupaintRoom = function(main, room_name) {
                 // data
                 if(typeof d.admin != "undefined") {
 
-                    var c = main.Cursor('#' + d.admin);
+                    var c = main.Cursor('#painter-' + d.admin);
                     if(c == null) {
                         return console.error("Admin cursor doesn't exist!")
                     }
@@ -229,7 +229,7 @@ var ParupaintRoom = function(main, room_name) {
                 var l = parseInt(d.l),
                     f = parseInt(d.f);
 
-                var c = main.Cursor('#' + d.id);
+                var c = main.Cursor('#painter' + d.id);
                 if(c === null) return console.error("Cursor doesn't exist.");
                 if(rthis.server_roundtrip && c.IsMe()) {
                     ParupaintCanvas.Focus(l, f);
@@ -255,7 +255,7 @@ var ParupaintRoom = function(main, room_name) {
 
                 if(typeof d.id != "undefined") {
                     //someone.
-                    var c = main.Cursor('#' + d.id);
+                    var c = main.Cursor('#painter-' + d.id);
                     if(c === null) {
                         return console.error("Cursor doesn't exist.");
                     }
@@ -306,7 +306,6 @@ var ParupaintRoom = function(main, room_name) {
                         typeof lf[1] == "number" &&
                         typeof xx != "undefined" &&
                         typeof yy != "undefined") {
-
                         var canvas = $('.canvas-pool canvas').
                         filter('[data-layer=' + lf[0] + '][data-frame=' + lf[1] + ']');
                         ParupaintCanvas.DrawLine(canvas,

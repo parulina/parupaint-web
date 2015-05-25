@@ -431,24 +431,27 @@ $(function() {
     PP.socket.on('peer', function(d) {
 
         console.info('Peer connected [' + d.id + '] (' + d.name + ').');
-        var id = $('#' + d.id);
+        var id = $('#painter-' + d.id);
         if(d.disconnect && id.length) {
             id.remove();
-        } else if(!d.disconnect) {
+        } else if(!d.disconnect && d.id > 0) {
             var cursor = $('<div/>', {
                 class: 'canvas-cursor',
-                id: d.id,
+                id: 'painter-' + d.id,
                 'data-name': d.name
             });
 
             var CC = PP.Cursor(cursor);
+	    CC.LayerFrame(0, 0);
 
-            CC.Color(d.brushdata.c);
-            CC.Size(d.brushdata.s);
+	    if(typeof d.brushdata == "object"){
+		    CC.Color(d.brushdata.c);
+		    CC.Size(d.brushdata.s);
 
-            CC.Position(d.brushdata.x, d.brushdata.y);
-            CC.LayerFrame(d.brushdata.l, d.brushdata.f);
-            CC.Drawing(d.brushdata.d);
+		    CC.Position(d.brushdata.x, d.brushdata.y);
+		    CC.LayerFrame(d.brushdata.l, d.brushdata.f);
+		    CC.Drawing(d.brushdata.d);
+	    }
 
             $('#mouse-pool').append(cursor);
         }
