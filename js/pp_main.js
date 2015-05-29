@@ -71,7 +71,19 @@ function Parupaint() {
                         this.cursor.css({
                             left: x,
                             top: y
-                        }).data({
+                        });
+
+                    } else return [
+                        parseFloat(this.cursor.css('left')),
+                        parseFloat(this.cursor.css('top')),
+                    ];
+                };
+                this.CanvasPosition = function(x, y) {
+                    if(this.cursor == null) return [0, 0];
+
+                    if(typeof x == "number" &&
+                        typeof y == "number") {
+                        this.cursor.data({
                             x: x,
                             y: y
                         });

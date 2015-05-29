@@ -270,13 +270,14 @@ var ParupaintRoom = function(main, room_name) {
                         ];
 
                     // get saved position
-                    var pp = c.Position(),
+                    var pp = c.CanvasPosition(),
                         lf = c.LayerFrame();
 
 
                     if(typeof xx != "undefined" &&
                         typeof yy != "undefined") {
                         c.Position((xx / od[0]) * nd[0], (yy / od[1]) * nd[1]);
+                        c.CanvasPosition(xx, yy);
                     }
                     if(typeof ss != "undefined") c.Size(ss);
                     if(typeof cc != "undefined") c.Color(cc);
@@ -476,12 +477,14 @@ var ParupaintRoom = function(main, room_name) {
                     }
 
                     if(!pthis.server_roundtrip) {
-                        cc.Position(data.x, data.y);
+		        cc.Position(data.x, data.y);
+		        cc.CanvasPosition(mx, my);
                     }
                     if(!pthis.server_roundtrip) {
                         if(pthis.mouseTimer) clearTimeout(pthis.mouseTimer);
                         pthis.mouseTimer = setTimeout(function() {
                             cc.Position(data.x, data.y);
+                            cc.CanvasPosition(mx, my);
                         }, 800);
                     }
                 }
@@ -495,8 +498,8 @@ var ParupaintRoom = function(main, room_name) {
 
                     var cc = main.Cursor();
                     main.Emit('draw', {
-                        x: cc.Position()[0],
-                        y: cc.Position()[1],
+                        x: cc.CanvasPosition()[0],
+                        y: cc.CanvasPosition()[1],
                         s: pthis.brush.Size(),
                         c: pthis.brush.Color(),
                         d: false
@@ -609,8 +612,8 @@ var ParupaintRoom = function(main, room_name) {
         } else if(e == 'mouseout') {
             var c = main.Cursor();
             main.Emit('draw', {
-                x: c.Position()[0],
-                y: c.Position()[1],
+                x: c.CanvasPosition()[0],
+                y: c.CanvasPosition()[1],
                 s: pthis.brush.Size(),
                 c: pthis.brush.Color(),
                 d: false
@@ -630,8 +633,8 @@ var ParupaintRoom = function(main, room_name) {
 
                     var cc = main.Cursor();
                     main.Emit('draw', {
-                        x: cc.Position()[0],
-                        y: cc.Position()[1],
+                        x: cc.CanvasPosition()[0],
+                        y: cc.CanvasPosition()[1],
                         s: s,
                         c: pthis.brush.Color(),
                         d: false
@@ -672,8 +675,8 @@ var ParupaintRoom = function(main, room_name) {
 
                         var cc = main.Cursor();
                         main.Emit('draw', {
-                            x: cc.Position()[0],
-                            y: cc.Position()[1],
+                            x: cc.CanvasPosition()[0],
+                            y: cc.CanvasPosition()[1],
                             s: pthis.brush.Size(),
                             c: pthis.brush.Color(),
                             d: false
@@ -705,8 +708,8 @@ var ParupaintRoom = function(main, room_name) {
 
                         var cc = main.Cursor();
                         main.Emit('draw', {
-                            x: cc.Position()[0],
-                            y: cc.Position()[1],
+                            x: cc.CanvasPosition()[0],
+                            y: cc.CanvasPosition()[1],
                             s: pthis.brush.Size(),
                             c: pthis.brush.Color(),
                             d: false
