@@ -422,7 +422,7 @@ $(function() {
     // chat
     PP.socket.on('chat', function(d) {
         PP.chat.Message({
-            msg: d.msg,
+            msg: d.message,
             name: d.name,
             time: d.time
         });

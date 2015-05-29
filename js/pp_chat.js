@@ -26,7 +26,7 @@ var ParupaintChat = function(){
             if(ll){
                 if(PP.IsConnected()){
                     PP.Emit('chat', {
-                        msg: msg
+                        message: msg
                     })
                 } else {
                     pthis.Message({
