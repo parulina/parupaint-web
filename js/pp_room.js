@@ -395,6 +395,18 @@ var ParupaintRoom = function(main, room_name) {
 
         if(e == 'mousemove' && data.target.tagName == 'CANVAS') {
 
+            // original dimensions and new (zoomed) dimensions
+            var ow = $('canvas.focused').get(0).width,
+                oh = $('canvas.focused').get(0).height,
+                nw = $('.canvas-workarea').width(),
+                nh = $('.canvas-workarea').height();
+
+            // brush information
+            var mx = (data.x / nw) * ow,
+                my = (data.y / nh) * oh,
+                s = pthis.brush.Size(),
+                c = pthis.brush.Color();
+
             if(main.ui.movingCanvas || (data.button == main.ui.key_move)) {
                 var b = $(window);
                 b.scrollLeft(b.scrollLeft() - data.sx);
@@ -404,11 +416,9 @@ var ParupaintRoom = function(main, room_name) {
             } else if(pthis.picking_color) {
 
                 if(pthis.pick_canvas.length) {
-                    var x = data.x,
-                        y = data.y;
 
                     var px = pthis.pick_canvas.get(0).
-                    getContext('2d').getImageData(x, y, 1, 1).data;
+                    getContext('2d').getImageData(mx, my, 1, 1).data;
 
                     var r = ('00' + px[0].toString(16)).slice(-2),
                         g = ('00' + px[1].toString(16)).slice(-2),
@@ -437,18 +447,6 @@ var ParupaintRoom = function(main, room_name) {
             }
             var drawing = (data.button == 1);
             var plugin = document.getElementById('wacomPlugin');
-
-            // original dimensions and new (zoomed) dimensions
-            var ow = $('canvas.focused').get(0).width,
-                oh = $('canvas.focused').get(0).height,
-                nw = $('.canvas-workarea').width(),
-                nh = $('.canvas-workarea').height();
-
-            // brush information
-            var mx = (data.x / nw) * ow,
-                my = (data.y / nh) * oh,
-                s = pthis.brush.Size(),
-                c = pthis.brush.Color();
 
             var cc = main.Cursor();
             var cursor = cc.cursor;
