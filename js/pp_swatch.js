@@ -140,14 +140,16 @@ var ParupaintSwatch = function() {
         sel_color = null,
         pthis = this;
 
-    var gui = $('#main-canvas'),
+    var gui = $(window),
         pick = $('.hsl-select-pick'),
         hsel = pick.children('.hue-pick'),
         ssel = pick.children('.saturation-pick'),
         lsel = pick.children('.light-pick'),
         asel = pick.children('.alpha-pick');
 
-    gui.unbind().on('mousedown', function(e) {
+    gui.unbind('mousedown mousewheel mousemove mouseup DOMMouseScroll').
+	on('mousedown', function(e) {
+
         var t = e.target || e.srcElement || e.originalTarget,
             tt = $(t);
         if(!sel) {
