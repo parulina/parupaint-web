@@ -592,9 +592,10 @@ var ParupaintRoom = function(main, room_name) {
 
                 pthis.brush.Brush(nb).UpdateLocal();
 
+		var c = main.Cursor();
                 main.Emit('draw', {
-                    x: data.x,
-                    y: data.y,
+		    x: c.CanvasPosition()[0],
+		    y: c.CanvasPosition()[1],
                     s: pthis.brush.Size(),
                     c: pthis.brush.Color(),
                     d: false
