@@ -618,7 +618,7 @@ var ParupaintRoom = function(main, room_name) {
             })
 
         } else if(e == 'mousewheel') {
-            if(!(main.ui.zoomingCanvas && main.ui.movingCanvas)) {
+            if(!(main.ui.zoomingCanvas || main.ui.movingCanvas)) {
                 var a = data.scroll > 0 ? 2 : 0.5;
 
                 if(true) {
