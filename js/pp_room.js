@@ -247,10 +247,13 @@ var ParupaintRoom = function(main, room_name) {
                     // required
                     xx = d.x, // net x
                     yy = d.y, // net y
-                    ss = d.s, // net size
+                    ww = d.w, // net width
+                    pp = d.p, // net pressure
                     cc = d.c, // net color
                     dd = d.d; // net drawing
 
+		var ss = ww*pp;
+		if(typeof ss != "number") return; // something went awfully wrong.
 
 
                 if(typeof d.id != "undefined") {
@@ -270,7 +273,7 @@ var ParupaintRoom = function(main, room_name) {
                         ];
 
                     // get saved position
-                    var pp = c.CanvasPosition(),
+                    var ppc = c.CanvasPosition(),
                         lf = c.LayerFrame();
 
 
@@ -298,7 +301,7 @@ var ParupaintRoom = function(main, room_name) {
                         dd != c.Drawing()) {
                         if(dd) {
                             //starting to draw
-                            pp[0] = xx, pp[1] = yy;
+                            ppc[0] = xx, ppc[1] = yy;
                         }
                         c.Drawing(dd);
                     }
@@ -310,7 +313,7 @@ var ParupaintRoom = function(main, room_name) {
                         var canvas = $('.canvas-pool canvas').
                         filter('[data-layer=' + lf[0] + '][data-frame=' + lf[1] + ']');
                         ParupaintCanvas.DrawLine(canvas,
-                            pp[0], pp[1], xx, yy, cc, ss);
+                            ppc[0], ppc[1], xx, yy, cc, ss);
                     }
                 } else {
                     var canvas = $('.canvas-pool canvas').
