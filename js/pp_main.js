@@ -21,6 +21,62 @@ function Parupaint() {
     this.ui = new ParupaintInterface();
     this.chat = new ParupaintChat();
     this.color = new ParupaintSwatch();
+    this.brush = new ParupaintBrushglass();
+    this.admin = null;
+
+    var pthis = this;
+
+    // Save + load canvas data
+    this.GetCanvasKey = function() {
+        return "room_canvas";
+    }
+    this.GetCanvas = function(callback) {
+        ParupaintStorage.GetStorageKey(this.GetCanvasKey(),
+            function(key) {
+                if(typeof key == "string") key = JSON.parse(key)
+                if(typeof callback == "function") callback(key);
+            });
+    };
+    this.SaveCanvas = function(callback) {
+        var key = this.GetCanvasKey();
+
+        this.GetCanvas(function(key) {
+
+            var kk = {};
+            var ra = {};
+            if(typeof key != "undefined" && key) ra = key;
+
+            console.info('Saving room to storage.', key);
+
+            var d = ParupaintCanvas.Init();
+            ra.width = d[0];
+            ra.height = d[1];
+            ra.data = [];
+
+            $('.canvas-pool canvas').each(function(k, e) {
+                var l = $(e).data('layer'),
+                    f = $(e).data('frame'),
+                    bytes = e.toDataURL();
+
+                if(typeof ra.data[l] == "undefined") {
+                    ra.data[l] = [];
+                }
+                if(typeof ra.data[l][f] == "undefined") {
+                    ra.data[l][f] = {};
+                }
+
+                ra.data[l][f].data = bytes;
+
+            });
+
+            kk[ke] = ra;
+            ParupaintStorage.SetStorageKey(kk, function() {
+                if(typeof callback == "function") callback();
+            })
+        });
+    }
+
+
 
     this.Connect = function() {
         var pthis = this;
@@ -160,26 +216,8 @@ function Parupaint() {
             }
 
             return cur;
-        }
-        // either:
-        // set current room, which will toggle states and such
-        // get current room name
-
-    this.Room = function(room_name) {
-        this.ResetBody();
-        $('body').addClass('loading');
-        this.room = ParupaintRoom(this); // clean up and reset
-
-        if(typeof room_name == "string") {
-            console.warn('Creating Parupaint Room [' + room_name + '].');
-
-            $('body').removeClass('loading');
-            this.room = new ParupaintRoom(this, room_name);
-        }
-    }
-
+    };
     this.ResetBody = function() {
-        window.location.hash = '';
         $('body').removeClass(
             'is-private is-admin loading'
         );
@@ -192,19 +230,37 @@ function Parupaint() {
     this.Update = function() {
         this.UpdatePainters();
 
-        if(this.room) {
-            var d = ParupaintCanvas.Init(); // get dimensions
-            var ll = [
-                '[' + this.room.name + ']',
-                this.painters.length + ' artists',
-                '[' + d[0] + '×' + d[1] + ']'
-            ];
+	var d = ParupaintCanvas.Init(); // get dimensions
+	var ll = [
+	'[' + (this.IsConnected() ? "Connected" : "Disconnected") + ']',
+	this.painters.length + ' artists',
+	'[' + d[0] + '×' + d[1] + ']'
+	];
 
-            document.title = ll.join(' ');
-
-        }
+	document.title = ll.join(' ');
     }
 
+    this.Admin = function(cursor) {
+        if(typeof cursor != "undefined" && cursor) {
+            $('.canvas-cursor').removeClass('admin');
+
+            cursor.cursor.addClass('admin');
+            pthis.ui.SetAdmin(cursor.IsMe());
+
+            pthis.admin = cursor;
+        }
+        return pthis.admin;
+    }
+
+    this.color.OnColor = function(rgba){
+
+        var c = new ParupaintColor(rgba.r, rgba.g, rgba.b, rgba.a);
+        var hex = c.ToHex();
+        console.info('New color.', rgba, hex);
+
+        pthis.brush.Color(hex, pthis.Cursor()).UpdateLocal(pthis);
+    }
+    this.brush.UpdateLocal(this);
 }
 
 
@@ -214,7 +270,37 @@ $(function() {
 
     PP = new Parupaint();
 
-    // TODO name set? and stuff
+    var default_width = 540,
+    	default_height = 540;
+
+    var newCanvasHardReset = function(){
+        PP.Update();
+	ParupaintCanvas.Focus(0, 0);
+	PP.ui.UpdateHeavy();
+    };
+
+    ParupaintCanvas.Init(default_width, default_height, [
+	    [{}]
+    ]);
+    PP.GetCanvas(function(key) {
+	if(key) {
+	    var w = key.width || default_width,
+	        h = key.height || default_height;
+
+	    ParupaintCanvas.Init(w, h, key.data);
+	    newCanvasHardReset();
+	}
+    });
+    newCanvasHardReset();
+
+    ParupaintStorage.GetStorageKey('default_brush', function(d) {
+        if(d != null) {
+            if(typeof d == "string") d = JSON.parse(d);
+            PP.brush.brushes = d;
+	    PP.brush.UpdateLocal(PP);
+        }
+    });
+
     ParupaintStorage.GetStorageKey('name', function(d) {
         var name = d;
         if(typeof name != "string") {
@@ -269,36 +355,8 @@ $(function() {
         }
     });
 
-    // ROOM
-    var current_hash = document.location.hash;
-
-    $(window).on('hashchange', function(){
-        var room_name = document.location.hash.replace(/#/, '');
-        if(document.location.hash === current_hash){
-            PP.default_room = room_name;
-            return;
-        }
-        current_hash = document.location.hash = document.location.hash;
-        console.info('Switching to new room.', room_name);
-
-
-        PP.Room(room_name);
-        if(PP.IsConnected()){
-            PP.socket.emit('leave');
-            PP.socket.emit('join', {
-                room: room_name
-            });
-        }
-
-    })
-
-
     if(navigator.onLine) {
         PP.Connect();
-    } else {
-        PP.Room(PP.default_room);
-        // if disconnected, just load the default room
-        // in offline mode
     }
 
     var manual_disconnect = false;
@@ -329,11 +387,11 @@ $(function() {
     });
     PP.socket.on('close', function(e) {
         PP.SetConnected(false);
-        if(PP.room !== null) {
-            PP.room.OnClose(e);
-            if(!manual_disconnect){
-                PP.ui.ConnectionError("socket closed.");
-            }
+        $('.canvas-cursor:not(.cursor-self)').remove();
+        $('.canvas-cursor.cursor-self').removeClass('admin');
+	
+        if(!manual_disconnect){
+            PP.ui.ConnectionError("socket closed.");
         }
 
         PP.ui.SetPrivate(false);
@@ -347,7 +405,6 @@ $(function() {
         console.error('Websocket error', d);
         if(PP.room == null) {
             setTimeout(function() {
-                PP.Room(PP.default_room);
                 PP.ui.ClearLoading();
             }, 1000);
         }
@@ -368,11 +425,9 @@ $(function() {
 
             if(p === null) {
                 PP.socket.Close();
-                PP.Room(PP.default_room);
                 manual_disconnect = true;
                 PP.ui.ClearLoading();
             } else {
-                console.log(p)
                 PP.Emit('join', {
                     room: d.name,
                     password: p
@@ -380,13 +435,12 @@ $(function() {
             }
             return;
         }
-        PP.Room(d.name);
         PP.ui.ClearLoading();
 
     });
     PP.socket.on('leave', function(d) {
         console.warn("Got websocket message to leave.");
-        PP.Room(PP.default_room);
+	// TODO remove all ppls
         PP.ui.ConnectionError('you were kicked.')
     });
 
@@ -471,9 +525,133 @@ $(function() {
         PP.Update();
     });
 
+    PP.socket.on('rs', function(d) {
+	// data
+	if(typeof d.admin != "undefined") {
+
+	    var c = PP.Cursor('#painter-' + d.admin);
+	    if(c == null) {
+		return console.error("Admin cursor doesn't exist!")
+	    }
+	    pthis.Admin(c);
+	    $('body').toggleClass('is-admin', c.IsMe());
+	}
+	// TODO password info thing
+	//rthis.Private(d.password);
+	PP.Update();
+    });
+    PP.socket.on('lf', function(d) {
+
+	var l = parseInt(d.l),
+	    f = parseInt(d.f);
+
+	var c = PP.Cursor('#painter' + d.id);
+	if(c === null) return console.error("Cursor doesn't exist.");
+	if(pthis.server_roundtrip && c.IsMe()) {
+	    ParupaintCanvas.Focus(l, f);
+	    PP.ui.UpdateHeavy();
+	}
+	c.LayerFrame(l, f);
+    });
+    PP.socket.on('draw', function(d) {
+	var x = d.xo, // net original x
+	    y = d.yo, // net original y
+	    l = d.l, // net l
+	    f = d.f, // net f
+
+	    // required
+	    xx = d.x, // net x
+	    yy = d.y, // net y
+	    ww = d.w, // net width
+	    pp = d.p, // net pressure
+	    cc = d.c, // net color
+	    dd = d.d; // net drawing
+
+	var ss = ww*pp;
+	if(typeof ss != "number") return; // something went awfully wrong.
+
+
+	if(typeof d.id != "undefined") {
+	    //someone.
+	    var c = PP.Cursor('#painter-' + d.id);
+	    if(c === null) {
+		return console.error("Cursor doesn't exist.");
+	    }
+	    if(!pthis.server_roundtrip && c.IsMe()) {
+		// ignore this is this is me and roundtrip is off
+		return false;
+	    }
+	    var od = ParupaintCanvas.Init(),
+		nd = [
+		    $('.canvas-workarea').width(),
+		    $('.canvas-workarea').height()
+		];
+
+	    // get saved position
+	    var ppc = c.CanvasPosition(),
+		lf = c.LayerFrame();
+
+
+	    if(typeof xx != "undefined" &&
+		typeof yy != "undefined") {
+		c.Position((xx / od[0]) * nd[0], (yy / od[1]) * nd[1]);
+		c.CanvasPosition(xx, yy);
+	    }
+	    if(typeof ss != "undefined") c.Size(ss);
+	    if(typeof cc != "undefined") c.Color(cc);
+	    if(typeof l != "undefined" &&
+		typeof f != "undefined") {
+		c.LayerFrame(l, f);
+		lf[0] = l;
+		lf[1] = f;
+	    }
+	    // save the 'raw' cursor pos.
+	    c.cursor.data({
+		x: xx,
+		y: yy
+	    });
+
+
+	    if(typeof dd != "undefined" &&
+		dd != c.Drawing()) {
+		if(dd) {
+		    //starting to draw
+		    ppc[0] = xx, ppc[1] = yy;
+		}
+		c.Drawing(dd);
+	    }
+	    if(c.Drawing() &&
+		typeof lf[0] == "number" &&
+		typeof lf[1] == "number" &&
+		typeof xx != "undefined" &&
+		typeof yy != "undefined") {
+		var canvas = $('.canvas-pool canvas').
+		filter('[data-layer=' + lf[0] + '][data-frame=' + lf[1] + ']');
+		ParupaintCanvas.DrawLine(canvas,
+		    ppc[0], ppc[1], xx, yy, cc, ss);
+	    }
+	} else {
+	    var canvas = $('.canvas-pool canvas').
+	    filter('[data-layer=' + l + '][data-frame=' + f + ']');
+	    ParupaintCanvas.DrawLine(canvas,
+		x, y, xx, yy, cc, ss);
+	}
+
+    });
+
+
 
     // events
 
+    $('form.password-input').unbind().submit(function(e) {
+        var p = $(this).children('.password-change').val();
+        if(pthis.Admin()) {
+            PP.Emit('rs', {
+                password: p
+            });
+        }
+        return false;
+    })
     $('form.dimension-input').submit(function() {
         var w = parseInt($(this).children('.dimension-w-input').val()),
             h = parseInt($(this).children('.dimension-h-input').val());
@@ -538,7 +716,350 @@ $(function() {
         } else if(e.is('.setting-reload-img')) {
             PP.Emit('img');
         }
+    });
+
+
+    this.key_eraser = 3;
+    this.picking_color = false;
+    this.pick_canvas = null;
+    this.autoswitch = false;
+    this.mouseTimer = null;
+    this.server_roundtrip = false;
+
+    var pthis = this;
+
+    $('#mouse-pool').unbind().sevent(function(e, data) {
+
+        if(e == 'mousemove' && data.target.tagName == 'CANVAS') {
+
+            // original dimensions and new (zoomed) dimensions
+            var ow = $('canvas.focused').get(0).width,
+                oh = $('canvas.focused').get(0).height,
+                nw = $('.canvas-workarea').width(),
+                nh = $('.canvas-workarea').height();
+
+            // brush information
+            var mx = (data.x / nw) * ow,
+                my = (data.y / nh) * oh,
+                s = PP.brush.Size(),
+                c = PP.brush.Color();
+
+            if(PP.ui.movingCanvas || (data.button == PP.ui.key_move)) {
+                var b = $(window);
+                b.scrollLeft(b.scrollLeft() - data.sx);
+                b.scrollTop(b.scrollTop() - data.sy);
+                return true;
+
+            } else if(pthis.picking_color) {
+
+                if(pthis.pick_canvas.length) {
+
+                    var px = pthis.pick_canvas.get(0).
+                    getContext('2d').getImageData(mx, my, 1, 1).data;
+
+                    var r = ('00' + px[0].toString(16)).slice(-2),
+                        g = ('00' + px[1].toString(16)).slice(-2),
+                        b = ('00' + px[2].toString(16)).slice(-2),
+                        a = ('00' + px[3].toString(16)).slice(-2);
+                    var hex = "#" + ("00000000" + (r + g + b + a)).slice(-8);
+
+                    if(hex != PP.brush.Color()) {
+
+                        var hsl = new ParupaintColor(px[0], px[1], px[2], px[3]).ToHsl();
+                        PP.color.Hsl(hsl.h, hsl.s, hsl.l, hsl.a);
+
+                        PP.brush.Color(hex, PP.Cursor()).UpdateLocal(PP);
+
+                        PP.Cursor().cursor.css('background-color',
+                            'rgba(' +
+                            px[0] + ',' +
+                            px[1] + ',' +
+                            px[2] + ',' +
+                            px[3] / 255 + ')');
+                    }
+
+
+                }
+
+            }
+            var drawing = (data.button == 1);
+            var plugin = document.getElementById('wacomPlugin');
+
+            var cc = PP.Cursor();
+            var cursor = cc.cursor;
+            if(cursor.length) {
+                // move the cursor.
+
+                var left = parseInt(cursor.css('left')),
+                    top = parseInt(cursor.css('top'));
+
+                var dx = (data.x - left),
+                    dy = (data.y - top);
+
+                var dist = Math.sqrt(dx * dx + dy * dy);
+
+                // use a higher distance when not drawing to skip updating more
+                if(pthis.picking_color || dist > (drawing ? 2 : 15)) {
+
+                    if(!drawing && !pthis.picking_color) {
+                        PP.Emit('draw', {
+                            x: mx,
+                            y: my,
+                            s: s,
+                            c: c,
+                            d: false
+                        });
+                    }
+
+                    if(!pthis.server_roundtrip) {
+		        cc.Position(data.x, data.y);
+		        cc.CanvasPosition(mx, my);
+                    }
+                    if(!pthis.server_roundtrip) {
+                        if(pthis.mouse_timer) clearTimeout(pthis.mouse_timer);
+                        pthis.mouse_timer = setTimeout(function() {
+                            cc.Position(data.x, data.y);
+                            cc.CanvasPosition(mx, my);
+                        }, 800);
+                    }
+                }
+            }
+
+            // tablet hokus pokus
+            var tabletPressure = null; {
+
+                var tabletSwitch = function(e) {
+                    PP.brush.Brush(e).UpdateLocal(PP);
+
+                    var cc = PP.Cursor();
+                    PP.Emit('draw', {
+                        x: cc.CanvasPosition()[0],
+                        y: cc.CanvasPosition()[1],
+                        s: PP.brush.Size(),
+                        c: PP.brush.Color(),
+                        d: false
+                    });
+                    //TODO put d as cc.Drawing()?
+                };
+
+                var eraser = PP.brush.current;
+                // switch brush if tablet pen has flipped
+                if(plugin && plugin.penAPI) {
+                    eraser = plugin.penAPI.isEraser ? 1 : 0;
+                    if(plugin.penAPI.pointerType != 0) {
+                        tabletPressure = plugin.penAPI.pressure;
+                    }
+
+                }
+                if(typeof tabletConnection != "undefined" &&
+                    tabletConnection.connections) {
+                    eraser = parseInt(tabletConnection.e);
+                    tabletPressure = tabletConnection.p;
+                }
+                if(eraser != PP.brush.current &&
+                    !pthis.autoswitch) {
+                    tabletSwitch(eraser);
+                } else if (eraser == PP.brush.current &&
+                    pthis.autoswitch){
+                        // turn it off if we match
+                        pthis.autoswitch = false;
+                    }
+            }
+
+            // we might actually be drawing right now.
+            if(drawing) {
+
+                // get the.. change?
+                var nx1 = ((data.x - data.cx) / nw) * ow;
+                var ny1 = ((data.y - data.cy) / nh) * oh;
+
+                // pressure
+                if(typeof tabletPressure == "number") {
+
+                    var ns = null;
+
+                    if(tabletPressure != null) {
+                        ns = tabletPressure;
+                    } else if(data.mozPressure) {
+                        // just test mozPressure, doubtful if it works
+                        ns = data.mozPressure;
+                    }
+
+                    if(ns != null) {
+                        var ps = cursor.children('.cursor-pressure-size');
+                        if(ps.length) {
+                            // multiply the caches size so it affects everything
+                            s *= ns;
+
+                            var ss = Math.round(ns * 10) / 10;
+                            if(ps.data('ts') != ss) {
+                                ps.css({
+                                    'transform': 'scale(' + ns + ') translate(-50%, -50%)'
+                                }).data('ts', ss);
+                            }
+                        }
+                    }
+                }
+                if(s != 0.0) {
+                    PP.Emit('draw', {
+                        x: mx,
+                        y: my,
+                        w: s,
+			p: 1.0,
+                        c: c,
+                        d: true
+                    });
+                    if(!pthis.server_roundtrip) {
+                        ParupaintCanvas.DrawLine(
+                            $('canvas.focused'), nx1, ny1,
+                            mx, my, c, s);
+                    }
+                }
+            }
+
+
+        } else if(e == 'mousedown') {
+            var plugin = document.getElementById('wacomPlugin');
+            if(plugin && plugin.penAPI) {
+                // ???
+                // no idea why i added this here
+            }
+            if(data.button == pthis.key_eraser) {
+                var nb = PP.brush.OppositeBrush();
+                pthis.autoswitch = true;
+
+                PP.brush.Brush(nb).UpdateLocal(PP);
+
+		var c = PP.Cursor();
+                PP.Emit('draw', {
+		    x: c.CanvasPosition()[0],
+		    y: c.CanvasPosition()[1],
+                    s: PP.brush.Size(),
+                    c: PP.brush.Color(),
+                    d: false
+                })
+
+            }
+        } else if(e == 'mouseup') {
+            var c = PP.Cursor();
+            if(c != null) {
+                c.cursor.children('.cursor-pressure-size').removeAttr('style');
+                // clear pressure sensitivity marker
+            }
+        } else if(e == 'mouseout') {
+            var c = PP.Cursor();
+            PP.Emit('draw', {
+                x: c.CanvasPosition()[0],
+                y: c.CanvasPosition()[1],
+                s: PP.brush.Size(),
+                c: PP.brush.Color(),
+                d: false
+            })
+
+        } else if(e == 'mousewheel') {
+            if(!(PP.ui.zoomingCanvas || PP.ui.movingCanvas)) {
+                var a = data.scroll > 0 ? 2 : 0.5;
+
+                if(true) {
+                    var s = PP.brush.Size() * a;
+                    if(s < 1) s = 1;
+                    if(s > 256) s = 256;
+
+                    PP.brush.
+                    Size(s, PP.Cursor()).UpdateLocal(PP);
+
+                    var cc = PP.Cursor();
+                    PP.Emit('draw', {
+                        x: cc.CanvasPosition()[0],
+                        y: cc.CanvasPosition()[1],
+                        s: s,
+                        c: PP.brush.Color(),
+                        d: false
+                    });
+
+                }
+            }
+        } else if(e == 'keyup') {
+            if($('input:focus, textarea:focus').length) return true;
+            switch(data.key) {
+                case 82: // r
+                    {
+                        // TODO trigger new palette
+
+                        PP.Cursor().cursor.removeClass('pick-color');
+                        return(pthis.picking_color = false);
+                    }
+            }
+        } else if(e == 'keydown') {
+
+            if($('input:focus, textarea:focus').length) return true;
+            switch(data.key) {
+                case 49: // 1
+                case 50:
+                case 51:
+                case 52:
+                case 53: // 5
+                    {
+                        var k = (data.key - 48) - 1;
+                        var sizes = [
+                            1,
+                            3,
+                            6,
+                            16,
+                            64
+                        ];
+                        PP.brush.Size(sizes[k]).UpdateLocal(PP);
+
+                        var cc = PP.Cursor();
+                        PP.Emit('draw', {
+                            x: cc.CanvasPosition()[0],
+                            y: cc.CanvasPosition()[1],
+                            s: PP.brush.Size(),
+                            c: PP.brush.Color(),
+                            d: false
+                        });
+
+                        return false;
+                    }
+                case 82: // r
+                    {
+                        if(data.ctrl) {
+                            // pick color from all canvases
+                        } else if(data.shift) {
+                            PP.Emit('img');
+                        } else {
+                            if(!pthis.picking_color) {
+                                pthis.picking_color = true;
+                                PP.Cursor().cursor.addClass('pick-color');
+                                pthis.pick_canvas = $('canvas.focused');
+                            }
+                        }
+                        break;
+                    }
+                case 69: // e
+                    {
+                        var nb = PP.brush.OppositeBrush();
+                        pthis.autoswitch = true;
+
+                        PP.brush.Brush(nb).UpdateLocal(PP);
+
+                        var cc = PP.Cursor();
+                        PP.Emit('draw', {
+                            x: cc.CanvasPosition()[0],
+                            y: cc.CanvasPosition()[1],
+                            s: PP.brush.Size(),
+                            c: PP.brush.Color(),
+                            d: false
+                        });
+                        break;
+                    }
+            }
+        }
+    }).bind('contextmenu', function(e) {
+        return false;
     })
+
+
 });
 
 jQuery.fn.extend({

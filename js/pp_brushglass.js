@@ -5,7 +5,7 @@
 function ParupaintBrushglass() {
     this.current = 0;
     this.brushes = [
-        new ParupaintBrush("brush", "#000", 2),
+        new ParupaintBrush("brush", "#000000ff", 2),
         new ParupaintBrush("eraser", "#00000000", 16)
     ];
 
@@ -17,13 +17,13 @@ function ParupaintBrushglass() {
         }
     }
 
-    this.UpdateLocal = function() {
+    this.UpdateLocal = function(main) {
 
-        this.UpdateCursor(PP.Cursor());
-        PP.ui.UpdateBrushinfo(this.Brush());
+        this.UpdateCursor(main.Cursor());
+        main.ui.UpdateBrushinfo(this.Brush());
 
         var hsl = new ParupaintColor(this.Color()).ToHsl();
-        PP.color.Hsl(hsl.h, hsl.s, hsl.l, hsl.a);
+        main.color.Hsl(hsl.h, hsl.s, hsl.l, hsl.a);
 
         ParupaintStorage.SetStorageKey({
             'default_brush': this.brushes
