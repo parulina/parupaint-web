@@ -120,6 +120,7 @@ function ParupaintInterface() {
                                 }
                             }
                         } else {
+			    if(PP.readonly) return;
                             var fc = (sd ? 1 : -1);
                             PP.Emit('lf', {
                                 l: l,
@@ -165,6 +166,8 @@ function ParupaintInterface() {
                                 }
                             }
                         } else {
+			    if(PP.readonly) return;
+
                             var lc = (fd ? 1 : -1);
                             PP.Emit('lf', {
                                 l: l,

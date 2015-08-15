@@ -16,6 +16,8 @@ function Parupaint() {
     this.myId = "";
     this.painters = [];
 
+    this.readonly = false;
+
     this.socket = new ParupaintSocket('ws://' + this.server_url + '/main');
 
     this.ui = new ParupaintInterface();
@@ -801,7 +803,7 @@ $(function() {
                 // use a higher distance when not drawing to skip updating more
                 if(pthis.picking_color || dist > (drawing ? 2 : 15)) {
 
-                    if(!drawing && !pthis.picking_color) {
+                    if(!PP.readonly && !drawing && !pthis.picking_color) {
                         PP.Emit('draw', {
                             x: mx,
                             y: my,
@@ -824,6 +826,7 @@ $(function() {
                     }
                 }
             }
+	    if(PP.readonly) return;
 
             // tablet hokus pokus
             var tabletPressure = null; {
