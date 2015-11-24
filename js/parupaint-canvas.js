@@ -1,4 +1,5 @@
 function hex2rgba(hex) {
+	if(!hex || !hex.length) return {r: 0, g: 0, b: 0, a: 0};
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 	hex = hex.replace(shorthandRegex, function(m, r, g, b) {
@@ -20,7 +21,7 @@ function hex2rgba(hex) {
 
 var parupaintBrush = function(s, c){
 	// brush has explicit members that just contains the most important info
-	this.size = (typeof s == "number" ? s : 1);
+	this.size = (typeof s == "number" ? s : 1.0);
 	this.color = (typeof c == "string" ? c : "#000");
 };
 var parupaintBrushGlass = function(){
@@ -57,6 +58,10 @@ var parupaintCursor = function(id){
 	this.cursor = document.querySelector(".canvas-cursor.cursor-self");
 	if(typeof id == "string") {
 		// do stuff
+		this.cursor = document.getElementById(id);
+	}
+	if(typeof id == "number"){
+		if(id > 0) this.cursor = document.getElementById('c' + id);
 	}
 	if(!this.cursor) return null;
 
@@ -77,17 +82,49 @@ var parupaintCursor = function(id){
 		this.cursor.style.top = y + (typeof y == "number" ? "px" : "");
 		return this;
 	};
+	this.pressure = function(p){
+		if(typeof p == "undefined") {
+			p = this.cursor.getAttribute("data-pressure");
+			return parseFloat((!p || !p.length) ? "1.0" : p);
+		}
+		this.cursor.setAttribute("data-pressure", p);
+		var cs = this.cursor.querySelector(".cursor-size");
+		if(cs){
+			cs.style.width = p + "px";
+			cs.style.height = p + "px";
+		}
+		return this;
+	};
 	this.size = function(s){
-		if(typeof s == "undefined") return this.cursor.getAttribute("data-size");
+		if(typeof s == "undefined") {
+			s = this.cursor.getAttribute("data-size");
+			return parseFloat((!s || !s.length) ? "1" : s);
+		}
 		this.cursor.setAttribute("data-size", s);
 		this.cursor.style.width = s + "px";
 		this.cursor.style.height = s + "px";
 		return this;
 	};
 	this.color = function(c){
-		if(typeof c != "undefined") return this.cursor.getAttribute("data-color");
+		if(typeof c == "undefined") {
+			c = this.cursor.getAttribute("data-color");
+			return ((!c || !c.length) ? "#000000" : c);
+		}
 		this.cursor.setAttribute("data-color", c);
 		this.cursor.style.color = c;
+		return this;
+	};
+	this.drawing = function(d){
+		if(typeof d == "undefined"){
+			d = this.cursor.getAttribute("data-drawing");
+			return ((!d || !d.length) ? false : (d != "false"));
+		}
+		this.cursor.setAttribute("data-drawing", d);
+		return this;
+	};
+	this.name = function(n){
+		if(typeof n == "undefined") return this.cursor.getAttribute("data-name");
+		this.cursor.setAttribute("data-name", n);
 		return this;
 	};
 
@@ -95,6 +132,10 @@ var parupaintCursor = function(id){
 
 var parupaintCanvas = new function(){
 	this.changed = false;
+	this.cleanup = function(){
+		var pool = document.querySelector(".canvas-pool");
+		pool.innerHTML = '';
+	};
 	this.init = function(){
 		var workarea = document.querySelector(".canvas-workarea");
 		var canvases = document.querySelectorAll(".canvas-pool > canvas");
@@ -127,6 +168,9 @@ var parupaintCanvas = new function(){
 		workarea.setAttribute("data-ow", w);
 		workarea.setAttribute("data-oh", h);
 	};
+	this.get = function(l, f) {
+		return document.querySelector('.canvas-pool > canvas[data-layer="'+l+'"][data-frame="'+f+'"]');
+	}
 	this.dataurl = function(){
 		var workarea = document.querySelector(".canvas-workarea");
 		var ow = parseInt(workarea.getAttribute("data-ow"));
@@ -142,6 +186,8 @@ var parupaintCanvas = new function(){
 		return canvas.toDataURL();
 	};
 	this.clear = function(canvas, color){
+		if(!canvas) return;
+
 		var w = canvas.width,
 		    h = canvas.height;
 		var ctx = canvas.getContext('2d');
@@ -150,36 +196,35 @@ var parupaintCanvas = new function(){
 		if(hex2rgba(color).a == 0) {
 			ctx.clearRect(0, 0, w, h);
 		} else {
+			if(color.length >= 7) color = color.substr(0, 7);
 			ctx.fillStyle = color;
 			ctx.fillRect(0, 0, w, h);
 		}
 	};
 	this.line = function(canvas, x1, y1, x2, y2, color, width){
-		if(canvas) {
-		    var ctx = canvas.getContext('2d');
+		if(!canvas) return;
 
-		    var composite = ctx.globalCompositeOperation;
-		    var col = hex2rgba(color);
+		var ctx = canvas.getContext('2d');
+		var composite = ctx.globalCompositeOperation;
+		var col = hex2rgba(color);
 
-		    if(!col.a) {
+		if(!col.a) {
 			ctx.globalCompositeOperation = "destination-out";
 			col.a = 255;
-		    }
-		    ctx.strokeStyle = 'rgba(' + col.r + ',' + col.g + ',' + col.b + ',' + (col.a / 255.0) + ')'
-
-		    ctx.lineWidth = width;
-		    ctx.lineCap = 'round';
-
-		    ctx.beginPath();
-		    ctx.moveTo(x1, y1);
-		    ctx.lineTo(x2, y2);
-		    ctx.stroke();
-
-		    ctx.globalCompositeOperation = composite;
-
-		    this.changed = true;
-
 		}
+		ctx.strokeStyle = 'rgba(' + col.r + ',' + col.g + ',' + col.b + ',' + (col.a / 255.0) + ')'
+
+		ctx.lineWidth = width;
+		ctx.lineCap = 'round';
+
+		ctx.beginPath();
+		ctx.moveTo(x1, y1);
+		ctx.lineTo(x2, y2);
+		ctx.stroke();
+
+		ctx.globalCompositeOperation = composite;
+
+		this.changed = true;
 	};
 };
 
@@ -189,6 +234,22 @@ window.addEventListener("load", function(e){
 	if(!canvas || !scrollarea) return;
 
 	var brushglass = new parupaintBrushGlass();
+	var netcache = {
+		x: 0,
+		y: 0,
+		w: 0,
+		d: false,
+		c: '',
+		update: function(net){
+			var n = {};
+			if(net.x != this.x) n.x = this.x = net.x;
+			if(net.y != this.y) n.y = this.y = net.y;
+			if(net.w != this.w) n.w = this.w = net.w;
+			if(net.c != this.c) n.c = this.c = net.c;
+			if(net.d != this.d) n.d = this.d = net.d;
+			return n;
+		}
+	};
 
 	if(typeof localStorage["canvasdimensions"] == "string"){
 		var a = localStorage["canvasdimensions"].split(",");
@@ -197,6 +258,18 @@ window.addEventListener("load", function(e){
 	}
 	canvas.addEventListener("keydown", function(e) {
 		console.log("key:", e.keyCode);
+		if(e.keyCode == 82) {
+			var x = (new parupaintCursor()).x(),
+			    y = (new parupaintCursor()).y();
+
+			var d = Array.from(parupaintCanvas.get(0, 0).getContext('2d').getImageData(x, y, 1, 1).data).map(function(e){
+				var na = ("00" + e.toString(16)).slice(-2);
+				return na;
+			});
+			var hex = '#' + d.join('');
+			console.log("Pick color", hex);
+			(new parupaintCursor()).update(brushglass.color(hex));
+		}
 		if(e.keyCode == 69) {
 			(new parupaintCursor()).update(brushglass.brush(brushglass.opposite()));
 		}
@@ -207,14 +280,19 @@ window.addEventListener("load", function(e){
 	canvas.addEventListener("mouseleave", function(e) {
 		canvas.blur();
 	});
+	var drawbtn_down = false;
 	canvas.addEventListener("mouseup", function(e) {
 		//TODO testme
 		if(e.target == this && e.target.style.resize.length) {
 			localStorage["canvasdimensions"] =
 				parseInt(this.style.width) + "," + parseInt(this.style.height);
 		}
+		drawbtn_down = false;
 	});
 	canvas.addEventListener("mousedown", function(e){
+		if((e.buttons || e.which) == 1) {
+			drawbtn_down = true;
+		}
 		if((e.buttons || e.which) == 4) e.preventDefault();
 		if((e.buttons || e.which) == 2){
 			if(e.target.tagName == "CANVAS") {
@@ -235,11 +313,20 @@ window.addEventListener("load", function(e){
 				e.movementX = ax - old_x;
 				e.movementY = ay - old_y;
 			}
-			(new parupaintCursor()).x(ax).y(ay);
-			if((e.buttons || e.which) == 1){
+			var w = (new parupaintCursor()).x(ax).y(ay).size(),
+			    c = (new parupaintCursor()).color();
+
+			var net = {x: ax, y: ay, w: w, c: c, d: false};
+			if(drawbtn_down == 1){
+				net.d = true;
 				parupaintCanvas.line(e.target,
 					ax, ay, ax - e.movementX, ay - e.movementY,
 					brushglass.color(), brushglass.size());
+			}
+			if(parupaint.net && parupaint.net.socket.connected){
+				var a = netcache.update(net);
+				a.p = 1.0;
+				parupaint.net.socket.emit('draw', a);
 			}
 		}
 		if(e.buttons == 4) {
@@ -251,7 +338,11 @@ window.addEventListener("load", function(e){
 		var y = e.deltaY * (e.deltaMode == 0 ? 0.1 : 2)
 		if(e.target.tagName == "CANVAS") {
 			if(this.classList.contains("scroll-actions")){
-				new parupaintCursor().update(brushglass.size(brushglass.size() - y));
+				var w = (new parupaintCursor()).update(brushglass.size(brushglass.size() - y)).size();
+				// Update cache and push out new width
+				if(parupaint.net && parupaint.net.socket.connected){
+					parupaint.net.socket.emit('draw', netcache.update({w: w}));
+				}
 				e.preventDefault();
 				return false;
 			}
@@ -283,4 +374,7 @@ window.addEventListener("load", function(e){
 	}
 
 	parupaintCanvas.init();
+	if(parupaintConfig.connect_on_load === true){
+		parupaint.net = new parupaintNetwork(parupaintConfig.ws_host);
+	}
 });

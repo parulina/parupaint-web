@@ -27,6 +27,9 @@
 	box-shadow:0 0 0 1px black, 0 0 0 1px white inset;
 	pointer-events:none;
 }
+.canvas-cursor.cursor-self:before {
+	display:none;
+}
 
 .canvas-cursor.cursor-self {
 	pointer-events:none;
