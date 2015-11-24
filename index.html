@@ -1,168 +1,29 @@
 <!DOCTYPE html>
 <html>
 
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <link rel=icon href="css/icon16.png">
+	<head>
+		<title>PARUPAINT</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="icon" sizes="128x128" href="res/icon128.png">
+		<link rel=icon href="css/icon16.png">
 
-        <link href="css/background.css" rel="stylesheet"></link>
-        <link href="css/canvas.css" rel="stylesheet"></link>
-        <link href="css/guifront.css" rel="stylesheet"></link>
-        <link href="css/qgui.css" rel="stylesheet"></link>
+		<!-- todo find out lighter gzip stuff, single file? -->
+		<script src="js/pako.min.js"></script>
 
-        <link href="css/theme_classic.css" rel="stylesheet"></link>
+		<!-- main stuff -->
+		<link href="css/parupaint-canvas.css" rel="stylesheet"></link>
+		<script src="js/parupaint-canvas.js"></script>
 
-        <script src="js/jquery-2.1.1.min.js"></script>
-        <script src="js/moment.min.js"></script>
-        <script src="js/livestamp.min.js"></script>
-        <script src="js/pako.min.js"></script>
-
-
-        <script src="js/pp_functions.js"></script>
-        <script src="js/pp_chrome.js"></script>
-        <script src="js/pp_storage.js"></script>
-        <script src="js/pp_socket.js"></script>
-
-        <script src="js/pp_chat.js"></script>
-        <script src="js/pp_color.js"></script>
-        <script src="js/pp_swatch.js"></script>
-        <script src="js/pp_brush.js"></script>
-        <script src="js/pp_brushglass.js"></script>
-        <script src="js/pp_gui.js"></script>
-        <script src="js/pp_canvas.js"></script>
-        <script src="js/pp_room.js"></script>
-        <script src="js/pp_main.js"></script>
-        <title>Initializing parupaint-web...</title>
-    </head>
-
-    <body class="loading crisp-image">
-        <div class="canvas-workarea" id="mouse-pool" tabindex="1">
-            <div class="canvas-pool"></div>
-
-            <div class="canvas-cursor cursor-self">
-                <div class="cursor-pressure-size"></div>
-            </div>
-        </div>
-
-        <div id="main-canvas" class="body-page overlay">
-            <div class="gui">
-                <!-- COLOR PICKER -->
-                <div class="color-spinner overlay-piece">
-                    <div class="hsl-select-pick">
-                        <div class="alpha-pick">
-                            <div class="color-selector"></div>
-                        </div>
-                        <div class="light-pick">
-                            <div class="color-selector"></div>
-                        </div>
-
-                        <div class="saturation-pick">
-                            <div class="color-selector"></div>
-                        </div>
-
-                        <div class="hue-pick">
-                            <div class="preview-col"></div>
-                            <div class="color-selector"></div>
-                        </div>
-                    </div>
-
-
-                    <div class="palette-storage"></div>
-                </div>
-                <!-- CHAT BOX -->
-                <div class="chat-box overlay-piece">
-                    <div class="chat-input-box">
-                        <textarea class="chat-input" tabindex="-1"></textarea>
-                        <div class="ci-size"></div>
-                    </div>
-                    <div class="chat-content"></div>
-                </div>
-
-
-                <!-- FLAYER LIST -->
-                <div class="flayer-list-container overlay-piece">
-                    <div class="flayer-info"></div>
-
-                    <div class="flayer-list">
-                        <div class="flayer-info-layer" data-layer="0" id="list-flayer-0">
-                            <div class="flayer-info-frame" data-frame="0" id="list-flayer-0-0"></div>
-
-                            <div class="flayer-info-frame" data-frame="1" id="list-flayer-0-1"></div>
-                        </div>
-
-                        <div class="flayer-info-layer" data-layer="1" id="list-flayer-1">
-                            <div class="flayer-info-frame" data-frame="0" id="list-flayer-1-0"></div>
-
-                            <div class="flayer-info-frame" data-frame="1" id="list-flayer-1-1"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="qstatus overlay-piece">
-                <div class="qstatus-brush qstatus-expandable">
-                    <div class="qstatus-piece preview-col" data-label="brush" data-label-2="0"  title="[#artists] - [current brush]"></div>
-
-                    <div class="qstatus-panel brush-panel">
-                        <div class="player-list" style="margin-left: 2em">
-                            You're quite lonely.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="qstatus-message" data-label="test" title="↡ pull down for overlay ↡"></div>
-
-                <div class="qstatus-settings qstatus-expandable">
-                    <div class="qstatus-piece qinfo online" title="[layer] - [frame] - [connected]"></div>
-
-                    <div class="qstatus-panel setting-panel">
-                        <!-- Settings -->
-                        <div class="setting-top-row setting-input-row">
-                            <form class="tablet-input knob-thing" data-label="tablet plugin">
-                                <input id="tablet-input-id" type="checkbox">
-                                <label for="tablet-input-id" title="enable/disable tablet"></label>
-                            </form>
-                        </div>
-
-                        <div class="setting-middle-row setting-input-row">
-
-                            <form class="connection-input knob-thing" data-label="disconnected">
-                                <input class="con-status" id="con-status-id" type="checkbox">
-                                <label for="con-status-id" title="connect/disconnect to this room on the server"></label>
-                            </form>
-
-                            <form class="password-input knob-thing multi-only admin-only" data-label="password">
-                                <input class="password-change" id="room-password-id" type="text" maxlength="12" placeholder="- public -">
-                            </form>
-
-                            <form class="dimension-input admin-only">
-                                <input class="dimension-confirm" type="submit" value="set dimensions">
-
-                                <input class="dimension-w-input" max="4096" min="0" type="number" list="dimensions">
-                                <input class="dimension-h-input" max="4096" min="0" type="number" list="dimensions">
-                                <datalist id="dimensions">
-                                  <option value="100">
-                                  <option value="200">
-                                  <option value="600">
-                                  <option value="800">
-                                  <option value="1000">
-                                  <option value="1200">
-                                  <option value="1600">
-                                  <option value="1900">
-                                </datalist>
-                            </form>
-                        </div>
-
-                        <div class="setting-bottom-row">
-                            <div class="crisp-image setting-down-img" title="download image" type="button"></div>
-                            <div class="crisp-image setting-reload-img multi-only" title="reload" type="button"></div>
-                            <div class="crisp-image setting-save-img" title="save" type="button"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </body>
-
+	</head>
+	<body class="parupaint-canvas scroll-actions">
+		<div class="canvas-scrollarea">
+			<div class="canvas-workarea">
+				<div class="canvas-pool">
+					<canvas class="visible" data-prefill="#FFF" width="256" height="256"></canvas>
+					<canvas class="visible main" width="256" height="256"></canvas>
+				</div>
+				<div class="canvas-cursor cursor-self"><div class="cursor-pressure-size"></div></div>
+			</div>
+		</div>
+	</body>
 </html>

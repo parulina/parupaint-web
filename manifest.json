@@ -1,16 +1,16 @@
 {
 	"manifest_version": 2,
 	"name": "parupaint",
-	"version": "0.3.4",
-	"description":"Paint stuff!",
-	"author":"paru",
 	"short_name":"parupaint",
-    "minimum_chrome_version": "40.0.0",
+	"version": "0.0.1",
+	"description":"paint with others",
+	"author":"paru",
+	"minimum_chrome_version": "40.0.0",
 	"icons": {
-		"16": "css/icon16.png",
-		"32": "css/icon32.png",
-		"48": "css/icon48.png",
-		"128": "css/icon128.png"
+		"16": "res/icon16.png",
+		"32": "res/icon32.png",
+		"48": "res/icon48.png",
+		"128": "res/icon128.png"
 	},
 	"app": {
 		"background": {
@@ -20,12 +20,13 @@
 	},
 	"permissions": [
 		"storage",
-		"http://sqnya.se:1108/*"
+		"http://your-server-url-here/*"
 	],
 	"optional_permissions":[
 		"alwaysOnTopWindows",
-		 "hid", {"usbDevices":[
-{ "vendorId": 1386, "productId": 0, "name":			"PenPartner" },
+		 "hid",
+{"usbDevices":[
+{ "vendorId": 1386, "productId": 0, "name":		"PenPartner" },
 { "vendorId": 1386, "productId": 16, "name":		"Graphire" },
 { "vendorId": 1386, "productId": 17, "name":		"Graphire2 4x5" },
 { "vendorId": 1386, "productId": 18, "name":		"Graphire2 5x7" },
@@ -52,7 +53,7 @@
 { "vendorId": 1386, "productId": 34, "name":      	"Intuos 9x12" },
 { "vendorId": 1386, "productId": 35, "name":      	"Intuos 12x12" },
 { "vendorId": 1386, "productId": 36, "name":      	"Intuos 12x18" },
-{ "vendorId": 1386, "productId": 3, "name":			"PTU600" },
+{ "vendorId": 1386, "productId":  3, "name":		"PTU600" },
 { "vendorId": 1386, "productId": 48, "name":		"PL400" },
 { "vendorId": 1386, "productId": 49, "name":		"PL500" },
 { "vendorId": 1386, "productId": 50, "name":		"PL600" },
@@ -165,7 +166,6 @@
 { "vendorId": 5935, "productId": 1281, "name": "" },
 { "vendorId": 5935, "productId": 1282, "name": "" },
 { "vendorId": 5935, "productId": 1283, "name": "" }
-
 		]}
 	]
 }
