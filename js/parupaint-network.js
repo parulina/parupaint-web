@@ -16,12 +16,8 @@ var parupaintNetwork = function(host){
 	};
 	var socket = this.socket;
 	this.socket.on('open', function(e){
-		var n = "test";
-		if(localStorage.name && localStorage.name.length) {
-			n = localStorage.name;
-		}
 		socket.emit('join', {
-			name: n,
+			name: parupaintConfig.name,
 			version: 'ppweb'
 		});
 	});
@@ -55,6 +51,10 @@ var parupaintNetwork = function(host){
 		console.log("Clear to", e.c);
 		parupaintCanvas.clear(parupaintCanvas.get(e.l, e.f), e.c);
 
+	});
+	this.socket.on('chat', function(d) {
+		console.log(d);
+		(new parupaintChat()).add(d.message, d.name);
 	});
 	this.socket.on('paste', function(e){
 		socket.emit('img');
@@ -91,7 +91,12 @@ var parupaintNetwork = function(host){
 			if(typeof e.w == "number") c.size(e.w);
 			if(typeof e.p == "number") c.pressure(e.p);
 			if(typeof e.c == "string") c.color(e.c);
-			if(typeof e.d == "boolean") c.drawing(e.d);
+			if(typeof e.d == "boolean"){
+				if(e.d && !c.drawing()){
+					ox = c.x(); oy = c.y();
+				}
+				c.drawing(e.d);
+			}
 			var p = c.pressure();
 			if(c.drawing() && dd){
 				parupaintCanvas.line(parupaintCanvas.get(0, 0),

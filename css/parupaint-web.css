@@ -1,0 +1,80 @@
+.canvas-sidebar {
+	float:left;
+	padding:2px 20px;
+	width:400px;
+	font-family:sans-serif;
+}
+@media all and (max-width:400px) {
+	.parupaint-canvas {
+		overflow:hidden;
+	}
+	.canvas-sidebar {
+		width:auto;
+		float:inherit;
+		position:absolute;
+		top:0; left:0; right:0; height:180px;
+	}
+	.canvas-scrollarea {
+		position:absolute;
+		top:180px; left:0; right:0; bottom:0;
+	}
+}
+
+.canvas-sidebar h1{
+	font-size:18px;
+}
+.canvas-sidebar p{
+	font-size:14px;
+}
+
+.chat-box {
+	padding:5px 0;
+}
+.chat-messages {
+	background:#444;
+	height:100px;
+	font-family:monospace;
+	overflow:auto;
+}
+.chat-input-label {
+	display:block;
+	margin-left:10px;
+	position:relative;
+}
+.chat-input-label:before {
+	content:">";
+	width:10px;
+	position:absolute;
+	right:100%;
+	top:2px;
+}
+.chat-input {
+	background:none;
+	border:none;
+	outline:none;
+	padding:4px 2px;
+	box-sizing:border-box;
+	width:100%;
+}
+.chat-input:focus {
+	background:#888;
+}
+
+.chat-message {
+	margin-bottom:2px;
+}
+.chat-text {
+	text-align:center;
+}
+.chat-user:after {
+	content:":";
+}
+.chat-message > .chat-user {
+	display:inline-block;
+	float:left;
+	padding-right:4px;
+	background-clip:content-box;
+}
+.chat-user + .chat-text {
+	text-align:inherit;
+}

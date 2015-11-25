@@ -13,7 +13,9 @@
 		<script src="js/pako.min.js"></script>
 
 		<!-- main stuff -->
+		<link href="css/parupaint-web.css" rel="stylesheet"></link>
 		<link href="css/parupaint-canvas.css" rel="stylesheet"></link>
+		<link href="css/parupaint-theme-classic.css" rel="stylesheet"></link>
 		<script src="js/parupaint-config.js"></script>
 		<script src="js/parupaint-socket.js"></script>
 		<script src="js/parupaint-network.js"></script>
@@ -21,9 +23,27 @@
 
 	</head>
 	<body class="parupaint-canvas scroll-actions">
+		<div class="canvas-sidebar">
+			<h1>parupaint</h1>
+			<p>paint and stuff</p>
+
+			<div class="chat-box">
+				<div class="chat-messages">
+					<div id="debug"></div>
+					<div class="chat-message">
+						<div class="chat-user">SYSTEM</div>
+						<div class="chat-text">Initializing parupaint</div>
+					</div>
+				</div>
+				<label class="chat-input-label">
+					<input type="text" class="chat-input"></input>
+				</label>
+			</div>
+		</div>
 		<div class="canvas-scrollarea">
 			<div class="canvas-workarea">
 				<div class="canvas-pool">
+					<canvas class="visible" width="512" height="512"></canvas>
 				</div>
 				<div class="canvas-cursor cursor-self"><div class="cursor-pressure-size"></div></div>
 			</div>

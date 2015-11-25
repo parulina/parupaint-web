@@ -1,0 +1,24 @@
+.canvas-cursor:after {
+	font-family:monospace;
+	background:rgba(0, 0, 0, 0.5);
+	color:white;
+}
+.parupaint-canvas {
+	background:#CCBC80;
+	color:black;
+}
+.chat-box,
+.chat-box input{
+	font-family:monospace;
+	color:#222;
+}
+.chat-messages {
+	background:#B7A773;
+}
+.chat-input:focus {
+	background:rgba(0, 0, 0, 0.25);
+	color:white;
+}
+.chat-user {
+	background:#DDD;
+}

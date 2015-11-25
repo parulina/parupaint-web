@@ -228,6 +228,31 @@ var parupaintCanvas = new function(){
 	};
 };
 
+var parupaintChat = function() {
+	this.add = function(msg, user){
+		var e = document.createElement("div");
+		e.className = "chat-message";
+		if(typeof user == "string" && user.length){
+			var u = document.createElement("div"),
+			    m = document.createElement("div");
+			u.className = "chat-user";
+			m.className = "chat-text";
+			u.appendChild(document.createTextNode(user));
+			m.appendChild(document.createTextNode(msg));
+
+			e.appendChild(u);
+			e.appendChild(m);
+		} else {
+			e.innerHTML = msg;
+		}
+		var s = document.querySelector(".chat-messages");
+		var autofollow = (s.scrollTop == (s.scrollHeight - s.clientHeight));
+		s.appendChild(e);
+
+		if(autofollow) s.scrollTop = s.scrollHeight;
+	}
+};
+
 window.addEventListener("load", function(e){
 	var canvas = document.querySelector(".parupaint-canvas");
 	var scrollarea = canvas.querySelector(".canvas-scrollarea");
@@ -256,6 +281,13 @@ window.addEventListener("load", function(e){
 		canvas.style.width = parseInt(a[0]) + "px";
 		canvas.style.height = parseInt(a[1]) + "px";
 	}
+	if(typeof localStorage.name == "string"){
+		parupaintConfig.name = localStorage.name;
+		a
+	} else {
+		a
+	}
+
 	canvas.addEventListener("keydown", function(e) {
 		console.log("key:", e.keyCode);
 		if(e.keyCode >= 49 && e.keyCode <= 54){
@@ -353,6 +385,136 @@ window.addEventListener("load", function(e){
 			scrollarea.scrollTop = scrollarea.scrollTop - e.movementY;
 		}
 	});
+	var tracking_draw = {
+		type: null,
+		startpoints: {}
+	};
+	canvas.addEventListener("touchstart", function(e){
+		if(e.target.tagName == "CANVAS"){
+
+			if(e.touches.length == 1){
+				var t = e.touches[0];
+				tracking_draw.startpoints[t.identifier] = {
+					x: t.clientX,
+					y: t.clientY
+				};
+				tracking_draw.type = "move";
+			}
+			if(e.touches.length >= 2){
+				var t = e.touches[1];
+				tracking_draw.startpoints[t.identifier] = {
+					x: t.clientX,
+					y: t.clientY,
+					d: 0
+				};
+				var bcr = t.target.parentNode.getBoundingClientRect();
+				(new parupaintCursor()).x(t.clientX - (bcr.x || bcr.left)).y(t.clientY - (bcr.y || bcr.top));
+				if(tracking_draw.type != "drawing") tracking_draw.type = "hold";
+				e.preventDefault();
+			}
+		}
+	});
+	canvas.addEventListener("touchend", function(e){
+		var t = e.changedTouches[0];
+		if(tracking_draw.startpoints[t.identifier]){
+			delete tracking_draw.startpoints[t.identifier];
+		}
+		if(e.touches.length == 1 && tracking_draw.type == "drawing"){
+			if(parupaint.net && parupaint.net.socket.connected){
+				var a = netcache.update({d: false});
+				a.d = false;
+				parupaint.net.socket.emit('draw', a);
+			}
+		}
+		if(e.touches.length == 0){
+			// to clear up other vars
+			delete tracking_draw.origin;
+			tracking_draw.type = null;
+			document.getElementById("debug").innerHTML = '';
+		}
+	});
+	canvas.addEventListener("touchmove", function(e){
+
+		if(e.targetTouches.length == 2 && tracking_draw.type == "hold"){
+			for(var i = 0; i < e.changedTouches.length; i++){
+				var t = e.changedTouches[i];
+				var x = t.clientX - tracking_draw.startpoints[t.identifier].x,
+				    y = t.clientY - tracking_draw.startpoints[t.identifier].y;
+				var d = Math.sqrt(x * x + y * y);
+				tracking_draw.startpoints[t.identifier].d = d;
+				if(d > 20) {
+					if(t.identifier == 1){
+						tracking_draw.type = "drawing";
+					} else if(t.identifier == 0){
+						tracking_draw.type = "sizing";
+					}
+					var op = t.identifier == 1 ? 0 : 1;
+					if(tracking_draw.startpoints[op].d > 10){
+						tracking_draw.type = "zooming";
+						document.getElementById("debug").innerHTML = "Zooming canvas";
+					}
+
+					tracking_draw.origin = new function(){
+						this.p1 = (tracking_draw.type == "drawing" ? 0 : 1);
+						this.p2 = (tracking_draw.type == "drawing" ? 1 : 0);
+
+						this.x = tracking_draw.startpoints[this.p1].x;
+						this.y = tracking_draw.startpoints[this.p1].y;
+					};
+					if(tracking_draw.type == "sizing"){
+						tracking_draw.origin.size = (new parupaintCursor()).size();
+					}
+				}
+				
+			}
+			return false;
+		}
+		if(tracking_draw.type == "sizing" || tracking_draw.type == "drawing"){
+			var p = tracking_draw.origin.p2;
+			if(e.touches.length == 1) p = 0;
+			if(e.touches.length == 1 && tracking_draw.type == "drawing") return;
+
+			if(e.touches.length >= p){
+				var t = e.touches[p];
+
+				var bcr = t.target.parentNode.getBoundingClientRect();
+				if(tracking_draw.type == "sizing"){
+					var x = t.clientX - tracking_draw.origin.x,
+					    y = t.clientY - tracking_draw.origin.y;
+					var d = Math.sqrt(x * x + y * y);
+					var s = (parseInt(d) / 100) * tracking_draw.origin.size;
+					if(s < 1) s = 1;
+
+					x = tracking_draw.origin.x - (bcr.x || bcr.left);
+					y = tracking_draw.origin.y - (bcr.y || bcr.top);
+
+					document.getElementById("debug").innerHTML = "Sizing " + s;
+					(new parupaintCursor()).update(brushglass.size(s)).x(x).y(y);
+
+				} else if(tracking_draw.type == "drawing") {
+					var x = t.clientX - (bcr.x || bcr.left),
+					    y = t.clientY - (bcr.y || bcr.top);
+					var cur = new parupaintCursor();
+					var ox = cur.x(), oy = cur.y();
+					var net = {
+						x: x,
+						y: y,
+						w: cur.size(),
+						c: cur.color(),
+						d: true
+					}; 
+					(new parupaintCursor()).x(net.x).y(net.y);
+
+					parupaintCanvas.line(e.target, ox, oy, x, y, net.c, net.w);
+					if(parupaint.net && parupaint.net.socket.connected){
+						var a = netcache.update(net);
+						a.p = t.force;
+						parupaint.net.socket.emit('draw', a);
+					}
+				}
+			}
+		}
+	});
 	canvas.addEventListener("wheel", function(e){
 		var y = e.deltaY * (e.deltaMode == 0 ? 0.1 : 2)
 		if(e.target.tagName == "CANVAS") {
@@ -391,8 +553,26 @@ window.addEventListener("load", function(e){
 			parupaintCanvas.clear(document.querySelector(".canvas-pool > canvas.main"), "#00000000");
 		});
 	}
+	var chatinput = document.querySelector("input.chat-input");
+	if(chatinput) {
+		chatinput.onkeydown = function(e){
+			if(e.keyCode == 13){
+				var msg = e.target.value;
+				if(msg && msg.length){
+					e.target.value = "";
+					if(parupaint.net && parupaint.net.socket.connected){
+						parupaint.net.socket.emit('chat', {
+							message: msg,
+							name: parupaintConfig.name
+						});
+					};
+				}
+			}
+		};
+	}
 
 	parupaintCanvas.init();
+	//parupaintConfig.connect_on_load = false;
 	if(parupaintConfig.connect_on_load === true){
 		parupaint.net = new parupaintNetwork(parupaintConfig.ws_host);
 	}

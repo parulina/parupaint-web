@@ -3,4 +3,6 @@ this.parupaintConfig = {
 	'connect_on_load': true
 };
 
-this.parupaint = {};
+this.parupaint = {
+	name: "PressF2"
+};
