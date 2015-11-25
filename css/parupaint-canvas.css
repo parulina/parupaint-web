@@ -49,6 +49,8 @@
 }
 .parupaint-canvas {
 	background:#AAA;
+	-webkit-user-select:none;
+	user-select:none;
 }
 .canvas-scrollarea {
 	overflow:auto;
