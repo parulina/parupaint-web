@@ -16,8 +16,12 @@ var parupaintNetwork = function(host){
 	};
 	var socket = this.socket;
 	this.socket.on('open', function(e){
+		var n = "test";
+		if(localStorage.name && localStorage.name.length) {
+			n = localStorage.name;
+		}
 		socket.emit('join', {
-			name: 'test',
+			name: n,
 			version: 'ppweb'
 		});
 	});

@@ -13,6 +13,7 @@
 }
 .canvas-cursor:before, .name-label {
 	visibility:visible;
+	pointer-events:none;
 	content:attr(data-name);
 }
 .canvas-cursor:after, .cursor-size {

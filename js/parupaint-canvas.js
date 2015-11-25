@@ -258,6 +258,25 @@ window.addEventListener("load", function(e){
 	}
 	canvas.addEventListener("keydown", function(e) {
 		console.log("key:", e.keyCode);
+		if(e.keyCode >= 49 && e.keyCode <= 54){
+			var a = (e.keyCode - 49);
+			var ar = [
+				1,
+				3,
+				10,
+				20,
+				50,
+				64
+			];
+			(new parupaintCursor).update(brushglass.size(ar[a]));
+		}
+		if(e.keyCode == 113) {
+			var name = prompt("enter new name");
+			if(name && name.length){
+				localStorage.name = name;
+				window.location.reload();
+			}
+		}
 		if(e.keyCode == 82) {
 			var x = (new parupaintCursor()).x(),
 			    y = (new parupaintCursor()).y();
