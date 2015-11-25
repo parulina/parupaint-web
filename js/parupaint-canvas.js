@@ -309,6 +309,22 @@ window.addEventListener("load", function(e){
 				window.location.reload();
 			}
 		}
+		// 114 is F3, used for search
+		if(e.keyCode == 115) {
+			var url = parupaintCanvas.dataurl();
+			if(url){
+				var f = 'Drawing_at_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/\:/g, '.');
+				var a = document.createElement("a");
+				a.className = "download-link";
+				a.href = url;
+				a.target = "_blank";
+				a.innerHTML = f;
+				(new parupaintChat()).add(a.outerHTML);
+
+				a.download = f + ".png";
+				a.click();
+			}
+		}
 		if(e.keyCode == 82) {
 			var x = (new parupaintCursor()).x(),
 			    y = (new parupaintCursor()).y();

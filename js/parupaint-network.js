@@ -53,7 +53,6 @@ var parupaintNetwork = function(host){
 
 	});
 	this.socket.on('chat', function(d) {
-		console.log(d);
 		(new parupaintChat()).add(d.message, d.name);
 	});
 	this.socket.on('paste', function(e){
