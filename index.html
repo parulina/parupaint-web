@@ -26,7 +26,6 @@
 		<div class="canvas-sidebar">
 			<h1>parupaint</h1>
 			<p>paint and stuff</p>
-
 			<div class="chat-box">
 				<div class="chat-messages">
 					<div id="debug"></div>
@@ -36,8 +35,16 @@
 					</div>
 				</div>
 				<label class="chat-input-label">
-					<input type="text" class="chat-input"></input>
+					<input type="text" class="chat-input" autocomplete="off"></input>
 				</label>
+			</div>
+			<div class="oekaki-buttons">
+				<input type="color"  name="color" title="set brush color"></input>
+				<input type="button" name="brush" title="switch brush" value="swap"></input>
+				<input type="button" name="bd" title="decrease brush size" value="br-"></input>
+				<input type="button" name="bi" title="increase brush size" value="br+"></input>
+				<input type="button" name="n" title="change name" value="name"></input>
+				<input type="button" name="d" title="download canvas" value="download"></input>
 			</div>
 		</div>
 		<div class="canvas-scrollarea">

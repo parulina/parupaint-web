@@ -1,23 +1,14 @@
+.oekaki-buttons {
+	background:rgba(0, 0, 0, 0.2);
+	height:20px;
+	display:flex;
+	justify-content: space-around;
+}
 .canvas-sidebar {
 	float:left;
 	padding:2px 20px;
 	width:400px;
 	font-family:sans-serif;
-}
-@media all and (max-width:400px) {
-	.parupaint-canvas {
-		overflow:hidden;
-	}
-	.canvas-sidebar {
-		width:auto;
-		float:inherit;
-		position:absolute;
-		top:0; left:0; right:0; height:180px;
-	}
-	.canvas-scrollarea {
-		position:absolute;
-		top:180px; left:0; right:0; bottom:0;
-	}
 }
 
 .canvas-sidebar h1{
@@ -38,23 +29,23 @@
 }
 .chat-input-label {
 	display:block;
-	margin-left:10px;
 	position:relative;
 }
 .chat-input-label:before {
-	content:">";
-	width:10px;
+	content:"$";
+	color:transparent;
+	border-bottom:1px solid #DDD;
 	position:absolute;
-	right:100%;
-	top:2px;
+	left:0; right:0;
+	padding:2px 2px;
 }
 .chat-input {
 	background:none;
 	border:none;
 	outline:none;
+	width:100%;
 	padding:4px 2px;
 	box-sizing:border-box;
-	width:100%;
 }
 .chat-input:focus {
 	background:#888;
@@ -77,4 +68,20 @@
 }
 .chat-user + .chat-text {
 	text-align:inherit;
+}
+
+@media all and (max-width:400px) {
+	.parupaint-canvas {
+		overflow:hidden;
+	}
+	.canvas-sidebar {
+		width:auto;
+		float:inherit;
+		position:absolute;
+		top:0; left:0; right:0; height:190px;
+	}
+	.canvas-scrollarea {
+		position:absolute;
+		top:190px; left:0; right:0; bottom:0;
+	}
 }

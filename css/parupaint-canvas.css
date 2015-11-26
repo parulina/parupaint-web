@@ -2,6 +2,7 @@
 
 * {
 	margin:0;
+	padding:0;
 }
 .canvas-cursor {
 	position:absolute;
@@ -49,34 +50,28 @@
 }
 .parupaint-canvas {
 	background:#AAA;
-	-webkit-user-select:none;
-	user-select:none;
 }
 .canvas-scrollarea {
 	overflow:auto;
+	-webkit-user-select:none;
+	user-select:none;
 }
-
-/* bottom padding for buttons */
-.parupaint-canvas .oekaki-buttons {
-	position:absolute;
-	bottom:0;
-	left:0; right:0;
-	height:20px;
-	background:rgba(0, 0, 0, 0.6);
-	border-bottom-right-radius:20px;
-}
-.oekaki-buttons > button {
-	color:black;
-	height:100%;
-	padding:0 2px;
-	margin:0;
-	border:none;
+.oekaki-buttons > input {
 	outline:none;
-	min-width:14px;
-	font-family:Helvetica, monospace;
+	border:none;
+	padding:0 2px;
+
 	position:relative;
+	height:100%;
+	float:left;
+	margin-right:2px;
+
+	font-family:monospace;
+	background:white;
+	color:black;
 }
-.oekaki-buttons > button:hover:before {
+/*
+.oekaki-buttons > .button:hover:before {
 	position:absolute;
 	height:100%;
 	width:auto;
@@ -89,7 +84,7 @@
 	margin-bottom:5px;
 	white-space: nowrap;
 }
-.oekaki-buttons > button:hover:after {
+.oekaki-buttons > .button:hover:after {
 	width:1px; height:1px;
 	border:5px solid transparent;
 	border-top:4px solid black;
@@ -99,6 +94,7 @@
 	left:0;
 	content:" ";
 }
+*/
 
 .canvas-workarea {
 	position:relative;

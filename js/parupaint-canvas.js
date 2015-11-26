@@ -1,10 +1,18 @@
-function hex2rgba(hex) {
-	if(!hex || !hex.length) return {r: 0, g: 0, b: 0, a: 0};
+function hexnormalize(hex){
+	if(!hex) return hex;
+
 	// Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
 	var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 	hex = hex.replace(shorthandRegex, function(m, r, g, b) {
 		return r + r + g + g + b + b;
 	});
+	if(hex[0] != '#') hex = '#' + hex;
+	return hex;
+}
+function hex2rgba(hex) {
+	if(!hex || !hex.length) return {r: 0, g: 0, b: 0, a: 0};
+
+	hex = hexnormalize(hex);
 	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})?$/i.exec(hex);
 
 	if(!result) {
@@ -33,6 +41,7 @@ var parupaintBrushGlass = function(){
 	this.brush = function(b) {
 		if(b != null) {
 			this.current = b;
+			if(typeof this.onchange == "function") this.onchange(this.brush());
 			return this;
 		}
 		return this.brushes[this.current];
@@ -44,12 +53,14 @@ var parupaintBrushGlass = function(){
 		if(typeof size == "undefined") return this.brush().size;
 
 		this.brushes[this.current].size = size < 1 ? 1 : size;
+		if(typeof this.onchange == "function") this.onchange(this.brush());
 		return this;
 	}
 	this.color = function(color) {
 		if(typeof color == "undefined") return this.brush().color;
 
 		this.brushes[this.current].color = color;
+		if(typeof this.onchange == "function") this.onchange(this.brush());
 		return this;
 	}
 };
@@ -258,7 +269,42 @@ window.addEventListener("load", function(e){
 	var scrollarea = canvas.querySelector(".canvas-scrollarea");
 	if(!canvas || !scrollarea) return;
 
+	var change_name = function(name){
+		if(name && name.length){
+			localStorage.name = name;
+			window.location.reload();
+		}
+	};
+	var download_canvas = function(){
+		var url = parupaintCanvas.dataurl();
+		if(url){
+			var f = 'Drawing_at_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/\:/g, '.');
+			var a = document.createElement("a");
+			a.className = "download-link";
+			a.href = url;
+			a.target = "_blank";
+			a.innerHTML = f;
+			(new parupaintChat()).add(a.outerHTML);
+
+			a.download = f + ".png";
+			a.click();
+		}
+	};
+
+	var inputcolor = function(col){
+		var c = document.querySelector('.oekaki-buttons > input[name="color"]');
+		if(c){
+			if(!col) return c.value;
+			c.value = hexnormalize(col).substr(0, 7);
+		}
+	};
+
 	var brushglass = new parupaintBrushGlass();
+	brushglass.onchange = function(brush){
+		inputcolor(brush.color);
+
+	};
+
 	var netcache = {
 		x: 0,
 		y: 0,
@@ -283,9 +329,6 @@ window.addEventListener("load", function(e){
 	}
 	if(typeof localStorage.name == "string"){
 		parupaintConfig.name = localStorage.name;
-		a
-	} else {
-		a
 	}
 
 	canvas.addEventListener("keydown", function(e) {
@@ -303,27 +346,11 @@ window.addEventListener("load", function(e){
 			(new parupaintCursor).update(brushglass.size(ar[a]));
 		}
 		if(e.keyCode == 113) {
-			var name = prompt("enter new name");
-			if(name && name.length){
-				localStorage.name = name;
-				window.location.reload();
-			}
+			change_name(prompt("enter new name"));
 		}
 		// 114 is F3, used for search
 		if(e.keyCode == 115) {
-			var url = parupaintCanvas.dataurl();
-			if(url){
-				var f = 'Drawing_at_' + new Date().toISOString().replace(/T/, '_').replace(/\..+/, '').replace(/\:/g, '.');
-				var a = document.createElement("a");
-				a.className = "download-link";
-				a.href = url;
-				a.target = "_blank";
-				a.innerHTML = f;
-				(new parupaintChat()).add(a.outerHTML);
-
-				a.download = f + ".png";
-				a.click();
-			}
+			download_canvas();
 		}
 		if(e.keyCode == 82) {
 			var x = (new parupaintCursor()).x(),
@@ -548,16 +575,17 @@ window.addEventListener("load", function(e){
 	var buttons = document.querySelector(".oekaki-buttons");
 	if(buttons){
 		buttons.clickButton = function(inputname, func){
-			this.querySelector('button[name="' + inputname + '"]').onclick = func;
+			var c = this.querySelector('.oekaki-buttons > input[name="' + inputname + '"]');
+			if(c) c.onclick = func;
 		};
-		buttons.onmouseenter = function(){
-			(new parupaintCursor()).x("50%").y("50%");
+		var color = document.querySelector('.oekaki-buttons > input[name="color"]');
+		if(color){
+			color.oninput = function(){
+				(new parupaintCursor()).update(brushglass.color(this.value));
+			};
 		}
-		buttons.clickButton("e", function(){
-			(new parupaintCursor()).update(brushglass.brush(1));
-		});
-		buttons.clickButton("b", function(){
-			(new parupaintCursor()).update(brushglass.brush(0));
+		buttons.clickButton("brush", function(){
+			(new parupaintCursor()).update(brushglass.brush(brushglass.opposite()));
 		});
 		buttons.clickButton("bd", function(){
 			(new parupaintCursor()).update(brushglass.size(brushglass.size() - 2));
@@ -565,8 +593,11 @@ window.addEventListener("load", function(e){
 		buttons.clickButton("bi", function(){
 			(new parupaintCursor()).update(brushglass.size(brushglass.size() + 2));
 		});
-		buttons.clickButton("c", function(){
-			parupaintCanvas.clear(document.querySelector(".canvas-pool > canvas.main"), "#00000000");
+		buttons.clickButton("n", function(){
+			change_name(prompt("enter new name"));
+		});
+		buttons.clickButton("d", function(){
+			download_canvas();
 		});
 	}
 	var chatinput = document.querySelector("input.chat-input");
