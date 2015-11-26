@@ -1,5 +1,8 @@
 /* basic stuff, canvas, pannable view, cursor */
 
+html {
+	height:100%;
+}
 * {
 	margin:0;
 	padding:0;
@@ -31,11 +34,16 @@
 	top:0; left:0; right:0; bottom:0;
 	-webkit-transform:translate(-50%, -50%);
 	transform:translate(-50%, -50%);
+	box-sizing:content-box;
 
 	border-radius:100%;
 	box-shadow:0 0 0 1px black, 0 0 0 1px white inset;
 	pointer-events:none;
 	z-index:-1;
+}
+.canvas-cursor[data-color="#00000000"]:before {
+	box-shadow:none;
+	border:1px dashed black;
 }
 .canvas-cursor.cursor-self {
 	pointer-events:none;
@@ -50,11 +58,14 @@
 }
 .parupaint-canvas {
 	background:#AAA;
+	height:100%;
+	position:relative;
 }
 .canvas-scrollarea {
 	overflow:auto;
 	-webkit-user-select:none;
 	user-select:none;
+	max-height:100%;
 }
 .oekaki-buttons > input {
 	outline:none;
@@ -102,6 +113,7 @@
 	height:300px;
 	overflow:hidden;
 	border:20px solid transparent;
+	cursor: none;
 	cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAYAAADgkQYQAAAAR0lEQVQYV5WQSQ4AIAgD6f8fXQGFQKJGOUE7YYM8BDYMVWt6LcwUkgKk7EmDDIhYYIPUn4CZNXep7JRgwDHpe6doer3u+LEBmLoZCntZhJ0AAAAASUVORK5CYII=") 5 5, none;
 	background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABn0lEQVR4Xu3ZQRKDIAwFUN14De9/K93oHdzY0hlmHMY2SAL5DXHZim2eAQKM5/saFK91XRV/fRhGB/AM8C7gY4DmKOSDoM8CPg1q9kD8OmCapg/QcRxVoKALoRh8jLwGAixACD4N+O4zblpAAvwKVBoBDoAKUHpMgAKggo/pLokAA5Ab/LXPl7RJxwwIAE4gnLYBQx1g33f2HM9BMAEQ3mQpgjqA5GqwBMEUQEkmmAN4imAS4AmCWYBcBNMAOQjmASiELgB+IXQD8A2hK4A7hO4AUoQuAa4I3QJEhHHbtrPGbmvuZuU8z7m3VrlvXJblLFlFSf0bCACqWJAK9u45MABaCFAAGghwAK0RIAFaIsACtEKABmiB8BcAAaJWsQQN0OJ8Hhag1fk8JEDL83k4AGpdIHk0HcYWKAAq+FjLSyLAAOQGf13QlLRJF0QQAJxAOG0huoDEhggHQT0DJAA4FaM6QNgRktrwKMkEUwAlmWAO4CmCSYAnCGYBchFMA+QgmAegZhgHQDgZot5Sze89AzwDAA5Ha6Y49WzvAspd4AXk+BDRuCM1ygAAAABJRU5ErkJggg==') 0/10% repeat content-box;
 }

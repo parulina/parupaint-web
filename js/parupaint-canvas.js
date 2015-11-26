@@ -301,7 +301,8 @@ window.addEventListener("load", function(e){
 		}
 	};
 
-	var brushglass = new parupaintBrushGlass();
+	parupaint.brushglass = new parupaintBrushGlass();
+	var brushglass = parupaint.brushglass;
 	brushglass.onchange = function(brush){
 		inputcolor(brush.color);
 
@@ -319,22 +320,37 @@ window.addEventListener("load", function(e){
 			if(net.y != this.y) n.y = this.y = net.y;
 			if(net.w != this.w) n.w = this.w = net.w;
 			if(net.c != this.c) n.c = this.c = net.c;
+			if(net.p != this.p) n.p = this.p = net.p;
 			if(net.d != this.d) n.d = this.d = net.d;
 			return n;
 		}
 	};
 
-	if(typeof localStorage["canvasdimensions"] == "string"){
-		var a = localStorage["canvasdimensions"].split(",");
-		canvas.style.width = parseInt(a[0]) + "px";
-		canvas.style.height = parseInt(a[1]) + "px";
+	if(typeof window.localStorage == "object"){
+		if(typeof localStorage["canvasdimensions"] == "string"){
+			var a = localStorage["canvasdimensions"].split(",");
+			canvas.style.width = parseInt(a[0]) + "px";
+			canvas.style.height = parseInt(a[1]) + "px";
+		}
+		if(typeof localStorage.name == "string"){
+			parupaintConfig.name = localStorage.name;
+		}
 	}
-	if(typeof localStorage.name == "string"){
-		parupaintConfig.name = localStorage.name;
-	}
-
+	var space = false;
+	canvas.addEventListener("keyup", function(e) {
+		if(e.keyCode == 32){
+			space = false;
+		}
+	});
 	canvas.addEventListener("keydown", function(e) {
+		if(e.target.tagName == "INPUT") return;
+
 		console.log("key:", e.keyCode);
+		if(e.keyCode == 32){
+			space = true;
+			e.preventDefault();
+			return false;
+		}
 		if(e.keyCode >= 49 && e.keyCode <= 54){
 			var a = (e.keyCode - 49);
 			var ar = [
@@ -370,196 +386,39 @@ window.addEventListener("load", function(e){
 			(new parupaintCursor()).update(brushglass.brush(brushglass.opposite()));
 		}
 	});
-	canvas.addEventListener("mouseenter", function(e) {
-		canvas.focus();
-	});
-	canvas.addEventListener("mouseleave", function(e) {
-		canvas.blur();
-	});
-	var drawbtn_down = false;
-	canvas.addEventListener("mouseup", function(e) {
-		//TODO testme
-		if(e.target == this && e.target.style.resize.length) {
-			localStorage["canvasdimensions"] =
-				parseInt(this.style.width) + "," + parseInt(this.style.height);
-		}
-		drawbtn_down = false;
-	});
-	canvas.addEventListener("mousedown", function(e){
-		if((e.buttons || e.which) == 1) {
-			drawbtn_down = true;
-		}
-		if((e.buttons || e.which) == 4) e.preventDefault();
-		if((e.buttons || e.which) == 2){
-			if(e.target.tagName == "CANVAS") {
-				e.preventDefault();
-				new parupaintCursor().update(brushglass.brush(brushglass.opposite()));
-				return false;
-			}
-		}
-	});
-	canvas.addEventListener("mousemove", function(e){
-		if(e.target.tagName == "CANVAS") {
-			var bcr = e.target.parentNode.getBoundingClientRect();
-			var ax = e.clientX - (bcr.x || bcr.left);
-			    ay = e.clientY - (bcr.y || bcr.top);
-			if(typeof e.movementX == "undefined" && typeof e.movementY == "undefined"){
-				var old_x = (new parupaintCursor()).x(),
-				    old_y = (new parupaintCursor()).y();
-				e.movementX = ax - old_x;
-				e.movementY = ay - old_y;
-			}
-			var w = (new parupaintCursor()).x(ax).y(ay).size(),
-			    c = (new parupaintCursor()).color();
-
-			var net = {x: ax, y: ay, w: w, c: c, d: false};
-			if(drawbtn_down == 1){
-				net.d = true;
-				parupaintCanvas.line(e.target,
-					ax, ay, ax - e.movementX, ay - e.movementY,
-					brushglass.color(), brushglass.size());
-			}
-			if(parupaint.net && parupaint.net.socket.connected){
-				var a = netcache.update(net);
-				a.p = 1.0;
-				parupaint.net.socket.emit('draw', a);
-			}
-		}
-		if(e.buttons == 4) {
+	parupaint.pointer = new parupaintPointerEvents(canvas);
+	canvas.addEventListener('mousemove', function(e){
+		if(space){
+			e.stopPropagation();
 			scrollarea.scrollLeft = scrollarea.scrollLeft - e.movementX;
 			scrollarea.scrollTop = scrollarea.scrollTop - e.movementY;
 		}
-	});
-	var tracking_draw = {
-		type: null,
-		startpoints: {}
+	}, true);
+	parupaint.pointer.onMove = function(d){
+
+		if(d.b[2]){
+			scrollarea.scrollLeft = scrollarea.scrollLeft - d.mx;
+			scrollarea.scrollTop = scrollarea.scrollTop - d.my;
+			return;
+		}
+
+		var net = {
+			x: d.x, y: d.y,
+			w: brushglass.size(),
+			c: brushglass.color(),
+			p: d.p, d: (d.b[1])
+		};
+
+		if(net.d){
+			var s = net.w * net.p;
+			if(s < 1) s = 1;
+			parupaintCanvas.line(d.canvas, d.ox, d.oy, d.x, d.y, net.c, s);
+		}
+		if(parupaint.net && parupaint.net.socket.connected){
+			parupaint.net.socket.emit('draw', netcache.update(net));
+		}
 	};
-	canvas.addEventListener("touchstart", function(e){
-		if(e.target.tagName == "CANVAS"){
 
-			if(e.touches.length == 1){
-				var t = e.touches[0];
-				tracking_draw.startpoints[t.identifier] = {
-					x: t.clientX,
-					y: t.clientY
-				};
-				tracking_draw.type = "move";
-			}
-			if(e.touches.length >= 2){
-				var t = e.touches[1];
-				tracking_draw.startpoints[t.identifier] = {
-					x: t.clientX,
-					y: t.clientY,
-					d: 0
-				};
-				var bcr = t.target.parentNode.getBoundingClientRect();
-				(new parupaintCursor()).x(t.clientX - (bcr.x || bcr.left)).y(t.clientY - (bcr.y || bcr.top));
-				if(tracking_draw.type != "drawing") tracking_draw.type = "hold";
-				e.preventDefault();
-			}
-		}
-	});
-	canvas.addEventListener("touchend", function(e){
-		var t = e.changedTouches[0];
-		if(tracking_draw.startpoints[t.identifier]){
-			delete tracking_draw.startpoints[t.identifier];
-		}
-		if(e.touches.length == 1 && tracking_draw.type == "drawing"){
-			if(parupaint.net && parupaint.net.socket.connected){
-				var a = netcache.update({d: false});
-				a.d = false;
-				parupaint.net.socket.emit('draw', a);
-			}
-		}
-		if(e.touches.length == 0){
-			// to clear up other vars
-			delete tracking_draw.origin;
-			tracking_draw.type = null;
-			document.getElementById("debug").innerHTML = '';
-		}
-	});
-	canvas.addEventListener("touchmove", function(e){
-
-		if(e.targetTouches.length == 2 && tracking_draw.type == "hold"){
-			for(var i = 0; i < e.changedTouches.length; i++){
-				var t = e.changedTouches[i];
-				var x = t.clientX - tracking_draw.startpoints[t.identifier].x,
-				    y = t.clientY - tracking_draw.startpoints[t.identifier].y;
-				var d = Math.sqrt(x * x + y * y);
-				tracking_draw.startpoints[t.identifier].d = d;
-				if(d > 20) {
-					if(t.identifier == 1){
-						tracking_draw.type = "drawing";
-					} else if(t.identifier == 0){
-						tracking_draw.type = "sizing";
-					}
-					var op = t.identifier == 1 ? 0 : 1;
-					if(tracking_draw.startpoints[op].d > 10){
-						tracking_draw.type = "zooming";
-						document.getElementById("debug").innerHTML = "Zooming canvas";
-					}
-
-					tracking_draw.origin = new function(){
-						this.p1 = (tracking_draw.type == "drawing" ? 0 : 1);
-						this.p2 = (tracking_draw.type == "drawing" ? 1 : 0);
-
-						this.x = tracking_draw.startpoints[this.p1].x;
-						this.y = tracking_draw.startpoints[this.p1].y;
-					};
-					if(tracking_draw.type == "sizing"){
-						tracking_draw.origin.size = (new parupaintCursor()).size();
-					}
-				}
-				
-			}
-			return false;
-		}
-		if(tracking_draw.type == "sizing" || tracking_draw.type == "drawing"){
-			var p = tracking_draw.origin.p2;
-			if(e.touches.length == 1) p = 0;
-			if(e.touches.length == 1 && tracking_draw.type == "drawing") return;
-
-			if(e.touches.length >= p){
-				var t = e.touches[p];
-
-				var bcr = t.target.parentNode.getBoundingClientRect();
-				if(tracking_draw.type == "sizing"){
-					var x = t.clientX - tracking_draw.origin.x,
-					    y = t.clientY - tracking_draw.origin.y;
-					var d = Math.sqrt(x * x + y * y);
-					var s = (parseInt(d) / 100) * tracking_draw.origin.size;
-					if(s < 1) s = 1;
-
-					x = tracking_draw.origin.x - (bcr.x || bcr.left);
-					y = tracking_draw.origin.y - (bcr.y || bcr.top);
-
-					document.getElementById("debug").innerHTML = "Sizing " + s;
-					(new parupaintCursor()).update(brushglass.size(s)).x(x).y(y);
-
-				} else if(tracking_draw.type == "drawing") {
-					var x = t.clientX - (bcr.x || bcr.left),
-					    y = t.clientY - (bcr.y || bcr.top);
-					var cur = new parupaintCursor();
-					var ox = cur.x(), oy = cur.y();
-					var net = {
-						x: x,
-						y: y,
-						w: cur.size(),
-						c: cur.color(),
-						d: true
-					}; 
-					(new parupaintCursor()).x(net.x).y(net.y);
-
-					parupaintCanvas.line(e.target, ox, oy, x, y, net.c, net.w);
-					if(parupaint.net && parupaint.net.socket.connected){
-						var a = netcache.update(net);
-						a.p = t.force;
-						parupaint.net.socket.emit('draw', a);
-					}
-				}
-			}
-		}
-	});
 	canvas.addEventListener("wheel", function(e){
 		var y = e.deltaY * (e.deltaMode == 0 ? 0.1 : 2)
 		if(e.target.tagName == "CANVAS") {

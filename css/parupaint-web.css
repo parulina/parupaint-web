@@ -1,3 +1,9 @@
+#tablet-api {
+	top:0;left:0;
+	width:1px; height:1px;
+	position:absolute;
+}
+
 .oekaki-buttons {
 	background:rgba(0, 0, 0, 0.2);
 	height:20px;
@@ -9,13 +15,29 @@
 	padding:2px 20px;
 	width:400px;
 	font-family:sans-serif;
+	position:relative;
 }
 
 .canvas-sidebar h1{
 	font-size:18px;
 }
+h1.title > b {
+	font-size:15px;
+}
 .canvas-sidebar p{
 	font-size:14px;
+}
+
+#help.canvas-help {
+	display:none;
+	overflow:auto;
+}
+#help.canvas-help:target {
+	background:#E4D7A5;
+	display:block;
+	padding:4px;
+	position:absolute;
+	top:0; left:0; right:0; bottom:0;
 }
 
 .chat-box {
@@ -23,9 +45,12 @@
 }
 .chat-messages {
 	background:#444;
-	height:100px;
+	max-height:100px;
 	font-family:monospace;
 	overflow:auto;
+}
+.chat-messages > .chat-message:nth-child(even){
+	background:rgba(255, 255, 255, 0.2);
 }
 .chat-input-label {
 	display:block;
@@ -70,9 +95,11 @@
 	text-align:inherit;
 }
 
-@media all and (max-width:400px) {
-	.parupaint-canvas {
+@media all and (max-width:800px) {
+	body.parupaint-canvas {
 		overflow:hidden;
+		max-width:500px;
+		margin:0 auto;
 	}
 	.canvas-sidebar {
 		width:auto;

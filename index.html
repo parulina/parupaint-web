@@ -5,11 +5,10 @@
 		<title>PARUPAINT</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-		<meta name="theme-color" content="#EEE" />
+		<meta name="theme-color" content="#CCBC80" />
 		<link rel="icon" sizes="128x128" href="res/icon128.png">
-		<link rel=icon href="css/icon16.png">
 
-		<!-- todo find out lighter gzip stuff, single file? -->
+		<!-- 3rd dependencies -->
 		<script src="js/pako.min.js"></script>
 
 		<!-- main stuff -->
@@ -19,13 +18,17 @@
 		<script src="js/parupaint-config.js"></script>
 		<script src="js/parupaint-socket.js"></script>
 		<script src="js/parupaint-network.js"></script>
+		<script src="js/parupaint-pointer.js"></script>
 		<script src="js/parupaint-canvas.js"></script>
 
 	</head>
 	<body class="parupaint-canvas scroll-actions">
 		<div class="canvas-sidebar">
-			<h1>parupaint</h1>
-			<p>paint and stuff</p>
+			<h1 class="title">parupaint:<b> paint and stuff</b></h1>
+			<p>
+			welcome to my paintchat -- play nice please. <a href="#help">FAQ/help</a><br/>
+			official website is at <a href="http://parupaint.sqnya.se" target="_blank">parupaint.sqnya.se</a>.
+			</p>
 			<div class="chat-box">
 				<div class="chat-messages">
 					<div id="debug"></div>
@@ -45,6 +48,15 @@
 				<input type="button" name="bi" title="increase brush size" value="br+"></input>
 				<input type="button" name="n" title="change name" value="name"></input>
 				<input type="button" name="d" title="download canvas" value="download"></input>
+			</div>
+			<div class="canvas-help" id="help">
+				<a href="#" style="float:right">X</a>
+				<h1>help/faq</h1>
+				<br/>
+				<p><b>rules?</b><br/>
+				for when drawing with strangers: ask before drawing over/erasing someone elses drawing.</p>
+				<p><b>does pen pressure work?</b><br/>
+				pen pressure works natively in IE/Edge, and in firefox with a wacom plugin.</p>
 			</div>
 		</div>
 		<div class="canvas-scrollarea">
