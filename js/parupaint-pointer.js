@@ -110,6 +110,7 @@ var parupaintPointerEvents = function(canvas){
 		}
 		if(e.touches.length == 1 && tracking_draw.type == "drawing"){
 			if(parupaint.net && parupaint.net.socket.connected){
+				(new parupaintCursor()).drawing(false);
 				var a = netcache.update({d: false});
 				a.d = false;
 				parupaint.net.socket.emit('draw', a);
@@ -137,7 +138,7 @@ var parupaintPointerEvents = function(canvas){
 						tracking_draw.type = "sizing";
 					}
 					var op = t.identifier == 1 ? 0 : 1;
-					if(tracking_draw.startpoints[op].d > 10){
+					if(tracking_draw.startpoints[op].d > 15){
 						tracking_draw.type = "zooming";
 						document.getElementById("debug").innerHTML = "Zooming canvas";
 					}
@@ -172,27 +173,28 @@ var parupaintPointerEvents = function(canvas){
 					var s = (parseInt(d) / 100) * tracking_draw.origin.size;
 					if(s < 1) s = 1;
 
-					x = tracking_draw.origin.x - (bcr.x || bcr.left);
-					y = tracking_draw.origin.y - (bcr.y || bcr.top);
+					x = (tracking_draw.origin.x + x/2) - (bcr.x || bcr.left);
+					y = (tracking_draw.origin.y + y/2) - (bcr.y || bcr.top);
 
-					document.getElementById("debug").innerHTML = "Sizing " + s;
-					(new parupaintCursor()).update(brushglass.size(s)).x(x).y(y);
+					(new parupaintCursor()).update(parupaint.brushglass.size(s)).x(x).y(y);
 
 				} else if(tracking_draw.type == "drawing") {
 					var ax = t.clientX - (bcr.x || bcr.left),
 					    ay = t.clientY - (bcr.y || bcr.top);
 					var cur = new parupaintCursor();
 					var ox = cur.x(), oy = cur.y();
-					var net = {
-						x: ax,
-						y: ay,
-						w: cur.size(),
-						c: cur.color(),
-						d: true
+					var d = {
+						canvas: t.target,
+						ox: ox, oy: oy, x: ax, y: ay,
+						p: t.force, b: [false, false, false, false]
 					};
-					(new parupaintCursor()).x(net.x).y(net.y);
-
-					var d = {canvas: t.target, ox: ox, oy: oy, x: ax, y: ay, p: t.force, b: buttons};
+					if(cur.drawing()){
+						d.b[1] = true;
+					}
+					if(typeof t.radiusX == "number"){
+						d.p = t.radiusX > 1 ? 1 : t.radiusX;
+					}
+					cur.x(ax).y(ay).drawing(true);
 					pthis.onMove(d);
 				}
 			}
