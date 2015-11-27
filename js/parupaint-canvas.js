@@ -371,16 +371,24 @@ window.addEventListener("load", function(e){
 			download_canvas();
 		}
 		if(e.keyCode == 82) {
-			var x = (new parupaintCursor()).x(),
-			    y = (new parupaintCursor()).y();
+			if(e.ctrlKey){
+				if(parupaint.net && parupaint.net.socket.connected){
+					console.log("Reloading image");
+					parupaint.net.socket.emit('img');
+				}
+				return e.preventDefault();
+			} else {
+				var x = (new parupaintCursor()).x(),
+				    y = (new parupaintCursor()).y();
 
-			var d = Array.from(parupaintCanvas.get(0, 0).getContext('2d').getImageData(x, y, 1, 1).data).map(function(e){
-				var na = ("00" + e.toString(16)).slice(-2);
-				return na;
-			});
-			var hex = '#' + d.join('');
-			console.log("Pick color", hex);
-			(new parupaintCursor()).update(brushglass.color(hex));
+				var d = Array.from(parupaintCanvas.get(0, 0).getContext('2d').getImageData(x, y, 1, 1).data).map(function(e){
+					var na = ("00" + e.toString(16)).slice(-2);
+					return na;
+				});
+				var hex = '#' + d.join('');
+				console.log("Pick color", hex);
+				(new parupaintCursor()).update(brushglass.color(hex));
+			}
 		}
 		if(e.keyCode == 69) {
 			(new parupaintCursor()).update(brushglass.brush(brushglass.opposite()));
