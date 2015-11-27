@@ -14,6 +14,7 @@ var parupaintPointerEvents = function(canvas){
 		var b = e.buttons ? e.which : e.buttons;
 		buttons[b] = true;
 		if(e.target.tagName == "CANVAS") {
+			//console.log(e.button, e.buttons, e.which, e);
 			if(buttons[3]){
 				(new parupaintCursor()).update(parupaint.brushglass.brush(parupaint.brushglass.opposite()));
 				return e.preventDefault();
@@ -22,6 +23,11 @@ var parupaintPointerEvents = function(canvas){
 				return e.preventDefault();
 			}
 		}
+	};
+	this.pointerUp = function(e){
+		var b = e.which;
+		buttons[b] = false;
+		//console.log(e.button, e.buttons, e.which);
 	};
 	this.pointerMove = function(e){
 		if(e.target.tagName == "CANVAS") {
@@ -54,13 +60,9 @@ var parupaintPointerEvents = function(canvas){
 			pthis.onMove(d);
 		}
 	};
-	this.pointerUp = function(e){
-		var b = e.buttons ? e.buttons : e.which;
-		buttons[e.buttons || e.which] = false;
-	};
 
 	if(window.PointerEvent){
-		//(new parupaintChat()).add("Using pointer events. Above will print: pointertype, pressure, mozpressure.");
+		console.info("Using pointer events.");
 		canvas.onpointerdown = this.pointerDown;
 		canvas.onpointermove = this.pointerMove;
 		canvas.onpointerup = this.pointerUp;

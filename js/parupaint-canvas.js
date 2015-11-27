@@ -387,6 +387,18 @@ window.addEventListener("load", function(e){
 		}
 	});
 	parupaint.pointer = new parupaintPointerEvents(canvas);
+	canvas.addEventListener('mousedown', function(e){
+		if(e.button == 1 && e.which == 2){
+			scrollarea.style.overflow = "hidden";
+			return false;
+		}
+	});
+	canvas.addEventListener('mouseup', function(e){
+		if(e.button == 1 && e.which == 2){
+			scrollarea.style.overflow = "";
+			return false;
+		}
+	});
 	canvas.addEventListener('mousemove', function(e){
 		if(space){
 			e.stopPropagation();
@@ -399,6 +411,8 @@ window.addEventListener("load", function(e){
 		if(d.b[2]){
 			scrollarea.scrollLeft = scrollarea.scrollLeft - d.mx;
 			scrollarea.scrollTop = scrollarea.scrollTop - d.my;
+			var cur = (new parupaintCursor());
+			cur.x(cur.x() - d.mx).y(cur.y() - d.my);
 			return;
 		}
 

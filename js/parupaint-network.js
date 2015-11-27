@@ -54,6 +54,7 @@ var parupaintNetwork = function(host){
 	});
 	this.socket.on('chat', function(d) {
 		(new parupaintChat()).add(d.message, d.name);
+		if(d.name && d.name != parupaint.name) navigator.vibrate([100, 50, 100]);
 	});
 	this.socket.on('paste', function(e){
 		socket.emit('img');
