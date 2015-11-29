@@ -12,8 +12,7 @@
 }
 .canvas-sidebar {
 	float:left;
-	padding:2px 20px;
-	width:400px;
+	padding:4px 12px;
 	font-family:sans-serif;
 	position:relative;
 }
@@ -41,11 +40,11 @@ h1.title > b {
 }
 
 .chat-box {
-	padding:5px 0;
+	padding:2px 0;
 }
 .chat-messages {
 	background:#444;
-	max-height:100px;
+	max-height:80px;
 	font-family:monospace;
 	overflow:auto;
 }
@@ -76,7 +75,11 @@ h1.title > b {
 	background:#888;
 }
 
+a.chat-message {
+	text-align:center;
+}
 .chat-message {
+	display:block;
 	margin-bottom:2px;
 }
 .chat-text {
@@ -95,20 +98,27 @@ h1.title > b {
 	text-align:inherit;
 }
 
-@media all and (max-width:800px) {
+@media all and (orientation:landscape) {
+	h1.title {
+		float:left;
+		padding:0 15px;
+	}
+	.chat-messages {
+		max-height:50px;
+	}
+}
+@media all and (max-width:900px) {
 	body.parupaint-canvas {
 		overflow:hidden;
-		max-width:500px;
-		margin:0 auto;
+
+		display:flex;
+		flex-direction: column;
 	}
 	.canvas-sidebar {
 		width:auto;
 		float:inherit;
-		position:absolute;
-		top:0; left:0; right:0; height:190px;
 	}
-	.canvas-scrollarea {
-		position:absolute;
-		top:190px; left:0; right:0; bottom:0;
+	.canvas-scrollarea > .canvas-workarea {
+		border-width:10px;
 	}
 }

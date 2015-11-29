@@ -285,10 +285,11 @@ window.addEventListener("load", function(e){
 			a.className = "download-link";
 			a.href = url;
 			a.target = "_blank";
+			a.className = "chat-message";
 			a.innerHTML = f;
-			(new parupaintChat()).add(a.outerHTML);
-
 			a.download = f + ".png";
+			document.querySelector(".chat-messages").appendChild(a);
+
 			a.click();
 		}
 	};

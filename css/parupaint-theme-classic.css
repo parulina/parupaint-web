@@ -7,6 +7,9 @@
 	background:#CCBC80;
 	color:black;
 }
+.canvas-sidebar {
+	background:#CCBC80;
+}
 .chat-box,
 .chat-box input{
 	font-family:monospace;
