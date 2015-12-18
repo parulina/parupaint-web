@@ -382,7 +382,8 @@ window.addEventListener("load", function(e){
 				var x = (new parupaintCursor()).x(),
 				    y = (new parupaintCursor()).y();
 
-				var d = Array.from(parupaintCanvas.get(0, 0).getContext('2d').getImageData(x, y, 1, 1).data).map(function(e){
+				var a = parupaintCanvas.get(0, 0).getContext('2d').getImageData(x, y, 1, 1).data;
+				var d = [a[0], a[1], a[2], a[3]].map(function(e){
 					var na = ("00" + e.toString(16)).slice(-2);
 					return na;
 				});
