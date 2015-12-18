@@ -6,6 +6,8 @@ var parupaintNetwork = function(host){
 	this.socket = new parupaintSocket(host);
 	this.socket.Connect();
 
+	this.reload_timeout = null;
+	var pthis = this;
 
 	var unpack_img = function(base64data){
 		if(!base64data) return null;
@@ -14,6 +16,7 @@ var parupaintNetwork = function(host){
 		}));
 		return pako.inflate(binary);
 	};
+
 	var socket = this.socket;
 	this.socket.on('open', function(e){
 		socket.emit('join', {
@@ -32,7 +35,7 @@ var parupaintNetwork = function(host){
 				var f = l[ff];
 
 				var c = document.createElement("canvas");
-				c.className = "visible";
+				if(ff == 0) c.className = "visible";
 				c.width = e.width;
 				c.height = e.height;
 				c.setAttribute("data-layer", ll);
@@ -85,21 +88,39 @@ var parupaintNetwork = function(host){
 			if(e.id == parupaint.me) return;
 
 			var c = new parupaintCursor(e.id);
-			var ox = c.x(), oy = c.y(), dd = false;
+			var ox = c.x(), oy = c.y(), dd = false, td = false;
+
 			if(typeof e.x == "number") { c.x(e.x); dd = true; }
 			if(typeof e.y == "number") { c.y(e.y); dd = true; }
 			if(typeof e.w == "number") c.size(e.w);
 			if(typeof e.p == "number") c.pressure(e.p);
 			if(typeof e.c == "string") c.color(e.c);
+			if(typeof e.t == "number") c.tool(e.t);
+			if(typeof e.l == "number") c.layer(e.l);
+			if(typeof e.f == "number") c.frame(e.f);
+
 			if(typeof e.d == "boolean"){
 				if(e.d && !c.drawing()){
 					ox = c.x(); oy = c.y();
+
+				} else if(!e.d && c.drawing()){
+					td = true;
 				}
 				c.drawing(e.d);
 			}
-			var p = c.pressure();
+
+			var p = c.pressure(),
+			    l = c.layer(),
+			    f = c.frame();
+
+			if(td && c.tool() != 0){
+				if(pthis.reload_timeout) clearTimeout(pthis.reload_timeout);
+				pthis.reload_timeout = setTimeout(function(){
+					socket.emit("img", {l: l, f: f});
+				}, 300);
+			}
 			if(c.drawing() && dd){
-				parupaintCanvas.line(parupaintCanvas.get(0, 0),
+				parupaintCanvas.line(parupaintCanvas.get(l, f),
 					ox, oy, c.x(), c.y(), c.color(), c.size() * p);
 			}
 		}

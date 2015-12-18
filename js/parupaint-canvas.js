@@ -127,6 +127,30 @@ var parupaintCursor = function(id){
 		this.cursor.style.color = c;
 		return this;
 	};
+	this.layer = function(l){
+		if(typeof l == "undefined"){
+			l = this.cursor.getAttribute("data-layer");
+			return parseInt((!l || !l.length) ? "0" : l);
+		}
+		this.cursor.setAttribute("data-layer", l);
+		return this;
+	};
+	this.frame = function(f){
+		if(typeof f == "undefined"){
+			f = this.cursor.getAttribute("data-frame");
+			return parseInt((!f || !f.length) ? "0" : f);
+		}
+		this.cursor.setAttribute("data-frame", f);
+		return this;
+	};
+	this.tool = function(t){
+		if(typeof t == "undefined"){
+			t = this.cursor.getAttribute("data-tool");
+			return parseFloat((!t || !t.length) ? "0" : t);
+		}
+		this.cursor.setAttribute("data-tool", t);
+		return this;
+	};
 	this.drawing = function(d){
 		if(typeof d == "undefined"){
 			d = this.cursor.getAttribute("data-drawing");
