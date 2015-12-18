@@ -56,8 +56,12 @@ var parupaintNetwork = function(host){
 
 	});
 	this.socket.on('chat', function(d) {
-		(new parupaintChat()).add(d.message, d.name);
-		if(d.name && d.name != parupaint.name) navigator.vibrate([100, 50, 100]);
+		if(typeof d.message == "string" && d.message.length) {
+			(new parupaintChat()).add(d.message, d.name);
+			if(d.name && d.name != parupaint.name) {
+				navigator.vibrate([100, 50, 100]);
+			}
+		}
 	});
 	this.socket.on('paste', function(e){
 		socket.emit('img');
@@ -148,7 +152,12 @@ var parupaintNetwork = function(host){
 				c = new parupaintCursor(e.id);
 			}
 			if(c.cursor && e.id > 0){
-				c.x(e.x).y(e.y).size(e.w);
+				if(typeof e.x == "number") c.x(e.x);
+				if(typeof e.y == "number") c.y(e.y);
+				if(typeof e.w == "number") c.size(e.w);
+				if(typeof e.t == "number") c.tool(e.t);
+				if(typeof e.l == "number") c.layer(e.l);
+				if(typeof e.f == "number") c.frame(e.f);
 			}
 			//TODO reload canvas
 		}
