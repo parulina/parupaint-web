@@ -38,7 +38,7 @@ var parupaintBrushGlass = function(){
 	this.current = 0;
 	this.brushes = [
 		new parupaintBrush(1, "#000"),
-		new parupaintBrush(16, "#00000000")
+		new parupaintBrush(16, "#FFF")
 	];
 	this.brush = function(b) {
 		if(b != null) {
