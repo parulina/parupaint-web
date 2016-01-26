@@ -38,7 +38,7 @@ var parupaintBrushGlass = function(){
 	this.current = 0;
 	this.brushes = [
 		new parupaintBrush(1, "#000"),
-		new parupaintBrush(16, "#FFF")
+		new parupaintBrush(16, "#00000000")
 	];
 	this.brush = function(b) {
 		if(b != null) {
@@ -336,14 +336,14 @@ window.addEventListener("load", function(e){
 	var netcache = {
 		x: 0,
 		y: 0,
-		w: 0,
+		s: 0,
 		d: false,
 		c: '',
 		update: function(net){
 			var n = {};
 			if(net.x != this.x) n.x = this.x = net.x;
 			if(net.y != this.y) n.y = this.y = net.y;
-			if(net.w != this.w) n.w = this.w = net.w;
+			if(net.s != this.s) n.s = this.s = net.s;
 			if(net.c != this.c) n.c = this.c = net.c;
 			if(net.p != this.p) n.p = this.p = net.p;
 			if(net.d != this.d) n.d = this.d = net.d;
@@ -399,7 +399,7 @@ window.addEventListener("load", function(e){
 			if(e.ctrlKey){
 				if(parupaint.net && parupaint.net.socket.connected){
 					console.log("Reloading image");
-					parupaint.net.socket.emit('img');
+					parupaint.net.socket.emit('image');
 				}
 				return e.preventDefault();
 			} else {
@@ -452,18 +452,18 @@ window.addEventListener("load", function(e){
 
 		var net = {
 			x: d.x, y: d.y,
-			w: brushglass.size(),
+			s: brushglass.size(),
 			c: brushglass.color(),
 			p: d.p, d: (d.b[1])
 		};
 
 		if(net.d){
-			var s = net.w * net.p;
+			var s = net.s * net.p;
 			if(s < 1) s = 1;
 			parupaintCanvas.line(d.canvas, d.ox, d.oy, d.x, d.y, net.c, s);
 		}
 		if(parupaint.net && parupaint.net.socket.connected){
-			parupaint.net.socket.emit('draw', netcache.update(net));
+			parupaint.net.socket.emit('brush', netcache.update(net));
 		}
 	};
 
@@ -474,7 +474,7 @@ window.addEventListener("load", function(e){
 				var w = (new parupaintCursor()).update(brushglass.size(brushglass.size() - y)).size();
 				// Update cache and push out new width
 				if(parupaint.net && parupaint.net.socket.connected){
-					parupaint.net.socket.emit('draw', netcache.update({w: w}));
+					parupaint.net.socket.emit('brush', netcache.update({s: w}));
 				}
 				e.preventDefault();
 				return false;

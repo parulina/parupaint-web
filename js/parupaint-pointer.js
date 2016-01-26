@@ -11,10 +11,10 @@ var parupaintPointerEvents = function(canvas){
 	var pthis = this;
 
 	this.pointerDown = function(e){
-		var b = e.buttons ? e.which : e.buttons;
+		var b = e.which;
 		buttons[b] = true;
+
 		if(e.target.tagName == "CANVAS") {
-			//console.log(e.button, e.buttons, e.which, e);
 			if(buttons[3]){
 				(new parupaintCursor()).update(parupaint.brushglass.brush(parupaint.brushglass.opposite()));
 				return e.preventDefault();
@@ -27,7 +27,6 @@ var parupaintPointerEvents = function(canvas){
 	this.pointerUp = function(e){
 		var b = e.which;
 		buttons[b] = false;
-		//console.log(e.button, e.buttons, e.which);
 	};
 	this.pointerMove = function(e){
 		if(e.target.tagName == "CANVAS") {
