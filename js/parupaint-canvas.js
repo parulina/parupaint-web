@@ -530,6 +530,9 @@ window.addEventListener("load", function(e){
 	parupaintCanvas.init();
 	//parupaintConfig.connect_on_load = false;
 	if(parupaintConfig.connect_on_load === true){
+		if(parupaintConfig.ws_host.match(/:\d\d\d\d\/?$/) === null){
+			parupaintConfig.ws_host = parupaintConfig.ws_host + ":1108";
+		}
 		parupaint.net = new parupaintNetwork(parupaintConfig.ws_host);
 	}
 });

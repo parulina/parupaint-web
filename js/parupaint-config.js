@@ -1,5 +1,5 @@
 this.parupaintConfig = {
-	'ws_host': "ws://sqnya.se:1108",
+	'ws_host': document.location.href.replace(/https?/, "ws"),
 	'connect_on_load': true
 };
 
