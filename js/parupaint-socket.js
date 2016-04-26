@@ -7,6 +7,7 @@ var parupaintSocket = function(addr){
 			return [name, data.substring(name.length+1, data.length)];
 		},
 		unmarshal: function(data) {
+			if(data.length == 0) return null;
 			return JSON.parse(data);
 		},
 		marshalAndPack: function(name, data) {

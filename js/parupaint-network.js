@@ -1,5 +1,17 @@
 // this file contains most network related functions
 
+// QT uses #AARRGGBB but html stuff uses #RRGGBBAA.
+var correctHex = function(hex){
+	var hexcode = hex.replace('#','');
+
+	if(hexcode.length == 8)
+		hexcode = hexcode.slice(2) + hexcode.substr(0, 2);
+	if(hexcode.length == 3)
+		hexcode = hexcode.slice(1) + hexcode.substr(0, 1);
+
+	return '#' + hexcode;
+};
+
 var parupaintNetwork = function(host){
 	console.log("Connecting to", host);
 
@@ -7,6 +19,7 @@ var parupaintNetwork = function(host){
 	this.socket.Connect();
 
 	this.reload_timeout = null;
+	this.joined = false;
 	var pthis = this;
 
 	var unpack_img = function(base64data){
@@ -17,41 +30,65 @@ var parupaintNetwork = function(host){
 		return pako.inflate(binary);
 	};
 
+	this.readOnly = function(){
+		return !(this.socket.connected && this.joined);
+	};
+
 	var socket = this.socket;
 	this.socket.on('open', function(e){
 		socket.emit('name', {
 			name: parupaintConfig.name
 		});
 	});
+	this.socket.on('join', function(e){
+		console.info("Joined.");
+		pthis.joined = true;
+	});
 	this.socket.on('canvas', function(e){
-		if(typeof e.w != "number") return;
-		if(typeof e.h != "number") return;
+		if(typeof e.canvasWidth != "number") return;
+		if(typeof e.canvasHeight != "number") return;
 		if(typeof e.layers != "object") return;
-		parupaintCanvas.cleanup();
-		for(var ll = 0; ll < e.layers.length; ll++){
-			var l = e.layers[ll];
-			for(var ff = 0; ff < l.length; ff++){
-				var f = l[ff];
 
-				var c = document.createElement("canvas");
-				if(ff == 0) c.className = "visible";
-				c.width = e.w;
-				c.height = e.h;
-				c.setAttribute("data-layer", ll);
-				c.setAttribute("data-frame", ff);
+		var w = e.canvasWidth, h = e.canvasHeight;
 
-				document.querySelector(".canvas-pool").appendChild(c);
+		if(typeof e.resize == "boolean" && e.resize){
+			var canvases = document.querySelectorAll('.canvas-pool > canvas');
+			for(var i = 0; i < canvases.length; i++){
+				var canvas = canvases[i];
+				canvas.width = w;
+				canvas.height = h;
+			}
+		} else {
+			parupaintCanvas.cleanup();
+			for(var l in e.layers){
+				var layer = e.layers[l];
+				for(var f in layer.frames){
+					var frame = layer.frames[f];
+
+					var c = document.createElement("canvas");
+					if(f == 0) c.className = "visible";
+					c.width = w;
+					c.height = h;
+					c.setAttribute("data-layer", parseInt(l));
+					c.setAttribute("data-frame", parseInt(f));
+
+					document.querySelector(".canvas-pool").appendChild(c);
+				}
 			}
 		}
 		parupaintCanvas.init();
+		if(typeof e.backgroundColor == "string"){
+			parupaintCanvas.backgroundColor(correctHex(e.backgroundColor));
+		}
 		socket.emit('image');
 	});
 	this.socket.on('fill', function(e){
 		if(typeof e.l != "number") return;
 		if(typeof e.f != "number") return;
 		if(typeof e.c != "string") return;
-		console.log("Clear to", e.c);
-		parupaintCanvas.clear(parupaintCanvas.get(e.l, e.f), e.c);
+		var color = correctHex(e.c);
+		console.log("Clear to", color);
+		parupaintCanvas.clear(parupaintCanvas.get(e.l, e.f), color);
 
 	});
 	this.socket.on('chat', function(d) {
@@ -68,6 +105,11 @@ var parupaintNetwork = function(host){
 	});
 	this.socket.on('lfa', function(e){
 		socket.emit('canvas');
+	});
+	this.socket.on('info', function(e){
+		if(typeof e["project-bgc"] == "string"){
+			parupaintCanvas.backgroundColor(correctHex(e["project-bgc"]));
+		}
 	});
 	this.socket.on('paste', function(e){
 		socket.emit('image');
@@ -118,8 +160,9 @@ var parupaintNetwork = function(host){
 			if(typeof e.y == "number") { c.y(e.y); dd = true; }
 			if(typeof e.s == "number") c.size(e.s);
 			if(typeof e.p == "number") c.pressure(e.p);
-			if(typeof e.c == "string") c.color(e.c);
+			if(typeof e.c == "string") c.color(correctHex(e.c));
 			if(typeof e.t == "number") c.tool(e.t);
+			if(typeof e.a == "number") c.pattern(e.a);
 			if(typeof e.l == "number") c.layer(e.l);
 			if(typeof e.f == "number") c.frame(e.f);
 			if(typeof e.n == "string") c.name(e.n);
@@ -138,7 +181,8 @@ var parupaintNetwork = function(host){
 			    l = c.layer(),
 			    f = c.frame();
 
-			if(td && c.tool() != 0){
+			// if lifted cursor and it's a different tool
+			if(td && (c.tool() != 0 || c.pattern() != 0)){
 				if(pthis.reload_timeout) clearTimeout(pthis.reload_timeout);
 				pthis.reload_timeout = setTimeout(function(){
 					socket.emit("image", {l: l, f: f});

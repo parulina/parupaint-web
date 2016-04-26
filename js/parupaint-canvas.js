@@ -143,6 +143,14 @@ var parupaintCursor = function(id){
 		this.cursor.setAttribute("data-frame", f);
 		return this;
 	};
+	this.pattern = function(p){
+		if(typeof p == "undefined"){
+			p = this.cursor.getAttribute("data-pattern");
+			return parseFloat((!p || !p.length) ? "0" : p);
+		}
+		this.cursor.setAttribute("data-pattern", p);
+		return this;
+	};
 	this.tool = function(t){
 		if(typeof t == "undefined"){
 			t = this.cursor.getAttribute("data-tool");
@@ -172,6 +180,7 @@ var parupaintCanvas = new function(){
 	this.cleanup = function(){
 		var pool = document.querySelector(".canvas-pool");
 		pool.innerHTML = '';
+		pool.style = "";
 	};
 	this.init = function(){
 		var workarea = document.querySelector(".canvas-workarea");
@@ -188,13 +197,6 @@ var parupaintCanvas = new function(){
 				this.removeAttribute(a);
 				return aa;
 			};
-
-			var pre;
-			if((pre = canvas.takeAttribute("data-prefill"))){
-				this.clear(canvas, pre);
-			}
-			// TODO add more?
-
 			canvas.oncontextmenu = function(e){
 				e.preventDefault();
 				return false;
@@ -205,6 +207,15 @@ var parupaintCanvas = new function(){
 		workarea.setAttribute("data-ow", w);
 		workarea.setAttribute("data-oh", h);
 	};
+	this.backgroundColor = function(c){
+		var pool = document.querySelector(".canvas-pool");
+		if(typeof c == "undefined") return pool.style.backgroundColor;
+
+		var col = hex2rgba(c);
+		pool.style.backgroundColor = 'rgba(' + col.r + ',' + col.g + ',' + col.b + ',' + (col.a / 255.0) + ')';
+
+		return this;
+	}
 	this.get = function(l, f) {
 		return document.querySelector('.canvas-pool > canvas[data-layer="'+l+'"][data-frame="'+f+'"]');
 	}
@@ -249,7 +260,7 @@ var parupaintCanvas = new function(){
 			ctx.globalCompositeOperation = "destination-out";
 			col.a = 255;
 		}
-		ctx.strokeStyle = 'rgba(' + col.r + ',' + col.g + ',' + col.b + ',' + (col.a / 255.0) + ')'
+		ctx.strokeStyle = 'rgba(' + col.r + ',' + col.g + ',' + col.b + ',' + (col.a / 255.0) + ')';
 
 		ctx.lineWidth = width;
 		ctx.lineCap = 'round';
@@ -449,6 +460,8 @@ window.addEventListener("load", function(e){
 			cur.x(cur.x() - d.mx).y(cur.y() - d.my);
 			return;
 		}
+
+		if(parupaint.net && parupaint.net.readOnly()) return;
 
 		var net = {
 			x: d.x, y: d.y,
