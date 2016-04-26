@@ -35,14 +35,15 @@ var parupaintNetwork = function(host){
 	};
 
 	var socket = this.socket;
+	this.socket.on('join', function(e){
+		console.info("Joined.");
+		pthis.joined = true;
+	});
 	this.socket.on('open', function(e){
 		socket.emit('name', {
 			name: parupaintConfig.name
 		});
-	});
-	this.socket.on('join', function(e){
-		console.info("Joined.");
-		pthis.joined = true;
+		socket.emit('join', {version: parupaintConfig.versionCompatible});
 	});
 	this.socket.on('canvas', function(e){
 		if(typeof e.canvasWidth != "number") return;
